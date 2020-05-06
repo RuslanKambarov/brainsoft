@@ -1,0 +1,42 @@
+<?php
+
+namespace App;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+
+class District extends Model
+{
+    public function devices()
+    {
+        return $this->hasMany('App\Device', 'district_id', 'owen_id');
+    }
+
+    public function users(){
+    	return $this->belongsToMany('App\User', 'user_district', 'district_id', 'user_id');
+    }
+
+    public function director(){
+    		return DB::table('user_district')
+    		->join('user_role', 'user_role.user_id',  '=', 'user_district.user_id')
+    		->join('users', 'user_district.user_id', '=', 'users.id')
+    		->where([['user_district.district_id', '=', $this->id], ['user_role.role_id', '=', 4]])->pluck('users.name')->first() ?? "Не назначен";
+    }
+
+    public function engineer(){
+    		return DB::table('user_district')
+    		->join('user_role', 'user_role.user_id',  '=', 'user_district.user_id')
+    		->join('users', 'user_district.user_id', '=', 'users.id')
+    		->where([['user_district.district_id', '=', $this->id], ['user_role.role_id', '=', 1]])->pluck('users.name')->first() ?? "Не назначен";
+    }
+
+    public function getConsumption(){
+        $this->district_id   = $this->owen_id;
+        unset($this->owen_id, $this->id);
+        $this->coal_reserve  = array_sum($this->devices()->pluck('coal_reserve')->toArray());   
+        $this->income        = $consumption->income ?? 0;
+        $this->consumption   = $consumption->consumption ?? 0;
+        $this->balance       = $this->income - $this->consumption;       
+        return $this;
+    }
+}

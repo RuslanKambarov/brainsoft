@@ -53,9 +53,9 @@
 				@endif
                 <td>{{$device->status}}</td>
 				@if($device->status == 0)
-        	        <td><a href="{{url('/device/'.$device->id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
+        	        <td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
 				@else
-                	<td><a href="{{url('/device/'.$device->id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
+                	<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
 				@endif
             </tr>
         @endforeach

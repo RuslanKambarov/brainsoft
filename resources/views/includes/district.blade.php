@@ -52,10 +52,9 @@
 					<td></td>	
 				@endif
                 <td>{{$device->status}}</td>
-				@if($device->status === 0)
+				@if($device->parameters->status === 0)
         	        <td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
-				@endif
-				@if($device->status === 1)
+				@else
                 	<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
 				@endif
             </tr>

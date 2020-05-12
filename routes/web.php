@@ -109,6 +109,8 @@ Route::group(["middleware" => "auth"], function(){
         Route::get("/", "SettingsController@index");
 
         Route::post("/update/{id}", "SettingsController@update");
+
+        Route::post("/create", "SettingsController@create");
     
     });
 });

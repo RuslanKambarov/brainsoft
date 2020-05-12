@@ -33,6 +33,7 @@ Vue.component('add-tempcard-row-component', require('./components/AddTempCardRow
 Vue.component('attach-objects-component', require('./components/AttachObjectsComponent.vue').default);
 Vue.component('chart-component', require('./components/ChartComponent.vue').default);
 Vue.component('application-settings-component', require('./components/ApplicationSettingsComponent.vue').default);
+Vue.component('settings-component', require('./components/SettingsComponent.vue').default);
 Vue.component('device-settings-component', require('./components/DeviceSettingsComponent.vue').default);
 Vue.component('district-settings-component', require('./components/DistrictSettingsComponent.vue').default);
 Vue.component('audit-index-component', require('./components/Audit/AuditIndexComponent.vue').default);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Cloud;
 use App\Device;
 use App\District;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class SettingsController extends Controller
 {
     public function index(){
         $devices = Device::select('owen_id', 'controller', 'name', 'coal_reserve', 'district_id', 'required_t', 'required_p')->get();
-        $districts = District::all();
+        $districts = District::with('devices')->get();
         $settings = DB::table("app_settings")->get();
         return view('settings', ['devices' => $devices, 'districts' => $districts , 'settings' => $settings]);
     }
@@ -35,5 +36,31 @@ class SettingsController extends Controller
             $setting = DB::table("app_settings")->where('id', $id)->update(["value" => $request->setting['value']]);
         }
         return response()->json($id);
+    }
+
+    public function create(Request $request){
+
+        if($request->target == "district"){
+            $district = new District;
+            $district->name = $request->name;
+            $district->owen_id = $request->owen_id;
+            $district->parent_id = $request->parent;
+            $district->save();
+        }
+        if($request->target == "device"){
+            
+            $token = Cloud::getToken();
+            
+            foreach($request->devices as $device){
+                $new_device = new Device;
+                //$owen = collect(Cloud::getContent(Cloud::request("v1/device-management/register", [])));
+                $new_device->name = $device['name'];
+                $new_device->owen_id = $device['owen_id'];
+                $new_device->district_id = $device['district_id'];
+                Cloud::request()
+                $new_device->save();
+            }
+        }
+
     }
 }

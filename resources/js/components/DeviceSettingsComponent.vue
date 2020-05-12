@@ -26,9 +26,6 @@ export default {
 }
 </script>
 <style scoped>
-div{
-    border-bottom: 0.1px solid #032903
-}
 input{
     width: 100%;
 }

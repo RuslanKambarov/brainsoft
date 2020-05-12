@@ -23607,11 +23607,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-<<<<<<< HEAD
-exports.push([module.i, "\ndiv[data-v-031f246e]{\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-031f246e]{\n    width: 100%;\n}\n", ""]);
-=======
-exports.push([module.i, "\ninput[data-v-031f246e]{\r\n    width: 100%;\n}\r\n", ""]);
->>>>>>> a061a26c9b0147164f148de54f7c1fff4ce504c4
+exports.push([module.i, "\ninput[data-v-031f246e]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -23630,10 +23626,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-<<<<<<< HEAD
-exports.push([module.i, "\ndiv[data-v-4ad3675e]{\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-4ad3675e]{\n    width: 100%;\n}\n", ""]);
-=======
-exports.push([module.i, "\ninput[data-v-4ad3675e]{\r\n    width: 100%;\n}\r\n", ""]);
+exports.push([module.i, "\ninput[data-v-4ad3675e]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -23652,8 +23645,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\ninput[data-v-67fba83f]{\r\n    width: 100%;\n}\r\n", ""]);
->>>>>>> a061a26c9b0147164f148de54f7c1fff4ce504c4
+exports.push([module.i, "\ninput[data-v-67fba83f]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -126269,8 +126261,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\laragon\www\brainsoft\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\laragon\www\brainsoft\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

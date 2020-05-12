@@ -57,7 +57,6 @@ class SettingsController extends Controller
                 $new_device->name = $device['name'];
                 $new_device->owen_id = $device['owen_id'];
                 $new_device->district_id = $device['district_id'];
-                Cloud::request()
                 $new_device->save();
             }
         }

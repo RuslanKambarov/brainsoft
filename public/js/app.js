@@ -23436,7 +23436,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\ninput[data-v-983ff4d6]{\r\n    width: 100%;\n}\r\n", ""]);
+exports.push([module.i, "\ninput[data-v-983ff4d6]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -23455,7 +23455,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\n.device-box[data-v-7e37e26b]{\r\n    margin: 15px 15px;\r\n    border: 1px solid;\r\n    box-shadow: 0 0 4px black;\r\n    cursor: pointer;\n}\n.device-box[data-v-7e37e26b]:hover{\r\n    border: 2px solid green;\n}\r\n", ""]);
+exports.push([module.i, "\n.device-box[data-v-7e37e26b]{\n    margin: 15px 15px;\n    border: 1px solid;\n    box-shadow: 0 0 4px black;\n    cursor: pointer;\n}\n.device-box[data-v-7e37e26b]:hover{\n    border: 2px solid green;\n}\n", ""]);
 
 // exports
 
@@ -23474,7 +23474,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\ndiv[data-v-031f246e]{\r\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-031f246e]{\r\n    width: 100%;\n}\r\n", ""]);
+exports.push([module.i, "\ndiv[data-v-031f246e]{\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-031f246e]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -23493,7 +23493,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\ndiv[data-v-4ad3675e]{\r\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-4ad3675e]{\r\n    width: 100%;\n}\r\n", ""]);
+exports.push([module.i, "\ndiv[data-v-4ad3675e]{\n    border-bottom: 0.1px solid #032903\n}\ninput[data-v-4ad3675e]{\n    width: 100%;\n}\n", ""]);
 
 // exports
 
@@ -23512,7 +23512,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\nbutton[data-v-7f2b8514]{\r\n    padding: 0 10px;\r\n    margin: 0 10px;\n}\ntr[data-v-7f2b8514]{\r\n    cursor: pointer;\n}\r\n", ""]);
+exports.push([module.i, "\nbutton[data-v-7f2b8514]{\n    padding: 0 10px;\n    margin: 0 10px;\n}\ntr[data-v-7f2b8514]{\n    cursor: pointer;\n}\n", ""]);
 
 // exports
 

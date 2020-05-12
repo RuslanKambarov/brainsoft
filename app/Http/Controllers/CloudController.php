@@ -16,38 +16,59 @@ class CloudController extends Controller
 {
     public function home(){
 
-        $user = Auth::user();
-        $owen = collect(Cloud::getContent(Cloud::request("v1/category/index", [])));
-        $root = $owen->filter(function($value){
-            return $value->parent_id == 0;
-        })->first()->id;
         $districts = [];
+        $user = Auth::user();
 
-    		if($user->hasAnyRole(3)){
-	        $districts = $owen->filter(function($value) use ($root){
-            return $value->parent_id == $root;
-   		    });
-    		}
+        /*  =========CLOUD STRUCTURE======= */
+
+        // $owen = collect(Cloud::getContent(Cloud::request("v1/category/index", [])));
+        // $root = $owen->filter(function($value){
+        //     return $value->parent_id == 0;
+        // })->first()->id;
+
+
+        // if($user->hasAnyRole(3)){
+        //     $districts = $owen->filter(function($value) use ($root){
+        //         return $value->parent_id == $root;
+        //     });
+        // }
+
+        // if($user->hasAnyRole(4) || $user->hasAnyRole(1)){
+        //     $districts = $user->districts()->select('name', 'owen_id as id')->get();
+        // }
+
+        // if($user->hasAnyRole(2)){
+        //     $devices = $user->devices()->select('name', 'owen_id as id')->get();
+        //     return view("monitor", ["include" => "district", "devices" => $devices]);
+        // }
+
+        // foreach($districts as $district){
+        //     $district->childs = $owen->filter(function($value) use ($district){
+        //         return $value->parent_id == $district->id;
+        //     });
+        // }
+
+        /* =========DATABASE STRUCTURE========== */
+
+        if($user->hasAnyRole(3)){
+            $districts = district::all();            
+        }
 
         if($user->hasAnyRole(4) || $user->hasAnyRole(1)){
-            $districts = $user->districts()->select('name', 'owen_id as id')->get();
+            $districts = $user->districts()->get();
         }
 
         if($user->hasAnyRole(2)){
             $devices = $user->devices()->select('name', 'owen_id as id')->get();
             return view("monitor", ["include" => "district", "devices" => $devices]);
         }
-
-        foreach($districts as $district){
-            $district->childs = $owen->filter(function($value) use ($district){
-                return $value->parent_id == $district->id;
-            });
-        }
+        
         return view("monitor", ["include" => "home", "districts" => $districts]);        
 	
     }
 
     public function devicesByDistricts(Request $request){
+        
         $devices = collect(Cloud::getContent(Cloud::request("v1/device/index", [])));
         $result = collect([]);
         foreach($request->districts as $district){
@@ -62,28 +83,42 @@ class CloudController extends Controller
 
     public function district($id){
 
-        $district = collect(Cloud::getContent(Cloud::request("v1/category/index", [])));
-        $district = $district->filter(function($item) use ($id){
-            return $item->id == $id;
-        });
-        $district = $district->first();
-        $owen = collect(Cloud::getContent(Cloud::request("v1/user-object/index", []))->devices);
+        /*  =========CLOUD STRUCTURE======= */
 
-        $devices = $owen->filter(function($item) use ($id){
-            return $item->categories[0] == $id;
-        });
+        // $district = collect(Cloud::getContent(Cloud::request("v1/category/index", [])));
+        // $district = $district->filter(function($item) use ($id){
+        //     return $item->id == $id;
+        // });
+        // $district = $district->first();
+        // $owen = collect(Cloud::getContent(Cloud::request("v1/user-object/index", []))->devices);
 
-        $db_district = District::where("owen_id", $district->id)->orWhere('owen_id', $district->parent_id)->first();
-        $district->director = $db_district->director();
-        $district->engineer = $db_district->engineer();
+        // $devices = $owen->filter(function($item) use ($id){
+        //     return $item->categories[0] == $id;
+        // });
+
+        // $db_district = District::where("owen_id", $district->id)->orWhere('owen_id', $district->parent_id)->first();
+        // $district->director = $db_district->director();
+        // $district->engineer = $db_district->engineer();
+        // foreach($devices as $device){
+        //     if($device->status == "online"){
+        //         $device->parameters = Event::where("object_id", $device->id)->latest()->first();
+        //     }else{
+        //         $device->parameters = null;
+        //     }	
+        // }	
+
+        /* =========DATABASE STRUCTURE========== */
+
+        $district = District::find($id);
+        $district->director = $district->director();
+        $district->engineer = $district->engineer();
+
+        $devices = Device::where('district_id', $district->owen_id)->get();
+
         foreach($devices as $device){
-            if($device->status == "online"){
-                $device->parameters = Event::where("object_id", $device->id)->latest()->first();
-            }else{
-                $device->parameters = null;
-            }	
+            $device->parameters = DB::table('last_data')->where("object_id", $device->owen_id)->first();            	
         }	
-
+        
         return view("monitor", ["include" => "district", "devices" => $devices, "district" => $district]);
     }
 

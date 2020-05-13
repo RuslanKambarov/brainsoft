@@ -123,14 +123,18 @@ class CloudController extends Controller
     }
 
     public function device($id){
-        $owen_device = Cloud::request("v1/device/".$id, []);
-        $owen_device = Cloud::getContent($owen_device);
+        $device = Device::where("owen_id", $id)->first();
+        $owen_device = [];
+        if($device->controller === 1){
+            $owen_device = Cloud::request("v1/device/".$id, []);
+            $owen_device = Cloud::getContent($owen_device);    
+        }
         $device = Device::where("owen_id", $id)->first();
         $user = DB::table("user_objects")->where("object_id", $device->id)->first();
         if($user){
             $user = User::find($user->user_id);
         }	
-        $temperature_card = Objectcard::where("object_id", $owen_device->id)->get();
+        $temperature_card = Objectcard::where("object_id", $device->owen_id)->get();
         return view("monitor", ["include" => "device", "device" => $device, "owen_device" => $owen_device, "temperature_card" => $temperature_card, "user" => $user]);
     }
 

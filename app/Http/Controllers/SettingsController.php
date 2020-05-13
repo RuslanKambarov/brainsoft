@@ -7,6 +7,8 @@ use Cloud;
 use App\Device;
 use App\District;
 use Illuminate\Http\Request;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
 
 class SettingsController extends Controller
 {
@@ -49,16 +51,36 @@ class SettingsController extends Controller
         }
         if($request->target == "device"){
             
-            $token = Cloud::getToken();
-            
+            $response = [];
+
             foreach($request->devices as $device){
+                
                 $new_device = new Device;
-                //$owen = collect(Cloud::getContent(Cloud::request("v1/device-management/register", [])));
+                
+                $request_body = [
+                        "identifier"            => $device['identifier'], 
+                        "address"               => "16", 
+                        "device_type_id"        => "141", 
+                        "name"                  => $device['name'], 
+                        "categories_list"       => [$device['district_id']],
+                        "time_zone"             => "360",
+                        "archive_storage_time"  => "90"
+                ];
+                //dd(json_encode($request_body));
+                $owen_request = Cloud::request("v1/device-management/register", $request_body);
+                $owen_response = Cloud::getContent($owen_request);
+                
+                //$owen_status = json_decode($response->getBody()->getContents())->devices
+
                 $new_device->name = $device['name'];
-                $new_device->owen_id = $device['owen_id'];
+                $new_device->owen_id = $owen_response->code;
                 $new_device->district_id = $device['district_id'];
                 $new_device->save();
+
+                $response[] = $owen_response->description;
             }
+
+            return response()->json($response);
         }
 
     }

@@ -1,6 +1,6 @@
     <div class = "card">
     <div class="card-body">
-                <h2>{{$owen_device->name ? $owen_device->name : null}}</h2>
+                <h2>{{$device->name}}</h2>
             </div>
     </div>
     <v-row>
@@ -8,10 +8,12 @@
         <div class = "card">
             <div class="card-body">
                 <table class="table table-bordered table-strped table-dark">
+                    @if($owen_device)
                     <tr>
                         <td><b>Данные получены:</b></td>
                         <td><b>{{Carbon\Carbon::createFromTimestamp($owen_device->last_dt)->diffForHumans()}}</b></td>
                     </tr>
+                    @endif
                     <tr>
                         <td><b>Инженер:</b></td>
                         <td><b>@if($user){{$user->name}}@else Не назначен @endif</b></td>
@@ -23,6 +25,7 @@
     </v-row>
     <v-row>
         <v-col>
+            @if($owen_device)
             <v-container>
             <h3>Текущие параметры</h3>
             <v-simple-table>
@@ -61,5 +64,10 @@
                 </template>
             </v-simple-table>
             </v-container>
+            @else
+                <v-container>
+                    <h2>Нет контроллера</h2>
+                </v-container>
+            @endif
         </v-col>
     </v-row>

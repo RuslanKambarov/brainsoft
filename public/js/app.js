@@ -2571,8 +2571,8 @@ __webpack_require__.r(__webpack_exports__);
       showObjects: false,
       add_devices: [{
         name: '',
-        district_id: this.district.owen_id,
-        owen_id: 0
+        identifier: 0,
+        district_id: this.district.owen_id
       }]
     };
   },
@@ -2589,8 +2589,8 @@ __webpack_require__.r(__webpack_exports__);
     addFields: function addFields() {
       this.add_devices.push({
         name: '',
-        district_id: this.district.owen_id,
-        owen_id: 0
+        identifier: 0,
+        district_id: this.district.owen_id
       });
     }
   }
@@ -74451,13 +74451,13 @@ var render = function() {
                           { attrs: { cols: "4" } },
                           [
                             _c("v-text-field", {
-                              attrs: { outlined: "", label: "OWEN ID" },
+                              attrs: { outlined: "", label: "Идентификатор" },
                               model: {
-                                value: device.owen_id,
+                                value: device.identifier,
                                 callback: function($$v) {
-                                  _vm.$set(device, "owen_id", $$v)
+                                  _vm.$set(device, "identifier", $$v)
                                 },
-                                expression: "device.owen_id"
+                                expression: "device.identifier"
                               }
                             })
                           ],

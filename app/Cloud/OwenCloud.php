@@ -16,7 +16,7 @@ class OwenCloud implements Cloud{
             'headers' => [
                 'Content-Type'  => 'application/x-www-form-urlencoded',
                 "Content-Length" => "68",
-		'User-Agent' => null,
+		        'User-Agent' => null,
                 "Accept"         => "*/*",    
             ],
             'body' => json_encode(['login' => "kambarov.rs@gmail.com", 'password' => "wwwggg123Q"])
@@ -27,8 +27,8 @@ class OwenCloud implements Cloud{
     public function request($uri, $body){
         $client = new \GuzzleHttp\Client();
 
-            Session::put("CloudToken", $this->getToken());
-
+        Session::put("CloudToken", $this->getToken());
+        
         $response = $client->post("https://api.owencloud.ru/".$uri , [
             'headers' => $this->getHeaders(),
             'body' => json_encode($body)
@@ -41,7 +41,7 @@ class OwenCloud implements Cloud{
             'Content-Type'  => 'application/x-www-form-urlencoded',
             "Content-Length" => "68",
             "Accept"         => "*/*",
-	    "User-Agent" => null,
+	        "User-Agent" => null,
             "Authorization" => 'Bearer '.Session::get("CloudToken")
         ];
     }

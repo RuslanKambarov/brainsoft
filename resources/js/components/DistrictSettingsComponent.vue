@@ -35,7 +35,7 @@
                     <v-text-field outlined v-model="device.name" label="Название"></v-text-field>
                 </v-col>
                 <v-col cols='4'>
-                    <v-text-field outlined v-model="device.owen_id" label="OWEN ID"></v-text-field>
+                    <v-text-field outlined v-model="device.identifier" label="Идентификатор"></v-text-field>
                 </v-col>
             
             </v-row>
@@ -63,8 +63,8 @@ export default {
             add_devices: [
                 {
                     name: '',
-                    district_id: this.district.owen_id,
-                    owen_id: 0
+                    identifier: 0,
+                    district_id: this.district.owen_id
                 }
             ]
         }
@@ -83,8 +83,8 @@ export default {
             this.add_devices.push(                
                 {
                     name: '',
-                    district_id: this.district.owen_id,
-                    owen_id: 0
+                    identifier: 0,
+                    district_id: this.district.owen_id
                 })
         }
     }

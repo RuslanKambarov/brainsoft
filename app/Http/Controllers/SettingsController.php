@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Auth;
 use Cloud;
 use App\Device;
 use App\District;
@@ -13,6 +14,11 @@ use GuzzleHttp\Exception\RequestException;
 class SettingsController extends Controller
 {
     public function index(){
+        $user = Auth::user();
+        if(!$user->hasAnyRole(3)){
+            return abort(403);
+        }
+        
         $devices = Device::select('owen_id', 'controller', 'name', 'coal_reserve', 'district_id', 'required_t', 'required_p')->get();
         $districts = District::with('devices')->get();
         $settings = DB::table("app_settings")->get();

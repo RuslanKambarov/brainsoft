@@ -38,6 +38,10 @@ Route::group(["middleware" => "auth"], function(){
 
     Route::get("/tempcard/remove/{id}", "CloudController@removeTempCard");
     
+    Route::get("profile", "UserController@profile");
+
+    Route::post("profile", "UserController@changePassword");
+
     Route::group(["prefix" => "users"], function(){
 	
         Route::get("/", "UserController@index");

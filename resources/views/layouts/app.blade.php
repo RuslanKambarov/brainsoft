@@ -71,7 +71,32 @@
                 <v-list-item-content>
                     <v-list-item-title>Аудит</v-list-item-title>
                 </v-list-item-content>
-            </v-list-item>                        
+            </v-list-item>
+            <v-list-group>
+                <template v-slot:activator>
+                    <v-list-item-action>
+                        <v-icon>mdi-eye-check</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Аудиты</v-list-item-title>
+                    </v-list-item-content>            
+                </template>
+                <v-list-item class="ml-10" link href="/audit">
+                    <v-list-item-content>
+                        <v-list-item-title>Аудит мониторинг</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-list-item class="ml-10" link href="/audit">
+                    <v-list-item-content>
+                        <v-list-item-title>Аудит</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-list-item class="ml-10" link href="/audit">
+                    <v-list-item-content>
+                        <v-list-item-title>Аудит учет топлива</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>            
+            </v-list-group>                        
             <v-list-item link href="/alarms">
                 <v-list-item-action>
                     <v-icon>mdi-alert</v-icon>
@@ -104,7 +129,9 @@
         <v-toolbar-title>ЦТК</v-toolbar-title>
         <v-spacer></v-spacer>
         @auth
-        <a href="{{route('logout')}}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><button class="btn btn-success">{{Auth::user()->name}}</button></a>
+        <a href="/profile"><button class="btn btn-success mr-4">{{Auth::user()->name}}</button></a>
+        
+        <a href="{{route('logout')}}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><button class="btn btn-danger">Выход</button></a>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>    

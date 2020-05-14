@@ -67,6 +67,7 @@
             @else
                 <v-container>
                     <h2>Нет контроллера</h2>
+                    <a href="{{url('/audit/results?device_id='.$device->owen_id)}}"><v-btn color="teal darken-2">Аудиты</v-btn></a>
                 </v-container>
             @endif
         </v-col>

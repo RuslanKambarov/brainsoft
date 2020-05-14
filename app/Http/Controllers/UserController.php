@@ -17,64 +17,24 @@ class UserController extends Controller
         $users = User::with('roles')->get();
         return view("monitor", ["include" => "users", "users" => $users]);                 
     }
+
     public function userInfo($id){
         $user = User::with('roles', 'districts', 'devices')->find($id);
         $roles = Role::all();
         return view("monitor", ["include" => "userinfo", "user" => $user, 'roles' => $roles]);
 
     }
-    public function update(){
-        
-        $request = request();
 
-	$user = User::find($request->user);
-	if($request->role == "engineer"){
-		if($request->districts){
-		foreach($request->districts as $district){
-                    $exist = DB::table("user_objects")->where([
-                        ['user_id', $request->user],
-                        ['district_id', $district]
-                    ])->first();
-                    if(!$exist){
-                        DB::table("user_objects")->insert([
-                            ['user_id' => $request->user, 'district_id' => $district]
-                        ]);
-                    }
-                }
-		}		
-	}
-	if($request->role == "fireman"){
-		if($request->devices){
-                foreach($request->devices as $device){
-                    $exist = DB::table("user_objects")->where([
-                        ['user_id', $request->user],
-                        ['object_id', $device]
-                    ])->first();
-                    if(!$exist){
-                        DB::table("user_objects")->insert([
-                            ['user_id' => $request->user, 'object_id' => $device]
-                        ]);
-                    }
-                }  
-		}	
-	}
-
-	$user->role = $request->role;
-	$user->save();
-	
-	return "Сохранено";
-
-    }
     public function removeUser($user_id){
     	$user = User::find($id);
-	$user_objcets = DB::table("user_objects")->where("user_id", $id)->get();
-	$user_objects->delete();
-	if($user->delete()){
-		$message  = "Пользователь ".$user." удален";
-	}else{
-		$message  = "Пользователь ".$user."не был удален";
-	}
-	return $message;	
+	    $user_objcets = DB::table("user_objects")->where("user_id", $id)->get();
+	    $user_objects->delete();
+        if($user->delete()){
+            $message  = "Пользователь ".$user." удален";
+        }else{
+            $message  = "Пользователь ".$user."не был удален";
+        }
+        return $message;	
     }
 
     public function detachObject($user_id, $object_id){        
@@ -107,5 +67,25 @@ class UserController extends Controller
         $notAttached->districts = District::whereNotIn('owen_id', $attachedDistricts)->get();
         $notAttached->devices = Device::whereNotIn('owen_id', $attachedDevices)->get();
         return response()->json($notAttached);
+    }
+
+    public function profile(){
+        return view("monitor", ['include' => 'profile']);        
+    }
+
+    public function changePassword(Request $request){
+        
+        $user = Auth::user();
+
+        if(\Hash::check($request->old_password, $user->password)){
+            $user->password = \Hash::make($request->new_password);
+            $user->save();
+            return view("monitor", ['include' => 'profile', 'class' => 'success', 'message' => "Пароль успешно сохранен"]);
+        }else{
+            return view("monitor", ['include' => 'profile', 'class' => 'danger', 'message' => "Не верный пароль"]);
+        }
+        
+         
+
     }
 }

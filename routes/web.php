@@ -106,6 +106,18 @@ Route::group(["middleware" => "auth"], function(){
 
         Route::get("/types/delete/{id}", "AuditController@deleteAudit");
 
+        Route::group(["prefix" => "monitor"], function(){
+
+            Route::get("/", "AuditController@monitorIndex");
+
+            Route::get("/analitycs/{district_id}", "AuditController@getMonitorAnalitycs");
+
+            Route::get("/{month}/{object_id}", "AuditController@monitorDetails");
+
+            Route::get("/excell", "AuditController@createExcel");
+
+        });
+
     });
 
     Route::group(["prefix" => "settings"], function(){

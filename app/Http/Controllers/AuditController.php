@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use DB;
 use App\User;
+use App\Alert;
+use App\Event;
 use App\Audit;
 use App\Device;
 use App\District;
 use App\Question;
 use App\Audit_result;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class AuditController extends Controller
 {
@@ -343,5 +348,122 @@ class AuditController extends Controller
         }
         // /dd($districts);
         return view('audit.director', ["districts" => $districts]);
+    }
+
+    public function monitorIndex(){
+
+        $districts = District::all();
+
+        return view('audit.monitor.index', ["districts" => $districts]);
+
+    }
+
+    public function getMonitorAnalitycs($district_id){
+
+        $sep = new \Carbon\Carbon("2020-09");
+        $oct = \Carbon\Carbon::create(2020, 10, 00);
+        $nov = \Carbon\Carbon::create(2020, 11, 00);
+        $dec = \Carbon\Carbon::create(2020, 12, 00);
+        $jan = \Carbon\Carbon::create(2020, 01, 00);
+        $feb = \Carbon\Carbon::create(2020, 02, 00);
+        $mar = \Carbon\Carbon::create(2020, 03, 00);
+        $apr = \Carbon\Carbon::create(2020, 04, 00);
+        $may = \Carbon\Carbon::create(2020, 05, 00);
+
+        $devices = Device::where("district_id", $district_id)->get();
+        $data = [];
+
+        foreach($devices as $device){
+            $data[]=array(
+                'id'     => $device->owen_id, 
+                'name'   => $device->name,
+                'engineer'  => $device->getEngineer(),
+                'total'  => count(Alert::where("object_id", $device->owen_id)->get()),      
+                'sep'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$sep')")->get()),
+                'oct'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$oct')")->get()),
+                'nov'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$nov')")->get()),
+                'dec'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$dec')")->get()),
+                'jan'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$jan')")->get()),
+                'feb'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$feb')")->get()),
+                'mar'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$mar')")->get()),
+                'apr'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$apr')")->get()),
+                'may'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$may')")->get())
+
+            );
+        }
+
+        $total_sep = 0;
+        $total_oct = 0;
+        $total_nov = 0;
+        $total_dec = 0; 
+        $total_jan = 0;
+        $total_feb = 0;
+        $total_mar = 0; 
+        $total_may = 0;
+        $total_apr = 0;
+
+        foreach($data as $row){
+            $total_sep += $row['sep'];
+            $total_oct += $row['oct'];
+            $total_nov += $row['nov'];
+            $total_dec += $row['dec']; 
+            $total_jan += $row['jan'];
+            $total_feb += $row['feb'];
+            $total_mar += $row['mar']; 
+            $total_may += $row['may'];
+            $total_apr += $row['apr'];
+        }
+        $data[] = ['name' => "Всего по району", 'sep' => $total_sep, 'oct' => $total_oct, 'nov' => $total_nov,
+        'dec' => $total_dec, 'jan' => $total_jan, 'feb' => $total_feb,
+        'mar' => $total_mar, 'apr' => $total_apr, 'may' => $total_may                
+        ];
+        
+               
+        return response()->json($data);
+    }
+
+    public function monitorDetails($month, $object_id){
+
+        switch ($month) {
+            case 'sep':  $date = new \Carbon\Carbon("2020-09"); break;
+            case 'oct':  $date = \Carbon\Carbon::create(2020, 10, 00); break;
+            case 'nov':  $date = \Carbon\Carbon::create(2020, 11, 00); break;
+            case 'dec':  $date = \Carbon\Carbon::create(2020, 12, 00); break;
+            case 'jan':  $date = \Carbon\Carbon::create(2020, 01, 00); break;
+            case 'feb':  $date = \Carbon\Carbon::create(2020, 02, 00); break;
+            case 'mar':  $date = \Carbon\Carbon::create(2020, 03, 00); break;
+            case 'apr':  $date = \Carbon\Carbon::create(2020, 04, 00); break;
+            case 'may':  $date = \Carbon\Carbon::create(2020, 05, 00); break;
+
+            default:
+                # code...
+                break;
+        }
+
+        $alerts = Alert::where("object_id", $object_id)->whereRaw("MONTH(created_at) = MONTH('$date')")->get();
+        
+        // foreach ($alerts as $alert) {
+        //     $alert->events = Event::where("object_id", $alert->object_id)
+        //         ->whereRaw("created_at > '$alert->created_at' AND created_at < '$alert->updated_at'")
+        //         ->get();               
+        // }
+        
+        return view("audit.monitor.details", ["alerts" => $alerts]);
+
+    }
+
+    public function createExcel(){
+        
+        
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Hello World !');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="file.xlsx"');
+        $writer->save("php://output");
+
     }
 }

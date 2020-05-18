@@ -39,6 +39,11 @@ Vue.component('district-settings-component', require('./components/DistrictSetti
 Vue.component('audit-index-component', require('./components/Audit/AuditIndexComponent.vue').default);
 Vue.component('audit-device-component', require('./components/Audit/AuditDeviceComponent.vue').default);
 Vue.component('device-analytics-component', require('./components/Audit/DeviceAnalyticsComponent.vue').default);
+Vue.component('monitor-index-component', require('./components/Audit/MonitorIndexComponent.vue').default);
+Vue.component('monitor-district-component', require('./components/Audit/MonitorDistrictComponent.vue').default);
+Vue.component('monitor-table-component', require('./components/Audit/MonitorTableComponent.vue').default);
+Vue.component('alert-history-component', require('./components/AlertHistoryComponent.vue').default);
+
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

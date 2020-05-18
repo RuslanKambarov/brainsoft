@@ -78,22 +78,22 @@
                         <v-icon>mdi-eye-check</v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
-                        <v-list-item-title>Аудиты</v-list-item-title>
+                        <v-list-item-title>Аналитика</v-list-item-title>
                     </v-list-item-content>            
                 </template>
-                <v-list-item class="ml-10" link href="/audit">
+                <v-list-item class="ml-10" link href="/audit/monitor">
                     <v-list-item-content>
-                        <v-list-item-title>Аудит мониторинг</v-list-item-title>
+                        <v-list-item-title>Аналитика мониторинга</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
                 <v-list-item class="ml-10" link href="/audit">
                     <v-list-item-content>
-                        <v-list-item-title>Аудит</v-list-item-title>
+                        <v-list-item-title>Аналитика аудитов</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
                 <v-list-item class="ml-10" link href="/audit">
                     <v-list-item-content>
-                        <v-list-item-title>Аудит учет топлива</v-list-item-title>
+                        <v-list-item-title>Аналитика учета топлива</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>            
             </v-list-group>                        

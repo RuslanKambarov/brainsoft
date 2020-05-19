@@ -3,6 +3,9 @@
         <div class="table-wrapper">
         <table class="table table-striped table-bordered">
             <thead>
+                <tr>
+                    <td colspan="15">Аналитика отклонений температурного режима отапливаемых объектов</td>
+                </tr>
                 <tr class="table-heading">
                 <th>№</th>
                 <th colspan="2">Наименование объекта</th>

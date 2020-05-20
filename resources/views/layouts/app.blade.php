@@ -105,14 +105,14 @@
                     <v-list-item-title>Аварии</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-item link href="/events">
+            {{-- <v-list-item link href="/events">
                 <v-list-item-action>
                     <v-icon>mdi-contact-mail</v-icon>
                 </v-list-item-action>
                 <v-list-item-content>
                     <v-list-item-title>События</v-list-item-title>
                 </v-list-item-content>
-            </v-list-item>
+            </v-list-item> --}}
             <v-list-item link href="/settings">
                 <v-list-item-action>
                     <v-icon>mdi-settings</v-icon>

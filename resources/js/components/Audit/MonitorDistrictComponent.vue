@@ -2,8 +2,8 @@
     <v-row class="district-box" @click="expand=true">
         <h3 class="text-center m-4">{{district.name}}</h3>
         <v-spacer></v-spacer>
-        <div class="p-4" v-show="expand">
-            <a href="/audit/monitor/excell"><button class="btn btn-small btn-success">Excell</button></a>
+        <div class="control-buttons" v-show="expand">
+            <a :href="'/audit/monitor/excell/'+district.owen_id"><button class="btn btn-small btn-success m-4 get-excell-button">Excell</button></a>
             <button class="btn btn-small btn-success" @click="expand=false">Скрыть</button>
         </div>
         <monitor-table-component v-if="expand==true" :district_id="district.owen_id"></monitor-table-component>

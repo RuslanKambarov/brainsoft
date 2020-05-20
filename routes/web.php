@@ -112,9 +112,9 @@ Route::group(["middleware" => "auth"], function(){
 
             Route::get("/analitycs/{district_id}", "AuditController@getMonitorAnalitycs");
 
-            Route::get("/{month}/{object_id}", "AuditController@monitorDetails");
+            Route::get("/excell/{district_id}", "AuditController@createExcel");
 
-            Route::get("/excell", "AuditController@createExcel");
+            Route::get("/{month}/{object_id}", "AuditController@monitorDetails");
 
         });
 

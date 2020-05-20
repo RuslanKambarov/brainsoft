@@ -452,13 +452,101 @@ class AuditController extends Controller
 
     }
 
-    public function createExcel(){
-        
+    public function createExcel($district_id){
+
+        $data = json_decode($this->getMonitorAnalitycs($district_id)->content());
         
         $spreadsheet = new Spreadsheet();
-
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Hello World !');
+
+        $styleArray = [
+            'alignment' => array(
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ),
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+        ];
+
+        $sheet->setCellValue("B4", "Аналитика отклонений температурного режима отапливаемых объектов");
+        $sheet->mergeCells('B4:N4');
+        $sheet->getStyle('B4:N4')
+        ->applyFromArray($styleArray);
+        
+
+        $sheet->getStyle('B5:N5')
+        ->applyFromArray($styleArray);
+
+        $sheet->getRowDimension('5')->setRowHeight(50);
+        $sheet->getStyle('B4:N24')
+            ->getAlignment()->setWrapText(true);
+
+        $sheet->setCellValue('B5', '№');
+        $sheet->setCellValue('C5', 'Наименование объекта');
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->setCellValue('D5', 'ФИО инженера');
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+        $sheet->setCellValue('E5', 'Нарушение температуры объекта за пройденый период');
+        $sheet->getColumnDimension('E')->setWidth(25);
+        $sheet->setCellValue('F5', 'сентябрь');
+        $sheet->setCellValue('G5', 'октябрь');
+        $sheet->setCellValue('H5', 'ноябрь');
+        $sheet->setCellValue('I5', 'декабрь');
+        $sheet->setCellValue('J5', 'январь');
+        $sheet->setCellValue('K5', 'февраль');
+        $sheet->setCellValue('L5', 'март');
+        $sheet->setCellValue('M5', 'апрель');
+        $sheet->setCellValue('N5', 'май');
+
+        $n = 0; //Number of row
+        $c = 5; //Number of cell
+
+        array_pop($data);
+        foreach($data as $row){
+            
+            $c++;
+            $n++;
+            $sheet->setCellValue("B".$c, $n);
+            $sheet->setCellValue('C'.$c, $row->name);
+            $sheet->setCellValue('D'.$c, $row->engineer ?? null);
+            $sheet->setCellValue('E'.$c, $row->total ?? null);
+            $sheet->setCellValue('F'.$c, $row->sep);
+            $sheet->setCellValue('G'.$c, $row->oct);
+            $sheet->setCellValue('H'.$c, $row->nov);
+            $sheet->setCellValue('I'.$c, $row->dec);
+            $sheet->setCellValue('J'.$c, $row->jan);
+            $sheet->setCellValue('K'.$c, $row->feb);
+            $sheet->setCellValue('L'.$c, $row->mar);
+            $sheet->setCellValue('M'.$c, $row->apr);
+            $sheet->setCellValue('N'.$c, $row->may);
+
+            $sheet->getStyle('B'.$c.':N'.$c)
+            ->applyFromArray($styleArray);
+        }
+
+        $c++;
+        $sheet->setCellValue('B'.$c, "Всего по району");
+        $sheet->mergeCells('B'.$c.':D'.$c);        
+        
+        $d = $c-1;
+        $sheet->setCellValue('E'.$c, "=SUM(E6:E".$d.")");
+        $sheet->setCellValue('F'.$c, "=SUM(F6:F".$d.")");
+        $sheet->setCellValue('G'.$c, "=SUM(G6:G".$d.")");
+        $sheet->setCellValue('H'.$c, "=SUM(H6:H".$d.")");
+        $sheet->setCellValue('I'.$c, "=SUM(I6:I".$d.")");
+        $sheet->setCellValue('J'.$c, "=SUM(J6:J".$d.")");
+        $sheet->setCellValue('K'.$c, "=SUM(K6:K".$d.")");
+        $sheet->setCellValue('L'.$c, "=SUM(L6:L".$d.")");
+        $sheet->setCellValue('M'.$c, "=SUM(M6:M".$d.")");
+        $sheet->setCellValue('N'.$c, "=SUM(N6:N".$d.")");
+
+        $sheet->getStyle('B'.$c.':N'.$c)
+        ->applyFromArray($styleArray);
+
+        $sheet->getStyle('B'.$c.':N'.$c)->getFont()->setBold(true);
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

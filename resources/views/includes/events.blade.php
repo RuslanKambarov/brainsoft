@@ -29,4 +29,7 @@
     </tbody>
 
 </table>
+@if(isset($path))
+    <date-picker-component :base_url="'{{$path}}'"></date-picker-component>
+@endif
 {{$events->links()}}

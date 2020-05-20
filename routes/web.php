@@ -64,6 +64,8 @@ Route::group(["middleware" => "auth"], function(){
 
         Route::get("/device/{id}", "EventController@deviceEvents");
 
+        Route::get("/device/{id}/{start}/{end}", "EventController@deviceEvents");
+        
         Route::get("/graph/{id}", "EventController@graph");
 
     });

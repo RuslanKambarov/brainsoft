@@ -442,6 +442,12 @@ class AuditController extends Controller
 
         $alerts = Alert::where("object_id", $object_id)->whereRaw("MONTH(created_at) = MONTH('$date')")->get();
         
+        foreach ($alerts as $alert) {
+            $alert->events = Event::where("object_id", $alert->object_id)
+                ->whereRaw("created_at = '$alert->created_at'")
+                ->first();               
+        }
+
         // foreach ($alerts as $alert) {
         //     $alert->events = Event::where("object_id", $alert->object_id)
         //         ->whereRaw("created_at > '$alert->created_at' AND created_at < '$alert->updated_at'")
@@ -459,8 +465,9 @@ class AuditController extends Controller
         $data = json_decode($this->getMonitorAnalitycs($district_id)->content());
         
         $spreadsheet = new Spreadsheet();
+        
         $sheet = $spreadsheet->getActiveSheet();
-
+        $sheet->setTitle("Аналитика Mониторинга");
         $styleArray = [
             'alignment' => array(
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -552,7 +559,7 @@ class AuditController extends Controller
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="file.xlsx"');
+        header('Content-Disposition: attachment; filename="Аналитика мониторинга. '. $district_name.'.xlsx"');
         $writer->save("php://output");
 
     }

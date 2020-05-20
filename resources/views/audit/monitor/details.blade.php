@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>№</th>
+                <th>Температура объекта</th>
                 <th>Тип аварии</th>
                 <th>Начало</th>
                 <th>Завершение</th>
@@ -15,6 +16,7 @@
         @foreach ($alerts as $alert)
             <tr>
                 <td>{{$loop->iteration}}</td>
+                <td>{{$alert->events->object_t}}</td>
                 <td>{{$alert->message}}</td>
                 <td><b>{{$alert->created_at}}</b></td>
                 <td><b>{{$alert->updated_at}}</b></td>

@@ -8,13 +8,25 @@ use Illuminate\Http\Request;
 class EventController extends Controller
 {
     public function index(Request $request){
-    	$events = Event::latest()->paginate(20);	
+      $events = Event::latest()->paginate(20);	
       return view("monitor", ["include" => "events", "events" => $events]);
     }
 
-    public function deviceEvents($id){
-    	$events = Event::where('object_id', $id)->latest()->paginate(20);
-    	return view("monitor", ["include" => "events", "events" => $events]);
+    public function deviceEvents($id, $start = null, $end = null){
+      
+      $path = "/events/device/".$id;
+
+      if(($start) && ($end)){        
+        $start = \Carbon\Carbon::createFromFormat('Y-m-d', $start);
+        $end = \Carbon\Carbon::createFromFormat('Y-m-d', $end);
+        $events = Event::where('object_id', $id)
+          ->whereRaw("created_at > DATE('$start') AND created_at < DATE('$end')")
+          ->paginate(20);  
+      } else{
+        $events = Event::where('object_id', $id)->latest()->paginate(20);
+      }
+      
+    	return view("monitor", ["include" => "events", "path" => $path, "events" => $events]);
     }
 
     public function graph($id){

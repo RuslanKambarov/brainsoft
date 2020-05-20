@@ -43,7 +43,7 @@ Vue.component('monitor-index-component', require('./components/Audit/MonitorInde
 Vue.component('monitor-district-component', require('./components/Audit/MonitorDistrictComponent.vue').default);
 Vue.component('monitor-table-component', require('./components/Audit/MonitorTableComponent.vue').default);
 Vue.component('alert-history-component', require('./components/AlertHistoryComponent.vue').default);
-
+Vue.component('date-picker-component', require('./components/DatePickerComponent.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

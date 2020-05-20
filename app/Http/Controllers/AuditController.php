@@ -454,6 +454,8 @@ class AuditController extends Controller
 
     public function createExcel($district_id){
 
+        $district_name = District::where("owen_id", $district_id)->first()->name;
+
         $data = json_decode($this->getMonitorAnalitycs($district_id)->content());
         
         $spreadsheet = new Spreadsheet();
@@ -471,11 +473,11 @@ class AuditController extends Controller
             ],
         ];
 
-        $sheet->setCellValue("B4", "Аналитика отклонений температурного режима отапливаемых объектов");
+        $sheet->setCellValue("B4", $district_name.". Аналитика отклонений температурного режима отапливаемых объектов");
         $sheet->mergeCells('B4:N4');
         $sheet->getStyle('B4:N4')
         ->applyFromArray($styleArray);
-        
+        $sheet->getStyle('B4:N4')->getFont()->setBold(true)->setSize(14);
 
         $sheet->getStyle('B5:N5')
         ->applyFromArray($styleArray);

@@ -18,6 +18,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class AuditController extends Controller
 {
+
+
     
     public function index(Request $request){
     
@@ -354,11 +356,11 @@ class AuditController extends Controller
 
         $districts = District::all();
 
-        return view('audit.monitor.index', ["districts" => $districts]);
+        return view('analytics.monitor.index', ["districts" => $districts]);
 
     }
 
-    public function getMonitorAnalitycs($district_id){
+    public function getMonitorAnalytics($district_id){
 
         $sep = new \Carbon\Carbon("2020-09");
         $oct = \Carbon\Carbon::create(2020, 10, 00);
@@ -417,7 +419,9 @@ class AuditController extends Controller
         'dec' => $total_dec, 'jan' => $total_jan, 'feb' => $total_feb,
         'mar' => $total_mar, 'apr' => $total_apr, 'may' => $total_may                
         ];
-        
+
+        $data[count($data) - 1]["total"] = array_sum($data[count($data) - 1]);
+
                
         return response()->json($data);
     }
@@ -454,7 +458,7 @@ class AuditController extends Controller
         //         ->get();               
         // }
         
-        return view("audit.monitor.details", ["alerts" => $alerts]);
+        return view("analytics.monitor.details", ["alerts" => $alerts]);
 
     }
 
@@ -462,7 +466,7 @@ class AuditController extends Controller
 
         $district_name = District::where("owen_id", $district_id)->first()->name;
 
-        $data = json_decode($this->getMonitorAnalitycs($district_id)->content());
+        $data = json_decode($this->getMonitorAnalytics($district_id)->content());
         
         $spreadsheet = new Spreadsheet();
         
@@ -471,6 +475,7 @@ class AuditController extends Controller
         $styleArray = [
             'alignment' => array(
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
             ),
             'borders' => [
                 'allBorders' => [
@@ -488,7 +493,7 @@ class AuditController extends Controller
 
         $sheet->getStyle('B5:N5')
         ->applyFromArray($styleArray);
-
+        
         $sheet->getRowDimension('5')->setRowHeight(50);
         $sheet->getStyle('B4:N24')
             ->getAlignment()->setWrapText(true);
@@ -560,6 +565,264 @@ class AuditController extends Controller
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="Аналитика мониторинга. '. $district_name.'.xlsx"');
+        $writer->save("php://output");
+
+    }
+
+    public function auditIndex(){
+
+        $districts = District::with("devices")->get();
+        
+        return view('analytics.audit.index', ["districts" => $districts]);
+    }
+
+    /*
+    Data for table Audit Analytics
+    View  /analytics/audit/index
+    Route /analytics/audit/analytics/{district_id}/{month}
+    */
+    public function getAuditAnalytics($district_id, $date = null){
+
+        $date = explode("(", $date)[0];         //get rid of "(timezone)"
+        $date = \Carbon\Carbon::parse($date);   //create a Carbon instance from recieved date
+        
+        $audit_id = 4;  
+        $audit = Audit::with('questions')->find($audit_id); //get audit
+
+        $district = District::where("owen_id", $district_id)->first();
+        $objects = Device::where("district_id", $district_id)->get();
+                
+        $manager_id = $district->getEngineerId();
+                
+        $district_audits_by_user = $district->getAuditResultsByUser($date)->groupBy('user_id');
+
+        $analytics_data = [];
+        
+        //Total by district
+        $total_district["object_name"] = "Итого по району";
+        $total_district["engineer_assigned"] = 0;
+        $total_district["engineer_conducted"] = 0;
+        $total_district["manager_assigned"] = 0;
+        $total_district["manager_conducted"] = 0;
+        $total_district["total_conducted"] = 0;
+        $total_district["kpi1"] = 0;
+        $total_district["kpi2"] = 0;
+
+        foreach($district_audits_by_user as $user_id => $user_audits){
+
+            $object_audits = $user_audits->groupBy('owen_id');
+            $total = [];
+
+            //Total by engineer
+            $total[$user_id]["engineer_assigned"] = 0;
+            $total[$user_id]["engineer_conducted"] = 0;
+            $total[$user_id]["manager_assigned"] = 0;
+            $total[$user_id]["manager_conducted"] = 0;
+            $total[$user_id]["total_conducted"] = 0;
+            $total[$user_id]["kpi1"] = 0;
+            $total[$user_id]["kpi2"] = 0;
+
+            foreach($object_audits as $object_id => $audits){
+
+                $temp = [];
+                $temp["engineer"] = $audits[0]->username;
+                $temp["object_name"] = $audits[0]->name;
+
+                $temp["engineer_assigned"] = $this->getAssignedAuditsCount($object_id, $audit_id);
+                if($audits[0]->audit_json === null){
+                    $temp["engineer_conducted"] = 0;    
+                }else{
+                    $temp["engineer_conducted"] = count($audits->where("auditor_id", $user_id));
+                }                
+                
+                $manager_audits = Audit_result::where("object_id", $object_id)
+                    ->where("audit_id", $audit_id)
+                    ->where("auditor_id", $manager_id)
+                    ->whereRaw("MONTH(audit_date) = MONTH('$date')")
+                    ->get();
+
+                $temp["manager_assigned"] = count($manager_audits);
+                $temp["manager_conducted"] = count($manager_audits);
+
+                $temp["total_conducted"] = $temp["engineer_conducted"] + $temp["manager_conducted"];
+
+                $total[$user_id]["engineer_assigned"] += $temp["engineer_assigned"];
+                $total[$user_id]["engineer_conducted"] += $temp["engineer_conducted"];    
+
+                $total[$user_id]["total_conducted"] += $temp["total_conducted"];
+
+                $total[$user_id]["manager_assigned"] += $temp["manager_assigned"];
+                $total[$user_id]["manager_conducted"] += $temp["manager_conducted"];
+                
+
+                $total_district["engineer_assigned"] += $temp["engineer_assigned"];
+                $total_district["engineer_conducted"] += $temp["engineer_conducted"];    
+
+                $total_district["total_conducted"] += $temp["total_conducted"];
+
+                $total_district["manager_assigned"] += $temp["manager_assigned"];
+                $total_district["manager_conducted"] += $temp["manager_conducted"];
+
+                $temp["NOK"] = $audit->countNOK($audits);
+                if(array_slice($temp["NOK"], 0, 1)[0] >= 3){ $temp["kpi1"] = 1; }else{ $temp["kpi1"] = 0; }
+                if(array_slice($temp["NOK"], 1, 1)[0] >= 3){ $temp["kpi2"] = 1; }else{ $temp["kpi2"] = 0; }
+                foreach($temp["NOK"] as $question_id => $answer){
+                    isset($total_district["NOK"][$question_id]) ? $total_district["NOK"][$question_id] += $answer : $total_district["NOK"][$question_id] = $answer;
+                    isset($total[$user_id]["NOK"][$question_id]) ? $total[$user_id]["NOK"][$question_id] += $answer : $total[$user_id]["NOK"][$question_id] = $answer;
+                }
+                $total[$user_id]["kpi1"] += $temp["kpi1"];
+                $total[$user_id]["kpi2"] += $temp["kpi2"];    
+
+                $total_district["kpi1"] += $temp["kpi1"];
+                $total_district["kpi2"] += $temp["kpi2"];
+
+                $analytics_data[] = $temp;
+            }
+
+            $analytics_data[] = $total;    
+
+        }
+
+        $analytics_data[] = $total_district;
+
+        return $analytics_data;
+
+    }   
+
+    public function createExcelAuditAnalytics($district_id, $date){
+        
+        $data = $this->getAuditAnalytics($district_id, $date);
+        $district_name = District::where("owen_id", $district_id)->first()->name;
+        $spreadsheet = new Spreadsheet();
+        
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle("Аналитика Аудитов");
+        $styleArray = [
+            'alignment' => array(
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ),
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+        ];
+
+        $sheet->setCellValue("B4", $district_name.". Аналитика проведения аудитов за месяц");
+        $sheet->mergeCells('B4:U4');
+        $sheet->getStyle('B4:U7')
+        ->applyFromArray($styleArray);
+        $sheet->getStyle('B4:U7')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->getStyle('B5:U7')
+        ->applyFromArray($styleArray);
+        
+        //$sheet->getRowDimension('5')->setRowHeight(50);
+        $sheet->getStyle('B4:U24')
+            ->getAlignment()->setWrapText(true);
+
+        $sheet->setCellValue('B5', '№');
+        $sheet->mergeCells('B5:B7');
+        $sheet->setCellValue('C5', 'Наименование объекта');
+        $sheet->mergeCells('C5:C7');
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->setCellValue('D5', 'ФИО инженера');
+        $sheet->mergeCells('D5:D7');
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+        $sheet->setCellValue('E5', 'Главный инженер');
+        $sheet->mergeCells('E5:F6');
+        $sheet->setCellValue('G5', 'Инженер');
+        $sheet->mergeCells('G5:H6');
+        $sheet->setCellValue('I5', 'Проведено аудитов');
+        $sheet->mergeCells('I5:I6');
+        $sheet->setCellValue('J5', 'Показатели для KPI');
+        $sheet->mergeCells('J5:K5');
+        $sheet->setCellValue('L5', 'Фактическое кол-во нарушений по проведенным аудитам за месяц');
+        $sheet->mergeCells('L5:U5');
+
+        $sheet->setCellValue('J6', '1');
+        $sheet->setCellValue('K6', '2');
+        $sheet->setCellValue('L6', '1');
+        $sheet->setCellValue('M6', '2');
+        $sheet->setCellValue('N6', '3');
+        $sheet->setCellValue('O6', '4');
+        $sheet->setCellValue('P6', '5');
+        $sheet->setCellValue('Q6', '6');
+        $sheet->setCellValue('R6', '7');
+        $sheet->setCellValue('S6', '8');
+        $sheet->setCellValue('T6', '9');
+        $sheet->setCellValue('U6', '10');
+
+        $sheet->setCellValue('E7', 'план');
+        $sheet->setCellValue('F7', 'факт');
+        $sheet->setCellValue('G7', 'план');
+        $sheet->setCellValue('H7', 'факт');
+        $sheet->setCellValue('I7', 'факт');
+
+        $sheet->setCellValue('J7', 'NOK');
+        $sheet->setCellValue('K7', 'NOK');
+        $sheet->setCellValue('L7', 'NOK');
+        $sheet->setCellValue('M7', 'NOK');
+        $sheet->setCellValue('N7', 'NOK');
+        $sheet->setCellValue('O7', 'NOK');
+        $sheet->setCellValue('P7', 'NOK');
+        $sheet->setCellValue('Q7', 'NOK');
+        $sheet->setCellValue('R7', 'NOK');
+        $sheet->setCellValue('S7', 'NOK');
+        $sheet->setCellValue('T7', 'NOK');
+        $sheet->setCellValue('U7', 'NOK');
+
+        $n = 0; //Number of row
+        $c = 7; //Number of cell
+
+        foreach($data as $row){
+            
+            ++$c;
+            if(count($row) === 1){
+                $sheet->setCellValue("B".$c, "Итого по инженеру");
+                $sheet->MergeCells('B'.$c.':D'.$c);
+                foreach($row as $user_row){
+                    $sheet->setCellValue('G'.$c, $user_row['engineer_assigned']);
+                    $sheet->setCellValue('H'.$c, $user_row['engineer_conducted']);
+                    $sheet->setCellValue('I'.$c, $user_row['total_conducted']);
+                    $sheet->setCellValue('J'.$c, $user_row['kpi1']);
+                    $sheet->setCellValue('K'.$c, $user_row['kpi2']);
+                    $row_num = 12;
+                    foreach($user_row['NOK'] as $nok_row){
+                        $sheet->setCellValueByColumnAndRow($row_num, $c, $nok_row);
+                        $row_num++;
+                    }                    
+                }
+            }else{
+                $n++;
+                $sheet->setCellValue("B".$c, $n);
+                $sheet->setCellValue('C'.$c, $row['object_name']);
+                $sheet->setCellValue('D'.$c, $row['engineer'] ?? null);
+                $sheet->setCellValue('E'.$c, $row['manager_assigned'] ?? null);
+                $sheet->setCellValue('F'.$c, $row['manager_conducted']);
+                $sheet->setCellValue('G'.$c, $row['engineer_assigned']);
+                $sheet->setCellValue('H'.$c, $row['engineer_conducted']);
+                $sheet->setCellValue('I'.$c, $row['total_conducted']);
+                $sheet->setCellValue('J'.$c, $row['kpi1']);
+                $sheet->setCellValue('K'.$c, $row['kpi2']);
+                $row_num = 12;
+                foreach($row['NOK'] as $nok_row){
+                    $sheet->setCellValueByColumnAndRow($row_num, $c, $nok_row);
+                    $row_num++;
+                }
+    
+        
+            }
+
+            $sheet->getStyle('B'.$c.':U'.$c)
+            ->applyFromArray($styleArray);
+        }
+        
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="Аналитика проведенных аудитов. '. $district_name.'.xlsx"');
         $writer->save("php://output");
 
     }

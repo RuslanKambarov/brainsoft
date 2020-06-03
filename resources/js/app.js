@@ -36,12 +36,18 @@ Vue.component('application-settings-component', require('./components/Applicatio
 Vue.component('settings-component', require('./components/SettingsComponent.vue').default);
 Vue.component('device-settings-component', require('./components/DeviceSettingsComponent.vue').default);
 Vue.component('district-settings-component', require('./components/DistrictSettingsComponent.vue').default);
-Vue.component('audit-index-component', require('./components/Audit/AuditIndexComponent.vue').default);
-Vue.component('audit-device-component', require('./components/Audit/AuditDeviceComponent.vue').default);
+Vue.component('audit-component', require('./components/Audit/AuditComponent.vue').default);
+//Vue.component('audit-device-component', require('./components/Audit/AuditDeviceComponent.vue').default);
 Vue.component('device-analytics-component', require('./components/Audit/DeviceAnalyticsComponent.vue').default);
-Vue.component('monitor-index-component', require('./components/Audit/MonitorIndexComponent.vue').default);
-Vue.component('monitor-district-component', require('./components/Audit/MonitorDistrictComponent.vue').default);
-Vue.component('monitor-table-component', require('./components/Audit/MonitorTableComponent.vue').default);
+
+Vue.component('monitor-index-component', require('./components/Analytics/MonitorIndexComponent.vue').default);
+Vue.component('monitor-district-component', require('./components/Analytics/MonitorDistrictComponent.vue').default);
+Vue.component('monitor-table-component', require('./components/Analytics/MonitorTableComponent.vue').default);
+
+Vue.component('audit-index-component', require('./components/Analytics/AuditIndexComponent.vue').default);
+Vue.component('audit-district-component', require('./components/Analytics/AuditDistrictComponent.vue').default);
+Vue.component('audit-table-component', require('./components/Analytics/AuditTableComponent.vue').default);
+
 Vue.component('alert-history-component', require('./components/AlertHistoryComponent.vue').default);
 Vue.component('date-picker-component', require('./components/DatePickerComponent.vue').default);
 

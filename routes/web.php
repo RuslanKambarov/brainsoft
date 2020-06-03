@@ -108,15 +108,29 @@ Route::group(["middleware" => "auth"], function(){
 
         Route::get("/types/delete/{id}", "AuditController@deleteAudit");
 
+    });
+
+    Route::group(["prefix" => "analytics"], function(){
+
         Route::group(["prefix" => "monitor"], function(){
 
             Route::get("/", "AuditController@monitorIndex");
 
-            Route::get("/analitycs/{district_id}", "AuditController@getMonitorAnalitycs");
+            Route::get("/{district_id}", "AuditController@getMonitorAnalytics");
 
             Route::get("/excell/{district_id}", "AuditController@createExcel");
 
             Route::get("/{month}/{object_id}", "AuditController@monitorDetails");
+
+        });
+
+        Route::group(["prefix" => "audit"], function(){
+
+            Route::get("/", "AuditController@auditIndex");
+
+            Route::get("/analytics/{district_id}/{month}", "AuditController@getAuditAnalytics");
+
+            Route::get("/excell/{district_id}/{date}", "AuditController@createExcelAuditAnalytics");
 
         });
 

@@ -10,5 +10,5 @@
             <h2>Аналитика аудитов</h2>            
         </div>
     </div>
-    <audit-index-component :devices="{{json_encode($devices)}}"></audit-index-component>
+    <audit-component :devices="{{json_encode($devices)}}"></audit-component>
 @endsection

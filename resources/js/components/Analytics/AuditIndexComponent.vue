@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div>
         <audit-district-component v-for="district in districts" :key="district.id" :district="district"></audit-district-component>
     </div>
 </template>

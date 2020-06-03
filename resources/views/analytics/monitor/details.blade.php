@@ -12,7 +12,6 @@
                 <th><a href="{{url()->previous()}}">Назад</a></th>
             </tr>
         </thead>
-        
         @foreach ($alerts as $alert)
             <tr>
                 <td>{{$loop->iteration}}</td>
@@ -20,7 +19,7 @@
                 <td>{{$alert->message}}</td>
                 <td><b>{{$alert->created_at}}</b></td>
                 <td><b>{{$alert->updated_at}}</b></td>
-                <td><alert-history-component :owen_id={{$alert->object_id}} :start="'{{$alert->created_at}}'" :end="'{{$alert->updated_at}}'"></alert-history-component></td>
+                <td><alert-history-component :object_id="{{$alert->object_id}}" :start="'{{$alert->created_at}}'" :end="'{{$alert->updated_at}}'"></alert-history-component></td>
             </tr>
         @endforeach
     </table>

@@ -81,17 +81,17 @@
                         <v-list-item-title>Аналитика</v-list-item-title>
                     </v-list-item-content>            
                 </template>
-                <v-list-item class="ml-10" link href="/audit/monitor">
+                <v-list-item class="ml-10" link href="/analytics/monitor">
                     <v-list-item-content>
                         <v-list-item-title>Аналитика мониторинга</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item class="ml-10" link href="/audit">
+                <v-list-item class="ml-10" link href="/analytics/audit">
                     <v-list-item-content>
                         <v-list-item-title>Аналитика аудитов</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item class="ml-10" link href="/audit">
+                <v-list-item class="ml-10" link href="/analytics/coal">
                     <v-list-item-content>
                         <v-list-item-title>Аналитика учета топлива</v-list-item-title>
                     </v-list-item-content>

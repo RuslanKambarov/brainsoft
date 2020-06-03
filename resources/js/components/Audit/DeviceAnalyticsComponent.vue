@@ -13,7 +13,7 @@
                     <th>Аудиты пользователя</th>
 		</thead>
                 <template v-for="(audit, auditname) in audits">
-                    <tr v-for="(auditarray, username, index) in audit">
+                    <tr v-for="(auditarray, username, index) in audit" :key="username+index">
                         <td :rowspan="audit.length">{{auditname}}</td>
                         <td>{{username}}</td>
                         <td>{{auditarray.length}}</td>

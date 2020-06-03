@@ -40,10 +40,10 @@
                 <device-component :device_id="{{$owen_device->id}}" :parameters="{{json_encode($owen_device->parameters)}}"></device-component>
                 </template>
             </v-simple-table>
-            <a href="{{url()->current()."/history"}}"><v-btn color="indigo lighten-3">История</v-btn></a>
+
             <a href="{{url('/audit/results?device_id='.$owen_device->id)}}"><v-btn color="teal darken-2">Аудиты</v-btn></a>
             <a href="{{url()->current().'/consumption'}}"><v-btn color="deep-orange lighten-2">Расход</v-btn></a>
-            <a href="{{url('/events/device/'.$owen_device->id)}}"><v-btn color="lime lighten-2">События</v-btn></a>
+            <a href="{{url('/events/device/'.$owen_device->id)}}"><v-btn color="lime lighten-2">История</v-btn></a>
             <a href="{{url('/events/graph/'.$owen_device->id)}}"><v-btn color="green lighten-1">График</v-btn></a>
             </v-container>
         </v-col>

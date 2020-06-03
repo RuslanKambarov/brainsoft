@@ -13,6 +13,10 @@ class Device extends Model
         return $this->belongsToMany("App\User", "user_objects", "object_id", "user_id")->first()->name ?? "Не назначен";
     }
 
+    public function getEngineerId(){
+        return $this->belongsToMany("App\User", "user_objects", "object_id", "user_id")->first()->id ?? 0;
+    }
+
     public function getParameters(){
 
     }

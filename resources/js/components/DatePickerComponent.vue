@@ -1,18 +1,21 @@
 <template>
     <div class="date-picker p-4">
-        <input v-model="start" type="date" class="form-control" name="start" id="">
-        <input v-model="end"   type="date" class="form-control" name="end" id="">
-        <button class="btn btn-primary" @click="filter()">Применить</button>
+        <date-picker v-model="date" type="datetime" range></date-picker>
+        <button class="btn btn-primary" @click="filter()">Применить</button>        
         <div class="alert">{{error}}</div>
     </div>
 </template>
 <script>
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+    components: {
+        DatePicker
+    },
     props: ['base_url'],
     data: function(){
         return {
-            start: 0,
-            end:   0,
+            date:   0,
             error: ""
         }
     },
@@ -21,17 +24,11 @@ export default {
     },
     methods:{
         filter: function(){
-            if(this.end < this.start){
-                this.error = "Дата начала должна быть раньше даты окончания"
-                return
-            }
-            if((this.end == 0) || (this.start == 0)){
-                this.error = "Установите дату начала и дату окончания"
-                return
-            }
-            
-            window.location = this.base_url+"/"+this.start+"/"+this.end
-            
+            if(this.date === 0){
+                this.error="Выберите дату"
+            }else{
+                window.location = this.base_url+"/"+this.date[0]+"/"+this.date[1]
+            }                        
         }
     }
 
@@ -51,5 +48,9 @@ export default {
     color: red;
     font-family: 'Times New Roman', Times, serif;
     font-size: 14;
+}
+button{
+    margin: 0 5px;
+    height: 34px;
 }
 </style>

@@ -47,7 +47,6 @@ class EventController extends Controller
         $item->formatedDate = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->created_at)->isoFormat('HH:mm Do MMMM YYYY');
         return $item;        
       });
-      $events = $events->reverse();
       return view("monitor", ["include" => "chart", 'events' => $events]);
     }
 }

@@ -48,6 +48,11 @@ Vue.component('audit-index-component', require('./components/Analytics/AuditInde
 Vue.component('audit-district-component', require('./components/Analytics/AuditDistrictComponent.vue').default);
 Vue.component('audit-table-component', require('./components/Analytics/AuditTableComponent.vue').default);
 
+Vue.component('consumption-index-component', require('./components/Analytics/ConsumptionIndexComponent.vue').default);
+Vue.component('consumption-district-component', require('./components/Analytics/ConsumptionDistrictComponent.vue').default);
+Vue.component('consumption-table-component', require('./components/Analytics/ConsumptionTableComponent.vue').default);
+
+Vue.component('kpi-component', require('./components/Analytics/KPIComponent.vue').default);
 Vue.component('alert-history-component', require('./components/AlertHistoryComponent.vue').default);
 Vue.component('date-picker-component', require('./components/DatePickerComponent.vue').default);
 

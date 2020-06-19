@@ -54,36 +54,31 @@ class APIController extends Controller
     }
 
     public function getParameters($id){
-			$device = Device::where("owen_id", $id)->select("id", "owen_id as device_id", "name")->first();
-			$event = Event::where('object_id', $id)->select("object_id", "outside_t", "direct_t", "back_t", "object_t", "pressure", "message")->latest()->first();
-			$card = Objectcard::where([["object_id", $event->object_id], ["outside_t", $event->outside_t]])->select("object_id", "outside_t", "direct_t", "back_t")->first();
-			if(!$card){
-				$card = Objectcard::first();
-			}
-			$inside_temp = DB::table("insidetemps")->where("device_id", $id)->first()->value;
-			$user = DB::table("user_objects")->where("object_id", $device->id)->first();
-        if($user){
-            $user = User::find($user->user_id);
-            $device->engineer = $user->name;
-        }else{
-  				$device->engineer = "Пользователь";      	
-        }
+		$device = Device::where("owen_id", $id)->select("id", "owen_id as device_id", "name")->first();
+		$event = Event::where('object_id', $id)->select("object_id", "outside_t", "direct_t", "back_t", "object_t", "pressure", "message")->latest()->first();
+		$card = Objectcard::where([["object_id", $event->object_id], ["outside_t", $event->outside_t]])->select("object_id", "outside_t", "direct_t", "back_t")->first();
+		if(!$card){
+			$card = Objectcard::first();
+		}
+		$inside_temp = DB::table("insidetemps")->where("device_id", $id)->first()->value;
+		$device->engineer = $device->getEngineer();
 	
-	$device->employee = "Коспанов Арман Нургельдиевич";
-	$device->has_alert = true;
-	$event->mode = $card;
-	$event->mode->object_t = $inside_temp;
-	$event->mode->pressure = 2;
-	if($event->message == "offline"){
-		$device->status = false;
-		$device->power = false;
-	}else{
-		$device->power = true;
-		$device->status = true;
-	}
-	$device->parameters = $event;
-	unset($device->id);
-	return response()->json($device);
+		$device->employee = "Коспанов Арман Нургельдиевич";
+		$device->has_alert = true;
+		$event->mode = $card;
+		$event->mode->object_t = $inside_temp;
+		$event->mode->pressure = 2;
+		if($event->message == "offline"){
+			$device->status = false;
+			$device->power = false;
+		}else{
+			$device->power = true;
+			$device->status = true;
+		}
+		$device->parameters = $event;
+		unset($device->id);
+
+		return response()->json($device);
     }
 
     public function districtDevices($id){
@@ -178,25 +173,26 @@ class APIController extends Controller
 
     public function consumeCoal(Request $request, $id){
 
-			if(Consumption::checkLastConsumeTime($id)){
-				return response()->json(["success" => false, "message" => "Данные о расходе угля можно вносить только раз в сутки"]);
-			}
+		if(Consumption::checkLastConsumeTime($id)){
+			return response()->json(["success" => false, "message" => "Данные о расходе угля можно вносить только раз в сутки"]);
+		}
 			
-			$lastConsumption = Consumption::getLastConsume($id);
+		$lastConsumption = Consumption::getLastConsume($id);
 
-			if(!$lastConsumption){
-				$balance = 0;
-			}else{
-				$balance = $lastConsumption->balance;
-			}
+		if(!$lastConsumption){
+			$balance = 0;
+		}else{
+			$balance = $lastConsumption->balance;
+		}
 
-			$consume = new Consumption;
-			$consume->object_id = $id;
-			$consume->consumption = $request->consumption/1000;
-			$consume->income = $request->income;
-			$consume->balance = $consume->income + $balance - $consume->consumption; 
+		$consume = new Consumption;
+		$consume->object_id = $id;
+		$consume->consumption = $request->consumption/1000;
+		$consume->income = $request->income;
+		$consume->balance = $consume->income + $balance - $consume->consumption; 
     	$consume->save();
-    	if($consume){
+		
+		if($consume){
     		return response()->json(["success" => true, "message" => "Операция прошла успешно"]);
     	}else{
     		return response()->json(["success" => false, "message" => "Произошла ошибка"]);

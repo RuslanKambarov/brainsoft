@@ -47,11 +47,11 @@ class compareParameters extends Command
 	
 	$start = microtime(true);
 
-	//Get token from OWEN CLOUD
+	//Get auth token from OWEN CLOUD
 	$token = Cloud::getToken();
 
-	//Get array of devices from database
-	$devices = DB::table("objects")->get()->pluck("owen_id");
+	//Get array of devices from local database
+	$devices = DB::table("objects")->get();
 
     //Get array of devices from OWEN CLOUD
     $client = new \GuzzleHttp\Client();     
@@ -65,6 +65,7 @@ class compareParameters extends Command
         'body' => json_encode([])
     ]);
 
+    //Get only devices from response
     $owen_status = json_decode($response->getBody()->getContents())->devices;
 
 
@@ -72,29 +73,23 @@ class compareParameters extends Command
 	foreach($devices as $device){
 
         //Get status (online/offline)
+        
         $status = Arr::first($owen_status, function($item) use ($device){
-            return $item->id == $device;
+            return $item->id == $device->owen_id;
         })->status;
+
+        
+        
 
         //Create new Event instance and set object_id
         $event = new Event;
-        $event->object_id = $device;
+        $event->object_id = $device->owen_id;
 
-        //if device is currently offline
+        //if device is currently online
 	    if($status == 'online'){
 
+            $owen_device = $device->getParameters($token);
             //Get actual parameters from OWEN CLOUD
-	        $client = new \GuzzleHttp\Client();		
-            $response = $client->post("https://api.owencloud.ru/v1/device/".$device, [
-                'headers' => [
-                    'Content-Type'  => 'application/x-www-form-urlencoded',
-                    "Content-Length" => "68",
-                    "Accept"         => "*/*",
-                    "Authorization" => 'Bearer '.$token
-                ],
-                'body' => json_encode([])
-            ]);
-            $owen_device = json_decode($response->getBody()->getContents());		
 	        
             //Insert parameters into array
             $data = [
@@ -124,15 +119,15 @@ class compareParameters extends Command
                     break;
                 case 2:
                     //change satus of alert as fixed (row status set = 1)
-                    Alert::where(['object_id' => $device, 'status' => 0])->update(['status' => 1]);
+                    Alert::where(['object_id' => $device->owen_id, 'status' => 0])->update(['status' => 1]);
                     break;
                 case 3:
                     break;
                 case 4:
-                    $object_users = DB::table("user_objects")->where("object_id", $device)->pluck("user_id");
+                    $object_users = DB::table("user_objects")->where("object_id", $device->owen_id)->pluck("user_id");
                     $object_users = [2];
-                    Alert::firstOrCreate(['object_id' => $device, 'status' => 0], ['message' => $compare_data["message"]]);
-                    echo Cloud::sendNotifications($object_users,  $compare_data["message"], $device);                  
+                    Alert::firstOrCreate(['object_id' => $device->owen_id, 'status' => 0], ['message' => $compare_data["message"]]);
+                    echo Cloud::sendNotifications($object_users,  $compare_data["message"], $device->owen_id);                  
                     break;
                                 
                 default:
@@ -140,7 +135,7 @@ class compareParameters extends Command
                     break;
 
             }
-            DB::table('last_data')->updateOrInsert(['object_id' => $device],
+            DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],
                                        ['object_t' => Cloud::floatOwenData($data["object_t"]),
                                         'outside_t' => Cloud::floatOwenData($data["outside_t"]), 
                                         'back_t' => Cloud::floatOwenData($data["back_t"]),
@@ -148,7 +143,7 @@ class compareParameters extends Command
                                         'pressure' => Cloud::floatOwenData($data["pressure"]),
                                         'status' => true]);
         }else{
-            DB::table('last_data')->updateOrInsert(['object_id' => $device],
+            DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],
                            ['status' => false]);
             $event->message = "offline";
         }   

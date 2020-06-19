@@ -63,7 +63,7 @@ class CloudController extends Controller
             return view("monitor", ["include" => "district", "devices" => $devices]);
         }
         
-        return view("monitor", ["include" => "home", "districts" => $districts]);        
+        return view("monitor", ["include" => "home", "districts" => $districts->sortBy('name')]);        
 	
     }
 
@@ -119,7 +119,22 @@ class CloudController extends Controller
             $device->parameters = DB::table('last_data')->where("object_id", $device->owen_id)->first();            	
         }	
         
-        return view("monitor", ["include" => "district", "devices" => $devices, "district" => $district]);
+        $sorted = $devices->sortBy(function($device){
+            if(stristr($device->name, 'ДС')){
+                return 1;
+            }elseif(stristr($device->name, 'СШ')){
+                return 2;
+            }elseif(stristr($device->name, 'ОШ')){
+                return 3;
+            }elseif(stristr($device->name, 'НШ')){
+                return 4;
+            }elseif(stristr($device->name, 'ДК')){
+                return 5;
+            }else{
+                return 6;
+            } 
+        });
+        return view("monitor", ["include" => "district", "devices" => $sorted, "district" => $district]);
     }
 
     public function device($id){

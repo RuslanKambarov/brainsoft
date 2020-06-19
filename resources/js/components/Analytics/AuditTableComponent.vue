@@ -4,7 +4,7 @@
         <table class="table table-striped table-bordered">
             <thead class="head">
                 <tr>
-                    <td colspan="18" class="text-center"><h3><b>Аналитика проведения аудитов за месяц</b></h3></td>
+                    <td colspan="20" class="text-center"><h3><b>Аналитика проведения аудитов за {{month}}</b></h3></td>
                     <td colspan="3"><date-picker v-model="date"  type="month" @change="getData()"></date-picker></td>
                     <td>
                         <a :href="'/analytics/audit/excell/'+this.district_id+'/'+this.date"><button class="btn btn-small btn-success m-4 get-excell-button">EXCELL</button></a>
@@ -18,12 +18,14 @@
                     <th rowspan="2" colspan="2">Инженер</th>
                     <th rowspan="2">Всего аудитов</th>
                     <th colspan="2">Показатели для КПИ</th>
-                    <th colspan="10">Фактическое кол-во нарушений по проведенным аудитам за месяц</th>
+                    <th colspan="12">Фактическое кол-во нарушений по проведенным аудитам за месяц</th>
                 </tr>
                 <tr class="table-heading-2">
                     <th>Чистота в котельной</th>
-                    <th>Целостность ограждающих конструкций</th>
+                    <th>Ведение сменного журнала</th>
                     <th>Чистота в котельной</th>
+                    <th>Ведение сменного журнала</th>
+                    <th>Чистота прилегающей территории котельной (отсутствие мусора, видимого скопления грязи, травы)</th>
                     <th>Целостность ограждающих конструкций</th>
                     <th>Проверка растяжек дымовой трубы на провис</th>
                     <th>Наличие топлива согласно отчета</th>
@@ -52,9 +54,11 @@
                     <th>NOK</th>
                     <th>NOK</th>
                     <th>NOK</th>
+                    <th>NOK</th>
+                    <th>NOK</th>
                 </tr>                  
             </thead>
-            <tbody class="data">                
+            <tbody class="data" v-show="loader==false">                
                 <tr v-for="(row, index) in data" :key="row.id">
                     <template v-if="Object.keys(row).length == 1">
                         <td colspan="7">Итого по инженеру</td>
@@ -83,7 +87,7 @@
                         </template>                        
                     </template>
                     <template v-else>
-                        <td>{{index}}</td>
+                        <td>{{row.number}}</td>
                         <td colspan="2">{{row.object_name}}</td>
                         <td colspan="2">{{row.engineer}}</td>
                         <td>{{row.manager_assigned}}</td>
@@ -100,6 +104,13 @@
                 </tr>
             </tbody>
         </table>
+        <div class="loader" v-if="loader">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
 </template>
@@ -115,16 +126,22 @@ export default {
         return {
             date: new Date(),
             data: {},
-            number: 1
+            loader: false
+        }
+    },
+    computed: {
+        month: function(){
+            return this.date.toLocaleString("ru", {month: 'long'})
         }
     },
     mounted(){
         var date = new Date()
         axios.get("/analytics/audit/analytics/"+this.district_id+"/"+this.date).then(response => this.data = response.data);
     },
-    methods: {
+    methods: {        
         getData: function(){
-            axios.get("/analytics/audit/analytics/"+this.district_id+"/"+this.date).then(response => this.data = response.data);            
+            this.loader = true
+            axios.get("/analytics/audit/analytics/"+this.district_id+"/"+this.date).then((response) => {this.data = response.data; this.loader = false});            
         }
     }
 
@@ -155,5 +172,8 @@ table thead th{
 }
 td button{
     margin: 0 !important;
+}
+.loader{
+    width: 100%;
 }
 </style>

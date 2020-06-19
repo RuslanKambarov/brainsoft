@@ -134,6 +134,22 @@ Route::group(["middleware" => "auth"], function(){
 
         });
 
+        Route::group(["prefix" => "consumption"], function(){
+
+            Route::get("/", "AuditController@consumptionIndex");
+
+            Route::get("/analytics/{district_id}", "AuditController@getConsumptionAnalytics");
+
+            Route::get("/excell/{district_id}", "AuditController@createExcelConsumptionAnalytics");
+
+        });
+
+        Route::get("/kpi", "AnalyticsController@index");
+
+        Route::post("/kpi/excell", "AnalyticsController@getExcell");
+
+        Route::get("/kpi/{date}", "AnalyticsController@index");
+
     });
 
     Route::group(["prefix" => "settings"], function(){
@@ -145,4 +161,5 @@ Route::group(["middleware" => "auth"], function(){
         Route::post("/create", "SettingsController@create");
     
     });
+    
 });

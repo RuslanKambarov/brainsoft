@@ -36,11 +36,11 @@
 </head>
 <body>
     <div id="app">
-
+        
     <v-app>
     <v-navigation-drawer v-model="drawer" app>
         <v-list dense>
-            <v-list-item link href="/">
+            <v-list-item link href="/" @if(request()->route()->getPrefix() === null) style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-home</v-icon>
                 </v-list-item-action>
@@ -48,7 +48,7 @@
                     <v-list-item-title>Главная</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-item link href="/users">
+            <v-list-item link href="/users" @if(request()->route()->getPrefix() === "/users") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-account</v-icon>
                 </v-list-item-action>
@@ -64,7 +64,7 @@
                     <v-list-item-title>Задачи</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-item link href="/audit">
+            <v-list-item link href="/audit" @if(request()->route()->getPrefix() === "/audit") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-eye-check</v-icon>
                 </v-list-item-action>
@@ -72,7 +72,7 @@
                     <v-list-item-title>Аудит</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-group>
+            <v-list-group @if(strstr(request()->route()->getPrefix(), "analytics")) value="true" @endif>
                 <template v-slot:activator>
                     <v-list-item-action>
                         <v-icon>mdi-eye-check</v-icon>
@@ -81,23 +81,28 @@
                         <v-list-item-title>Аналитика</v-list-item-title>
                     </v-list-item-content>            
                 </template>
-                <v-list-item class="ml-10" link href="/analytics/monitor">
+                <v-list-item class="ml-10" link href="/analytics/monitor" @if(request()->route()->getPrefix() === "analytics/monitor") style="background: #8286bc47" @endif>
                     <v-list-item-content>
                         <v-list-item-title>Аналитика мониторинга</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item class="ml-10" link href="/analytics/audit">
+                <v-list-item class="ml-10" link href="/analytics/audit" @if(request()->route()->getPrefix() === "analytics/audit") style="background: #8286bc47" @endif>
                     <v-list-item-content>
                         <v-list-item-title>Аналитика аудитов</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item class="ml-10" link href="/analytics/coal">
+                <v-list-item class="ml-10" link href="/analytics/consumption" @if(request()->route()->getPrefix() === "analytics/consumption") style="background: #8286bc47" @endif>
                     <v-list-item-content>
                         <v-list-item-title>Аналитика учета топлива</v-list-item-title>
                     </v-list-item-content>
+                </v-list-item>
+                <v-list-item class="ml-10" link href="/analytics/kpi">
+                    <v-list-item-content>
+                        <v-list-item-title>Оценочный лист KPI</v-list-item-title>
+                    </v-list-item-content>                    
                 </v-list-item>            
             </v-list-group>                        
-            <v-list-item link href="/alarms">
+            <v-list-item link href="/alarms" @if(request()->route()->getPrefix() === "/alarms") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-alert</v-icon>
                 </v-list-item-action>
@@ -113,7 +118,7 @@
                     <v-list-item-title>События</v-list-item-title>
                 </v-list-item-content>
             </v-list-item> --}}
-            <v-list-item link href="/settings">
+            <v-list-item link href="/settings" @if(request()->route()->getPrefix() === "/settings") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-settings</v-icon>
                 </v-list-item-action>

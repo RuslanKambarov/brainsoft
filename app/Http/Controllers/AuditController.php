@@ -10,6 +10,7 @@ use App\Audit;
 use App\Device;
 use App\District;
 use App\Question;
+use App\Consumption;
 use App\Audit_result;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -120,7 +121,7 @@ class AuditController extends Controller
 
         //Get count of planned audits in current month                                
         foreach($audits as $audit){
-            $audit->assigned = $this->getAssignedAuditsCount($id, $audit->audit_id);
+            $audit->assigned = $audit->getAssignedAuditsCount($id);
         }
         //Group by auditor
         $auditsByName = $audits->groupBy("audit");
@@ -132,21 +133,6 @@ class AuditController extends Controller
 
         return response()->json(["audits" => $auditsByName, "device" => $device]);
 
-    }
-
-    function getAssignedAuditsCount($device_id, $audit_id, $date = NULL){
-
-        if(!$date){
-            $date = \Carbon\Carbon::now();
-        }
-
-        $audits_assigned = DB::table("audit_assigned")
-            ->where([["device_id", $device_id], ["audit_id", $audit_id]])
-            ->whereRaw("MONTH(month) = MONTH(NOW())")
-            ->get();
-        
-            return $audits_assigned[0]->audits_count ?? DB::table("app_settings")->where("id", 1)->get()[0]->value;
-    
     }
 
     function getConductedAuditsCount($device_id, $audit_id, $date = NULL){
@@ -239,10 +225,11 @@ class AuditController extends Controller
 
         foreach($auditTypes as $type){
             $array = [];
+            $audit = Audit::find($type);
             foreach($dates as $date){                                
-                $array[] =  $this->getAssignedAuditsCount($device_id, $type);
+                $array[] =  $audit->getAssignedAuditsCount($device_id, $type);
             }
-            $auditName = Audit::find($type)->name;
+            $auditName = $audit->name;
             $auditsPlanned[$auditName] = $array;
         }
 
@@ -296,7 +283,6 @@ class AuditController extends Controller
         $audits = Audit_result::where("auditor_id", $user_id)->whereRaw("MONTH(audit_date) = MONTH(NOW())")->get();
         foreach($audits as $audit){
             $audit->answers = json_decode($audit->audit_json);
-
         }
         $answersCount = $this->countAnswers($audits);
         return view("audit.user", ["answersCount" => $answersCount, "audits" => $audits, "user" => $user]);
@@ -452,12 +438,6 @@ class AuditController extends Controller
                 ->first();               
         }
 
-        // foreach ($alerts as $alert) {
-        //     $alert->events = Event::where("object_id", $alert->object_id)
-        //         ->whereRaw("created_at > '$alert->created_at' AND created_at < '$alert->updated_at'")
-        //         ->get();               
-        // }
-        
         return view("analytics.monitor.details", ["alerts" => $alerts]);
 
     }
@@ -581,112 +561,12 @@ class AuditController extends Controller
     View  /analytics/audit/index
     Route /analytics/audit/analytics/{district_id}/{month}
     */
+
     public function getAuditAnalytics($district_id, $date = null){
-
-        $date = explode("(", $date)[0];         //get rid of "(timezone)"
-        $date = \Carbon\Carbon::parse($date);   //create a Carbon instance from recieved date
+  
+        $audit = Audit::with('questions')->find(4); //get audit
         
-        $audit_id = 4;  
-        $audit = Audit::with('questions')->find($audit_id); //get audit
-
-        $district = District::where("owen_id", $district_id)->first();
-        $objects = Device::where("district_id", $district_id)->get();
-                
-        $manager_id = $district->getEngineerId();
-                
-        $district_audits_by_user = $district->getAuditResultsByUser($date)->groupBy('user_id');
-
-        $analytics_data = [];
-        
-        //Total by district
-        $total_district["object_name"] = "Итого по району";
-        $total_district["engineer_assigned"] = 0;
-        $total_district["engineer_conducted"] = 0;
-        $total_district["manager_assigned"] = 0;
-        $total_district["manager_conducted"] = 0;
-        $total_district["total_conducted"] = 0;
-        $total_district["kpi1"] = 0;
-        $total_district["kpi2"] = 0;
-
-        foreach($district_audits_by_user as $user_id => $user_audits){
-
-            $object_audits = $user_audits->groupBy('owen_id');
-            $total = [];
-
-            //Total by engineer
-            $total[$user_id]["engineer_assigned"] = 0;
-            $total[$user_id]["engineer_conducted"] = 0;
-            $total[$user_id]["manager_assigned"] = 0;
-            $total[$user_id]["manager_conducted"] = 0;
-            $total[$user_id]["total_conducted"] = 0;
-            $total[$user_id]["kpi1"] = 0;
-            $total[$user_id]["kpi2"] = 0;
-
-            foreach($object_audits as $object_id => $audits){
-
-                $temp = [];
-                $temp["engineer"] = $audits[0]->username;
-                $temp["object_name"] = $audits[0]->name;
-
-                $temp["engineer_assigned"] = $this->getAssignedAuditsCount($object_id, $audit_id);
-                if($audits[0]->audit_json === null){
-                    $temp["engineer_conducted"] = 0;    
-                }else{
-                    $temp["engineer_conducted"] = count($audits->where("auditor_id", $user_id));
-                }                
-                
-                $manager_audits = Audit_result::where("object_id", $object_id)
-                    ->where("audit_id", $audit_id)
-                    ->where("auditor_id", $manager_id)
-                    ->whereRaw("MONTH(audit_date) = MONTH('$date')")
-                    ->get();
-
-                $temp["manager_assigned"] = count($manager_audits);
-                $temp["manager_conducted"] = count($manager_audits);
-
-                $temp["total_conducted"] = $temp["engineer_conducted"] + $temp["manager_conducted"];
-
-                $total[$user_id]["engineer_assigned"] += $temp["engineer_assigned"];
-                $total[$user_id]["engineer_conducted"] += $temp["engineer_conducted"];    
-
-                $total[$user_id]["total_conducted"] += $temp["total_conducted"];
-
-                $total[$user_id]["manager_assigned"] += $temp["manager_assigned"];
-                $total[$user_id]["manager_conducted"] += $temp["manager_conducted"];
-                
-
-                $total_district["engineer_assigned"] += $temp["engineer_assigned"];
-                $total_district["engineer_conducted"] += $temp["engineer_conducted"];    
-
-                $total_district["total_conducted"] += $temp["total_conducted"];
-
-                $total_district["manager_assigned"] += $temp["manager_assigned"];
-                $total_district["manager_conducted"] += $temp["manager_conducted"];
-
-                $temp["NOK"] = $audit->countNOK($audits);
-                if(array_slice($temp["NOK"], 0, 1)[0] >= 3){ $temp["kpi1"] = 1; }else{ $temp["kpi1"] = 0; }
-                if(array_slice($temp["NOK"], 1, 1)[0] >= 3){ $temp["kpi2"] = 1; }else{ $temp["kpi2"] = 0; }
-                foreach($temp["NOK"] as $question_id => $answer){
-                    isset($total_district["NOK"][$question_id]) ? $total_district["NOK"][$question_id] += $answer : $total_district["NOK"][$question_id] = $answer;
-                    isset($total[$user_id]["NOK"][$question_id]) ? $total[$user_id]["NOK"][$question_id] += $answer : $total[$user_id]["NOK"][$question_id] = $answer;
-                }
-                $total[$user_id]["kpi1"] += $temp["kpi1"];
-                $total[$user_id]["kpi2"] += $temp["kpi2"];    
-
-                $total_district["kpi1"] += $temp["kpi1"];
-                $total_district["kpi2"] += $temp["kpi2"];
-
-                $analytics_data[] = $temp;
-            }
-
-            $analytics_data[] = $total;    
-
-        }
-
-        $analytics_data[] = $total_district;
-
-        return $analytics_data;
-
+        return $audit->getAuditAnalytics($district_id, $date);
     }   
 
     public function createExcelAuditAnalytics($district_id, $date){
@@ -825,5 +705,118 @@ class AuditController extends Controller
         header('Content-Disposition: attachment; filename="Аналитика проведенных аудитов. '. $district_name.'.xlsx"');
         $writer->save("php://output");
 
+    }
+
+    public function consumptionIndex(){
+        $districts = District::with("devices")->get();        
+        return view('analytics.consumption.index', ["districts" => $districts]);
+    }
+
+    public function getConsumptionAnalytics($district_id){
+        // $date['sep'] = new \Carbon\Carbon("2020-09");
+        // $date['oct'] = \Carbon\Carbon::create(2020, 10, 01);
+        // $date['nov'] = \Carbon\Carbon::create(2020, 11, 01);
+        // $date['dec'] = \Carbon\Carbon::create(2020, 12, 01);
+        // $date['jan'] = \Carbon\Carbon::create(2020, 01, 01);
+        // $date['feb'] = \Carbon\Carbon::create(2020, 02, 01);
+        // $date['mar'] = \Carbon\Carbon::create(2020, 03, 01);
+        // $date['apr'] = \Carbon\Carbon::create(2020, 04, 01);
+        // $date['may'] = \Carbon\Carbon::create(2020, 05, 01);
+        $date['jun'] = \Carbon\Carbon::create(2020, 06, 01);
+        
+        $data = [];
+
+        $consumption_analytics = [];
+
+        foreach($date as $month){
+
+            $temp_query = Consumption::getDistrictConsumption($district_id, $month);
+            $temp_query = $temp_query->groupBy("user_name");
+
+            $start = $month; 
+            $end = clone $month;
+            $end->addMonths(1)->subDays(1);
+            $period  = \Carbon\CarbonPeriod::create($start, $end);
+
+            foreach($temp_query as $user_name => $coll){
+                $coll = $coll->groupBy("object_name");
+
+                $engineer_total = [];
+
+                foreach($coll as $object_name => $coll2){
+
+                    $month_total = array("income" => 0, "consumption" => 0, "input" => 0);
+                    
+                    
+                    foreach($period as $day){
+
+                        $formated = $day->format("Y-m-d");
+
+                        $parameters = $coll2->first(function($value) use ($formated, $object_name){
+                            return \Carbon\Carbon::create($value->created_at)->format('Y-m-d') == $formated AND $value->object_name == $object_name;
+                        });
+                        
+                        $consumption_analytics[$user_name][$object_name][$formated] = array("income" => $parameters->income ?? null, "consumption" => $parameters->consumption ?? null);
+
+                        if(!isset($engineer_total[$formated])){
+                            $engineer_total[$formated] = array("income" => 0, "consumption" => 0, "input" => 0);
+                        }
+
+                        if($parameters === null){
+                            //single date
+                            $consumption_analytics[$user_name][$object_name][$formated]["input"] = 0;
+                            //month total
+
+                        }else{
+                            //single date
+                            $consumption_analytics[$user_name][$object_name][$formated]["input"] = 1;
+                            //month total
+                            $month_total["income"] += $parameters->income;
+                            $month_total["consumption"] += $parameters->consumption;
+                            $month_total["input"]++;                            
+                            //engineer total
+                            $engineer_total[$formated]["income"] += $parameters->income;
+                            $engineer_total[$formated]["consumption"] += $parameters->consumption;
+                            $engineer_total[$formated]["input"]++;
+                            
+                        }                         
+
+                    }                    
+                    if($month_total["input"] > (count($period) - 3)){
+                        $month_total["input"] = 0;
+                    }else{
+                        $month_total["input"] = 1;
+                    }
+                    $consumption_analytics[$user_name][$object_name]["Всего"] = $month_total;
+
+                }                
+                $consumption_analytics[$user_name]["Всего"] = $engineer_total;
+                $consumption = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
+                    $carry += $item["consumption"];
+                    return $carry;
+                });
+                $income = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
+                    $carry += $item["income"];
+                    return $carry;
+                });
+                $input = array_reduce($consumption_analytics[$user_name], function($carry, $item){
+                    if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
+                    return $carry;
+                });
+                $consumption_analytics[$user_name]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
+            }
+
+        }
+        foreach($period as $day){
+            $days[] = $day->format('Y-m-d');             
+        }
+        
+        
+        //dd($consumption_analytics);
+        return  response()->json(["consumption_analytics" => $consumption_analytics, "period" => $days]);       
+    }
+
+    public function createExcelConsumptionAnalytics($district_id, $date){
+    
     }
 }

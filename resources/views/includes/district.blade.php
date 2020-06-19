@@ -1,9 +1,9 @@
 @if(isset($district))
-    <div class = "card">
+    <div class = "card" style="position: sticky; top: 50px; z-index: 2">
         <div class="card-body">
-					<h2>{{$district->name ? $district->name : null}}</h2>
-				</div>
+			<h2>{{$district->name ? $district->name : null}}</h2>
 		</div>
+	</div>
     <div class = "card">
         <div class="card-body">
 					<table class="table table-bordered table-strped table-dark">
@@ -12,25 +12,25 @@
 							<td><b>{{$district->director}}</b></td>
 						</tr>
 						<tr>
-							<td><b>Инженер</b></td>
-							<td><b>{{$district->engineer}}</b></td>
+							<td><b>Главный инженер</b></td>
+							<td><b>{{$district->manager()}}</b></td>
 						</tr>
 					</table>
 				</div>
 		</div>
 @endif
-<v-simple-table>
-    <template v-slot:default>
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th class="text-left">№</th>
-            <th class="text-left">Название</th>
-			<th class="text-left">Температура снаружи</th>
-			<th class="text-left">Температура объекта</th>	
-            <th class="text-left">Температура подачи</th>
-			<th class="text-left">Температура обратки</th>
-			<th class="text-left">Давление</th>
-			<th class="text-left">Статус</th>
+            <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">№</th>
+            <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Название</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Тн.в.</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т о.</th>	
+            <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т1</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т2</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Р</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Статус</th>
+			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left"></th>
         </tr>
     </thead>
     <tbody>
@@ -60,5 +60,4 @@
             </tr>
         @endforeach
     </tbody>
-    </template>
-</v-simple-table>
+</table>

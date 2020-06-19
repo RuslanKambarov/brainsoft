@@ -113,18 +113,18 @@ td button{
     width: 250px;
 }
 .side-heading-1{
-    background-color: coral;
+    background-color: #a7a19e;
     position: sticky;
     left: 0;
 }
 .side-heading-2{
-    background-color: coral;
+    background-color: #a7a19e;
     position: sticky;
     min-width: 40px;
     left: 40px;
 }
 .side-heading-3{
-    background-color: coral;    
+    background-color: #a7a19e;    
     position: sticky;
     min-width: 110px;
     left: 150px;

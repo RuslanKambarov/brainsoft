@@ -24,13 +24,21 @@ class District extends Model
     }
 
     public function engineer(){
+        return DB::table('objects')
+        ->distinct()
+        ->join('user_objects', 'object_id', '=', 'objects.id')
+        ->join('users', 'user_id', '=', 'users.id')
+        ->where('district_id', '=', $this->owen_id)->get('users.*');
+    }
+
+    public function manager(){
         return DB::table('user_district')
         ->join('user_role', 'user_role.user_id',  '=', 'user_district.user_id')
         ->join('users', 'user_district.user_id', '=', 'users.id')
         ->where([['user_district.district_id', '=', $this->id], ['user_role.role_id', '=', 1]])->pluck('users.name')->first() ?? "Не назначен";
     }
 
-    public function getEngineerId(){
+    public function getManagerId(){
         return DB::table('user_district')
         ->join('user_role', 'user_role.user_id',  '=', 'user_district.user_id')
         ->join('users', 'user_district.user_id', '=', 'users.id')
@@ -65,4 +73,5 @@ class District extends Model
         $this->balance       = $this->income - $this->consumption;       
         return $this;
     }
+
 }

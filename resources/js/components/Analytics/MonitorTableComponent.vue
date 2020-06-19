@@ -1,10 +1,15 @@
 <template>
-    <div class="container">
+    <div style = "width: 100%" class="">
         <div class="table-wrapper">
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <td colspan="15">Аналитика отклонений температурного режима отапливаемых объектов</td>
+                    <td colspan="12"><h3>Аналитика отклонений температурного режима отапливаемых объектов</h3></td>
+                    <td colspan="3">
+                        <a :href="'/analytics/monitor/excell/'+district_id">
+                            <button class="btn btn-small btn-success m-4 get-excell-button">Excell</button>
+                        </a>
+                    </td>
                 </tr>
                 <tr class="table-heading">
                 <th>№</th>
@@ -68,7 +73,7 @@ table td{
     text-align: center;
 }
 .table-wrapper{
-    max-height: 500px;
+    max-height: 750px;
     overflow-y: scroll;
 }
 table thead th { 
@@ -76,5 +81,8 @@ table thead th {
     top: 0;
     background-color: #737278;
     color: azure; 
+}
+td button{
+    margin: 0 !important;
 }
 </style>

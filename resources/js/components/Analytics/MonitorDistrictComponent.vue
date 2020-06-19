@@ -1,10 +1,7 @@
 <template>
     <v-row class="district-box">
-        <h3 class="text-center m-4" @click="expand=true">{{district.name}}</h3>
-        <v-spacer></v-spacer>
-        <div class="control-buttons" v-show="expand">
-            <a :href="'/analytics/monitor/excell/'+district.owen_id"><button class="btn btn-small btn-success m-4 get-excell-button">Excell</button></a>
-            <button class="btn btn-small btn-success" @click="expand=false">Скрыть</button>
+        <div class="col-12 expander" @click="expand = !expand">
+            <h3 class="text-center m-4">{{district.name}}</h3>
         </div>
         <monitor-table-component v-if="expand==true" :district_id="district.owen_id"></monitor-table-component>
     </v-row>

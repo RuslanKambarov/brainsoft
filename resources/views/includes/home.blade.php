@@ -41,7 +41,6 @@
                 <td>{{$district->descendant_unique_devices_offline_cnt}}</td>
                 <td><a href="{{url('/district/'.$district->id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
             </tr>
-            <tr><td></td><td></td></tr>
         @endforeach    
     </tbody>
     </template>

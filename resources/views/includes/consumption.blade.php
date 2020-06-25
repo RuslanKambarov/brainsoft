@@ -5,7 +5,7 @@
 @endif
 <div class = "card">
 		<div class="card-header">
-			<h2>{{$device->name}}</h2>	
+			<h4><a href="/district/{{$district->id}}">{{$district->name}}</a> / <a href="/device/{{$device->owen_id}}">{{$device->name}}</a> / Расход угля</h4	
 		</div>
     <div class="card-body">
 			<table class='table table-bordered'>
@@ -27,7 +27,7 @@
 				</tr>
 				<tr>
 					<td>Дата</td>
-					<td>{{$consumption->created_at}}</td>
+					<td>{{$consumption->created_at ?? 0}}</td>
 				</tr>
 			</table>
 		</div>

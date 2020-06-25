@@ -22,7 +22,7 @@ class AnalyticsController extends Controller
 
         $engineer = $district->engineer();
         $data = $audit->getAuditAnalytics($district->owen_id);
-        
+        //$consumption_data = HERE MUST BE Consumption::getConsumptionAnalytics($district, $data)  
         $manager = end($data);
         $manager["name"] = $district->manager();
         $manager["total_assigned"] = $manager["manager_assigned"] + $manager["engineer_assigned"];
@@ -31,8 +31,6 @@ class AnalyticsController extends Controller
         $data = Arr::where($data, function ($value, $key) {
             return count($value) === 1;
         });
-
-        
 
         foreach($data as $key => $value){
             unset($data[$key]); 
@@ -99,17 +97,17 @@ class AnalyticsController extends Controller
             $sheet->setCellValue("B".$i, "Критерий");
             $sheet->getColumnDimension('B')->setWidth(100);
             $sheet->setCellValue("C".$i, "Вес критерия, %");
-            $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setWidth(15);
             $sheet->setCellValue("D".$i, "Источник");
-            $sheet->getColumnDimension('D')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(20);
             $sheet->setCellValue("E".$i, "Ед. изм.");
-            $sheet->getColumnDimension('E')->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setAutoSize(20);
             $sheet->setCellValue("F".$i, "План, кол-во");
-            $sheet->getColumnDimension('F')->setAutoSize(true);
+            $sheet->getColumnDimension('F')->setWidth(20);
             $sheet->setCellValue("G".$i, "не выполнено, кол-во");
-            $sheet->getColumnDimension('G')->setAutoSize(true);
+            $sheet->getColumnDimension('G')->setAutoSize(15);
             $sheet->setCellValue("H".$i, "Оценка, %");
-            $sheet->getColumnDimension('H')->setAutoSize(true);            
+            $sheet->getColumnDimension('H')->setAutoSize(15);            
 
             $sheet->getStyle('A'.$i.':H'.$i)
             ->applyFromArray($styleArray);
@@ -197,6 +195,7 @@ class AnalyticsController extends Controller
 
             $i += 2;
             $sheet->setCellValue("B".$i, "Дата заполнения _________________2020 г.");
+            $sheet->mergeCells('C'.$i.':E'.$i);
             $sheet->setCellValue("C".$i, "Подпись руководителя ___________/___________/");
 
             $i += 2;
@@ -228,21 +227,21 @@ class AnalyticsController extends Controller
         $sheet->getStyle('A'.$i.':H'.$j)
         ->applyFromArray($styleArray);            
         $sheet->setCellValue("A".$i, "№");
-        $sheet->getColumnDimension('A')->setWidth(5);
+        
         $sheet->setCellValue("B".$i, "Критерий");
-        $sheet->getColumnDimension('B')->setWidth(100);
+        
         $sheet->setCellValue("C".$i, "Вес критерия, %");
-        $sheet->getColumnDimension('C')->setAutoSize(true);
+        
         $sheet->setCellValue("D".$i, "Источник");
-        $sheet->getColumnDimension('D')->setAutoSize(true);
+        
         $sheet->setCellValue("E".$i, "Ед. изм.");
-        $sheet->getColumnDimension('E')->setAutoSize(true);
+        
         $sheet->setCellValue("F".$i, "План, кол-во");
-        $sheet->getColumnDimension('F')->setAutoSize(true);
+        
         $sheet->setCellValue("G".$i, "не выполнено, кол-во");
-        $sheet->getColumnDimension('G')->setAutoSize(true);
+        
         $sheet->setCellValue("H".$i, "Оценка, %");
-        $sheet->getColumnDimension('H')->setAutoSize(true);            
+                    
         
         $i++;
         $sheet->setCellValue("A".$i, "1");
@@ -290,14 +289,17 @@ class AnalyticsController extends Controller
 
         $i += 2;
         $sheet->setCellValue("B".$i, "Дата заполнения _________________2020 г.");
+        $sheet->mergeCells('C'.$i.':E'.$i);
         $sheet->setCellValue("C".$i, "Подпись руководителя ___________/___________/");
         
+        $sheet->getStyle('B1:B256')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
-        $writer->save("05featuredemo.xlsx");
+        $writer->save("Аналитика мониторинга Оценочный лист.xlsx");
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         //header('Content-Disposition: attachment; filename="Аналитика мониторинга Оценочный лист .xlsx"');
 
-        return response()->download(public_path("05featuredemo.xlsx"));
+        return response()->download(public_path("Аналитика мониторинга Оценочный лист.xlsx"));
         
     }
 }

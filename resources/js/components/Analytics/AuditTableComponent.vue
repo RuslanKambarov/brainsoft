@@ -58,7 +58,7 @@
                     <th>NOK</th>
                 </tr>                  
             </thead>
-            <tbody class="data" v-show="loader==false">                
+            <tbody class="data">                
                 <tr v-for="(row, index) in data" :key="row.id">
                     <template v-if="Object.keys(row).length == 1">
                         <td colspan="7">Итого по инженеру</td>

@@ -30,7 +30,6 @@
 			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т2</th>
 			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Р</th>
 			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Статус</th>
-			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left"></th>
         </tr>
     </thead>
     <tbody>
@@ -51,7 +50,6 @@
 					<td></td>
 					<td></td>	
 				@endif
-                <td>{{$device->status}}</td>
 				@if($device->parameters->status === 0)
         	        <td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
 				@else

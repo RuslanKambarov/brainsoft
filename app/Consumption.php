@@ -37,4 +37,18 @@ class Consumption extends Model
         ->where("objects.district_id", "=", $district_id)
         ->get();        
     }
+
+    public static function getDistrictMonthConsumption($district_id, $date){
+        return DB::table('objects')
+        ->select(DB::raw("objects.name as object_name, users.name as user_name, SUM(income) as income, SUM(consumption) as consumption, (CASE WHEN DAY(LAST_DAY('$date')) - 3 > COUNT(consumption) THEN 1 ELSE 0 END) AS input, '$date' as date"))
+        ->leftJoin("user_objects", "object_id", "=", "objects.id")
+        ->leftJoin("users", "user_id", "=", "users.id")
+        ->leftJoin("consumption", function($join) use ($date){
+            $join->on("owen_id", "=", "consumption.object_id")
+                 ->on(DB::raw("MONTH(consumption.created_at)"), "=", DB::raw("MONTH('$date')"));
+        })
+        ->where("objects.district_id", "=", $district_id)
+        ->groupBy("objects.name", "users.name")
+        ->get();            
+    }
 }

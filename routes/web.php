@@ -138,9 +138,11 @@ Route::group(["middleware" => "auth"], function(){
 
             Route::get("/", "AuditController@consumptionIndex");
 
-            Route::get("/analytics/{district_id}", "AuditController@getConsumptionAnalytics");
+            Route::get("/analytics/{district_id}/{date}", "AuditController@getConsumptionAnalytics");
 
-            Route::get("/excell/{district_id}", "AuditController@createExcelConsumptionAnalytics");
+            Route::get("/season/{district_id}", "AuditController@getConsumptionSeasonAnalytics");
+
+            Route::get("/excell/{district_id}/{date}", "AuditController@createExcelConsumptionAnalytics");
 
         });
 

@@ -1,7 +1,7 @@
     <div class = "card">
-    <div class="card-body">
-                <h2>{{$device->name}}</h2>
-            </div>
+        <div class="card-body">
+            <h2><a href="/district/{{$district->id}}">{{$district->name}}</a> / {{$device->name}}</h2>
+        </div>
     </div>
     <v-row>
 	<v-col :key="12">

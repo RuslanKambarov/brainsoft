@@ -148,9 +148,10 @@ class CloudController extends Controller
         $user = DB::table("user_objects")->where("object_id", $device->id)->first();
         if($user){
             $user = User::find($user->user_id);
-        }	
+        }
+        $district = District::where("owen_id", $device->district_id)->first();	
         $temperature_card = Objectcard::where("object_id", $device->owen_id)->get();
-        return view("monitor", ["include" => "device", "device" => $device, "owen_device" => $owen_device, "temperature_card" => $temperature_card, "user" => $user]);
+        return view("monitor", ["include" => "device", "device" => $device, "district" => $district, "owen_device" => $owen_device, "temperature_card" => $temperature_card, "user" => $user]);
     }
 
     public function deviceUpdate($id, Request $request){
@@ -210,7 +211,8 @@ class CloudController extends Controller
     public function deviceConsumption($id){
         $consumption = DB::table('consumption')->where('object_id', $id)->first();
         $device = Device::where('owen_id', $id)->first();
-        return view("monitor", ["include" => "consumption", "device" => $device, "consumption" => $consumption]);
+        $district = District::where("owen_id", $device->district_id)->first();
+        return view("monitor", ["include" => "consumption", "device" => $device, "district" => $district, "consumption" => $consumption]);
     }
 
     public function setIncome(Request $request, $id){

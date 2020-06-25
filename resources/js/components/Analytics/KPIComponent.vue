@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid">
+    <div class="container">
         <div class="row" v-for="(engineer, key) in engineers" :key="engineer.id">
             <div class="col-12"><h3 class="text-center"> {{engineer.name}}</h3></div>
             <div class="col-1">№</div>
@@ -158,7 +158,7 @@ export default {
                 token:      $("meta[name=csrf-token]").attr('content'),
                 engineers:  this.engineers,
                 manager:    this.manager
-            }).then(()=>window.location = "http://brainsoft.com/05featuredemo.xlsx")
+            }).then(()=>window.location = "http://brainsoft.com/Аналитика мониторинга Оценочный лист.xlsx")
         }
     }
 }

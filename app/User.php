@@ -78,7 +78,7 @@ class User extends Authenticatable
 		foreach($districts as $district){
     	    $district->district_id = $district->owen_id;			
     	    $district->director = $district->director();
-    	    $district->engineer = $district->engineer();
+    	    $district->engineer = $district->manager();
             $district->devices_count = count($district->devices()->get()->toArray());
             $district->devices_with_controller = count($district->devices()->get()->where("controller", 1)->toArray());
     	    unset($district->id, $district->owen_id);

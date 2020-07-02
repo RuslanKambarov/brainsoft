@@ -111,7 +111,7 @@ class CloudController extends Controller
 
         $district = District::find($id);
         $district->director = $district->director();
-        $district->engineer = $district->engineer();
+        $district->engineer = $district->manager();
 
         $devices = Device::where('district_id', $district->owen_id)->get();
 

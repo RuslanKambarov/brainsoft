@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Arr;
 use Auth;
 use App\Audit;
+use App\Consumption;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -15,23 +16,38 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 class AnalyticsController extends Controller
 {
     public function index(){
-        $user = \App\User::find(12);
-        if(!$user->hasAnyRole(4)){ return abort(403); }
-        $district = $user->districts()->first();
-        $audit = Audit::find(4);
+
+        $user = \App\User::find(12);                    //get curent user
+        if(!$user->hasAnyRole(4)){ return abort(403); } //return 403 if no access
+        $district = $user->districts()->first();        //get attached district
+        $district_id = $district->id;
+        return view("analytics.audit.kpi", ["district_id" => $district_id]);    
+    }
+
+    public function getKPIData($date){
+
+        $user = \App\User::find(12);                    //get curent user
+        if(!$user->hasAnyRole(4)){ return abort(403); } //return 403 if no access
+        $district = $user->districts()->first();        //get attached district
+
+        $audit = Audit::find(4);                        //get audit    
 
         $engineer = $district->engineer();
-        $data = $audit->getAuditAnalytics($district->owen_id);
+        $data = $audit->getAuditAnalytics($district->owen_id); //get audit data
+        $consumption_data = Consumption::getConsumptionAnalytics($district->owen_id, $date);
+        $consumption_data = $consumption_data["consumption_analytics"];
+        //dd($consumption_data);
         //$consumption_data = HERE MUST BE Consumption::getConsumptionAnalytics($district, $data)  
         $manager = end($data);
         $manager["name"] = $district->manager();
         $manager["total_assigned"] = $manager["manager_assigned"] + $manager["engineer_assigned"];
         $manager["total_undone"] = $manager["total_assigned"] - $manager["total_conducted"];
         $manager["kpi1_mark"] = 30*($manager["total_assigned"] - $manager["total_undone"])*1/$manager["total_assigned"];
+        
         $data = Arr::where($data, function ($value, $key) {
             return count($value) === 1;
         });
-
+        
         foreach($data as $key => $value){
             unset($data[$key]); 
             $key = array_key_first($value);
@@ -42,9 +58,12 @@ class AnalyticsController extends Controller
             $item->audit_results = $data[$item->id];
             $item->audit_results["kpi1_mark"] = 10*($item->audit_results["total_objects"] - $item->audit_results["kpi1"])*1/$item->audit_results["total_objects"];        
             $item->audit_results["kpi2_mark"] = 10*($item->audit_results["total_objects"] - $item->audit_results["kpi2"])*1/$item->audit_results["total_objects"];
+            $item->consumption_data["total_objects"] = count($consumption_data[$item->name]) - 1;
+            $item->consumption_data["undone"] = $consumption_data[$item->name]["Всего"]["Всего"]["input"];
+            $item->consumption_data["consumption_mark"] = 20*($item->consumption_data["total_objects"] - $item->consumption_data["undone"])*1/$item->consumption_data["total_objects"];
         }
-        
-        return view("analytics.audit.kpi", ["engineers" => $engineer, "manager" => $manager]);
+
+        return ["engineers" => $engineer, "manager" => $manager];
     }
 
     public function getExcell(Request $request){

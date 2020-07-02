@@ -714,148 +714,16 @@ class AuditController extends Controller
     }
 
     public function getConsumptionAnalytics($district_id, $date){
-        
-        $consumption_analytics = [];
-
-        $date = explode("(", $date)[0];         //get rid of "(timezone)"
-        $month = \Carbon\Carbon::parse($date);   //create a Carbon instance from recieved date
-
-        $end = clone $month;
-        $temp_query = Consumption::getDistrictConsumption($district_id, $month);
-        $temp_query = $temp_query->sortBy(function($device){
-            if(stristr($device->object_name, 'ДС')){
-                return 1;
-            }elseif(stristr($device->object_name, 'СШ')){
-                return 2;
-            }elseif(stristr($device->object_name, 'ОШ')){
-                return 3;
-            }elseif(stristr($device->object_name, 'НШ')){
-                return 4;
-            }elseif(stristr($device->object_name, 'ДК')){
-                return 5;
-            }else{
-                return 6;
-            } 
-        });
-
-        $temp_query = $temp_query->groupBy("user_name");
-        
-        $start = $month->startOfMonth(); 
-        $end = clone $month;
-        $end->addMonths(1)->subDays(1);
-        $period  = \Carbon\CarbonPeriod::create($start, $end);
-
-        $district_total = [];
-
-        foreach($temp_query as $user_name => $coll){
-            $coll = $coll->groupBy("object_name");
-
-            $engineer_total = [];
-            foreach($coll as $object_name => $coll2){
-
-                $month_total = array("income" => 0, "consumption" => 0, "input" => 0);                                
-                foreach($period as $day){
-
-                    $formated = $day->format("Y-m-d");
-                    if($user_name == ""){
-                        $user_name = "Не назначен";
-                    }
-                    $consumption_analytics[$user_name][$object_name]["Всего"] = $month_total;
-
-                    $parameters = $coll2->first(function($value) use ($formated, $object_name){
-                        return \Carbon\Carbon::create($value->created_at)->format('Y-m-d') == $formated AND $value->object_name == $object_name;
-                    });
-                    
-                    $consumption_analytics[$user_name][$object_name][$formated] = array("income" => $parameters->income ?? null, "consumption" => $parameters->consumption ?? null);
-
-                    if(!isset($engineer_total[$formated])){
-                        $engineer_total[$formated] = array("income" => 0, "consumption" => 0, "input" => 0);
-                    }
-                    if(!isset($district_total[$formated])){
-                        $district_total[$formated] = array("income" => 0, "consumption" => 0, "input" => 0);
-                    }
-                    if($parameters === null){
-                        //single date
-                        $consumption_analytics[$user_name][$object_name][$formated]["input"] = 0;
-                        //month total
-
-                    }else{
-                        //single date
-                        $consumption_analytics[$user_name][$object_name][$formated]["input"] = 1;
-                        //month total
-                        $month_total["income"] += $parameters->income;
-                        $month_total["consumption"] += $parameters->consumption;
-                        $month_total["input"]++;                            
-                        //engineer total
-                        $engineer_total[$formated]["income"] += $parameters->income;
-                        $engineer_total[$formated]["consumption"] += $parameters->consumption;
-                        $engineer_total[$formated]["input"]++;
-                        //district total
-                        $district_total[$formated]["income"] += $parameters->income;
-                        $district_total[$formated]["consumption"] += $parameters->consumption;
-                        $district_total[$formated]["input"]++;
-                    }                         
-
-                }                    
-                if($month_total["input"] > (count($period) - 3)){
-                    $month_total["input"] = 0;
-                }else{
-                    $month_total["input"] = 1;
-                }
-                //$consumption_analytics[$user_name][$object_name]["Всего"] = $month_total;
-
-            }                
-            $consumption_analytics[$user_name]["Всего"] = $engineer_total;
-            $consumption = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
-                $carry += $item["consumption"];
-                return $carry;
-            });
-            $income = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
-                $carry += $item["income"];
-                return $carry;
-            });
-            $input = array_reduce($consumption_analytics[$user_name], function($carry, $item){
-                if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
-                return $carry;
-            });
-            $consumption_analytics[$user_name]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
-            $pop = array_pop($consumption_analytics[$user_name]["Всего"]);
-            $consumption_analytics[$user_name]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$user_name]["Всего"];
-
-        }
-        $consumption_analytics["Всего по району"]["Всего"] = $district_total;
-        $consumption = array_reduce($district_total, function($carry, $item){
-            $carry += $item["consumption"];
-            return $carry;
-        });
-        $income = array_reduce($district_total, function($carry, $item){
-            $carry += $item["income"];
-            return $carry;
-        });
-        $input = array_reduce($district_total, function($carry, $item){
-            $carry += $item["input"];
-            return $carry;
-        });
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
-        $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
-        $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
-
-        foreach($period as $day){
-            $days[] = $day->format('Y-m-d');             
-        }
-        
-        //dd($consumption_analytics["Всего по району"]["Всего"]);
-        return  response()->json(["consumption_analytics" => $consumption_analytics, "period" => $days]);       
+        return Consumption::getConsumptionAnalytics($district_id, $date);                    
     }
 
     public function createExcelConsumptionAnalytics($district_id, $date){
         if($date == "null"){
-            $data = $this->getConsumptionSeasonAnalytics($district_id);
+            $data = Consumption::getConsumptionSeasonAnalytics($district_id);
         }else{
-            $data = $this->getConsumptionAnalytics($district_id, $date);
+            $data = Consumption::getConsumptionAnalytics($district_id, $date);
         }        
-        $data = json_decode($data->content());
-        
+
         $district_name = District::where("owen_id", $district_id)->first()->name;
         $spreadsheet = new Spreadsheet();
         
@@ -893,7 +761,7 @@ class AuditController extends Controller
         $sheet->setCellValue('E6', 'Приход');
         $sheet->setCellValue('F6', 'Аналитика');
         $sheet->setCellValue('G6', 'Расход');
-        foreach($data->period as $key => $day){
+        foreach($data["period"] as $key => $day){
             $charNum = $key*3+8;
             $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
             $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);
@@ -907,8 +775,8 @@ class AuditController extends Controller
         $sheet->getStyle("B6:".$char2."6")->getFont()->setSize(11);
         $cur_row = 6;
         $i = 0;
-        //dd($data->consumption_analytics);
-        foreach($data->consumption_analytics as $user_name => $row){
+
+        foreach($data["consumption_analytics"] as $user_name => $row){
             foreach($row as $object_name => $row1){
                 $cur_row++;
                 $i++;
@@ -923,9 +791,9 @@ class AuditController extends Controller
                     $sheet->getColumnDimension($char)->setWidth(12);
                     $sheet->getColumnDimension($char1)->setWidth(12);
                     $sheet->getColumnDimension($char2)->setWidth(12);
-                    $sheet->setCellValue($char.$cur_row, $row2->income);
-                    $sheet->setCellValue($char1.$cur_row, $row2->input);
-                    $sheet->setCellValue($char2.$cur_row, $row2->consumption);
+                    $sheet->setCellValue($char.$cur_row, $row2["income"]);
+                    $sheet->setCellValue($char1.$cur_row, $row2["input"]);
+                    $sheet->setCellValue($char2.$cur_row, $row2["consumption"]);
                     $charNum = $charNum + 3;
                 }                
             }
@@ -943,107 +811,24 @@ class AuditController extends Controller
     }
 
     public function getConsumptionSeasonAnalytics($district_id){
-        $dates = [];
-        $dates[] = new \Carbon\Carbon("2020-09");
-        $dates[] = new \Carbon\Carbon("2020-10");
-        $dates[] = new \Carbon\Carbon("2020-11");
-        $dates[] = new \Carbon\Carbon("2020-12");
-        $dates[] = new \Carbon\Carbon("2020-01");
-        $dates[] = new \Carbon\Carbon("2020-02");
-        $dates[] = new \Carbon\Carbon("2020-03");
-        $dates[] = new \Carbon\Carbon("2020-04");
-        $dates[] = new \Carbon\Carbon("2020-05");
-        $data = [];
-        $period = [];
-        //$collection = collect([]);
-        foreach($dates as $date){
-            if(isset($collection)){
-                $collection = $collection->merge(Consumption::getDistrictMonthConsumption($district_id, $date));
-            }else{
-                $collection = Consumption::getDistrictMonthConsumption($district_id, $date);
-            }
-            $period[] = $date->isoFormat("MMMM");                
-        }
+        return Consumption::getConsumptionSeasonAnalytics($district_id);
+    }
 
-        $users = $collection->groupBy('user_name');
-        $consumption_analytics = [];
-        $district_total = [];
-
-        foreach($users as $key => $row){
-            
-            $engineer_total = [];
-            $objects = $row->groupBy('object_name');
-
-            foreach($objects as $key1 => $row1){
-                if($key == ""){
-                    $key = "Не назначен";
-                }
-                $consumption_analytics[$key][$key1]["Всего"] = array("income" => 0, "consumption" => 0, "input" => 0);
-                
-
-                foreach($row1 as $key2 => $row2){
-
-                    $formated = \Carbon\Carbon::create($row2->date)->isoFormat("MMMM");
-                    $consumption_analytics[$key][$key1][$formated] = array("income" => round($row2->income, 2) ?? 0, "consumption" => round($row2->consumption, 2) ?? 0, "input" => round($row2->input, 2) ?? 0);
-
-                    if(!isset($engineer_total[$formated])){
-                        $engineer_total[$formated] = array("income" => 0, "consumption" => 0, "input" => 0);
-                    }
-                    if(!isset($district_total[$formated])){
-                        $district_total[$formated] = array("income" => 0, "consumption" => 0, "input" => 0);
-                    }
-
-                    //object total
-                    $consumption_analytics[$key][$key1]["Всего"]["income"] += round($row2->income, 2);
-                    $consumption_analytics[$key][$key1]["Всего"]["consumption"] += round($row2->consumption, 2);
-                    $consumption_analytics[$key][$key1]["Всего"]["input"] += round($row2->input, 2); 
-                    //engineer total
-                    $engineer_total[$formated]["income"] += round($row2->income, 2);
-                    $engineer_total[$formated]["consumption"] += round($row2->consumption, 2);
-                    $engineer_total[$formated]["input"] += round($row2->input, 2);
-                    //district_total
-                    $district_total[$formated]["income"] += round($row2->income, 2);
-                    $district_total[$formated]["consumption"] += round($row2->consumption, 2);
-                    $district_total[$formated]["input"] += round($row2->input, 2); 
-                }
-            }
-            $consumption_analytics[$key]["Всего"] = $engineer_total;
-            $consumption_analytics[$key]["Всего"] = $engineer_total;
-            $consumption = array_reduce($consumption_analytics[$key]["Всего"], function($carry, $item){
-                $carry += $item["consumption"];
-                return $carry;
-            });
-            $income = array_reduce($consumption_analytics[$key]["Всего"], function($carry, $item){
-                $carry += $item["income"];
-                return $carry;
-            });
-            $input = array_reduce($consumption_analytics[$key], function($carry, $item){
-                if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
-                return $carry;
-            });
-            $consumption_analytics[$key]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
-            $pop = array_pop($consumption_analytics[$key]["Всего"]);
-            $consumption_analytics[$key]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$key]["Всего"];
-     
-        }
-        $consumption_analytics["Всего по району"]["Всего"] = $district_total;
-        $consumption = array_reduce($district_total, function($carry, $item){
-            $carry += $item["consumption"];
-            return $carry;
-        });
-        $income = array_reduce($district_total, function($carry, $item){
-            $carry += $item["income"];
-            return $carry;
-        });
-        $input = array_reduce($district_total, function($carry, $item){
-            $carry += $item["input"];
-            return $carry;
-        });
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
-        $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
-        $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
-
-        //dd($consumption_analytics);
-        return  response()->json(["consumption_analytics" => $consumption_analytics, "period" => $period]);
+    public function editConsumption(Request $request, $district_id){
+        $date = \Carbon\Carbon::parse($request->parameters["day_name"]);
+        $object_id = Device::where(["name" => $request->parameters["object_name"]])->first()->owen_id;  
+        $balance = Consumption::where("object_id", $object_id)->first()->balance ?? 0;
+        $balance = $balance + $request->parameters['income'] - $request->parameters['consumption']/1000;
+        //$consumption = Consumption::whereRaw("DATE(created_at) = DATE('$date')")->where(['object_id' => $object_id])->first();
+        //["income" => $request->parameters['income'], "consumption" => $request->parameters['consumption'], "balance" => $balance]);
+        $consumption = new Consumption;
+        $consumption->income = $request->parameters['income'];
+        $consumption->consumption = $request->parameters['consumption']/1000;
+        $consumption->created_at = $date;
+        $consumption->balance = $balance;
+        $consumption->object_id = $object_id;
+        $consumption->input_type = "web";
+        $consumption->save();
+        return "Сохранено";
     }
 }

@@ -144,13 +144,15 @@ Route::group(["middleware" => "auth"], function(){
 
             Route::get("/excell/{district_id}/{date}", "AuditController@createExcelConsumptionAnalytics");
 
+            Route::post("/edit/{district_id}", "AuditController@editConsumption");
+
         });
 
         Route::get("/kpi", "AnalyticsController@index");
 
         Route::post("/kpi/excell", "AnalyticsController@getExcell");
 
-        Route::get("/kpi/{date}", "AnalyticsController@index");
+        Route::get("/kpi/{date}", "AnalyticsController@getKPIData");
 
     });
 

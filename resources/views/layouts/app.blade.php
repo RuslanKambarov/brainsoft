@@ -56,14 +56,6 @@
                     <v-list-item-title>Пользователи</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-item link href="/tasks">
-                <v-list-item-action>
-                    <v-icon>mdi-calendar-check</v-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                    <v-list-item-title>Задачи</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
             <v-list-item link href="/audit" @if(request()->route()->getPrefix() === "/audit") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-eye-check</v-icon>

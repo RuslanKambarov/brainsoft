@@ -1,136 +1,171 @@
 <template>
-    <div class="container">
-        <div class="row" v-for="(engineer, key) in engineers" :key="engineer.id">
-            <div class="col-12"><h3 class="text-center"> {{engineer.name}}</h3></div>
-            <div class="col-1">№</div>
-            <div class="col-4" style="max-widdiv: 200px">Критерий</div>
-            <div class="col-1">Вес критерия</div>
-            <div class="col-1">Источник</div>
-            <div class="col-2">Ед. Изм.</div>
-            <div class="col-1">План кол-во</div>
-            <div class="col-1">не выполнено, кол-во</div>
-            <div class="col-1">Оценка, %</div>
-
-            <div class="col-1">1</div>
-            <div class="col-4">Контроль проведения влажной уборки в помещении котельной</div> 
-            <div class="col-1">10</div>
-            <div class="col-1">аналитика</div>
-            <div class="col-2">кол-во объектов</div>
-            <div class="col-1">{{engineer.audit_results["total_objects"]}}</div>
-            <div class="col-1">{{engineer.audit_results["kpi1"]}}</div>
-            <div class="col-1">{{engineer.audit_results["kpi1_mark"]}}</div>
-
-            <div class="col-1">2</div>
-            <div class="col-4">Ведение сменного журнала котельной. Наличие документации (режимная карта, график смен, телефоны ответственных лиц)</div> 
-            <div class="col-1">10</div>
-            <div class="col-1">аналитика</div>
-            <div class="col-2">кол-во объектов</div>
-            <div class="col-1">{{engineer.audit_results["total_objects"]}}</div>
-            <div class="col-1">{{engineer.audit_results["kpi2"]}}</div>
-            <div class="col-1">{{engineer.audit_results["kpi2_mark"]}}</div>
-
-            <div class="col-1">3</div>
-            <div class="col-4">Обеспечение бесперебойного теплоснабжения потребителей в соответствии с утвержденным графиком, безопасную работу оборудования, соблюдение требований правил технической эксплуатации, правил охраны труда и пожарной безопасности</div> 
-            <div class="col-1">40</div>
-            <div class="col-1">журнал жалоб</div>
-            <div class="col-2">кол-во жалоб</div>
-            <div class="col-1">1</div>
-            <div class="col-1"><input v-model="engineer.audit_results['report']" @change="compute(key)"></div>
-            <div class="col-1">{{engineer.audit_results['report_mark']}}</div>
-
-            <div class="col-1">4</div>
-            <div class="col-4">Предоставление суточного расхода угля</div> 
-            <div class="col-1">20</div>
-            <div class="col-1">аналитика</div>
-            <div class="col-2">кол-во объектов</div>
-            <div class="col-1"></div>
-            <div class="col-1"></div>
-            <div class="col-1"></div>
-
-            <div class="col-1">5</div>
-            <div class="col-4">Авария электродвигателя (насосы, тягодутьевые машины) в результате несоблюдения норм технического обслуживания</div> 
-            <div class="col-1">20</div>
-            <div class="col-1">факт нарушения</div>
-            <div class="col-2">0 нет нарушений, 1 есть нарушения</div>
-            <div class="col-1">0</div>
-            <div class="col-1"><input v-model="engineer.audit_results['crash']" @change="compute(key)"></div>
-            <div class="col-1">{{engineer.audit_results["crash_mark"]}}</div>
-
-            <div class="col-1"></div>
-            <div class="col-4"><b>Итоговая оценка/результативность</b></div> 
-            <div class="col-1">100</div>
-            <div class="col-1"></div>
-            <div class="col-2"></div>
-            <div class="col-1"></div>
-            <div class="col-1"></div>
-            <div class="col-1">{{engineer.audit_results["result"]}}</div>
-        </div>
-        <h3 class="text-center mt-10 mb-10">Оценочный лист эффективности деятельности главного инженера ТОО "КТРК" {{manager.name}}</h3>
-        <div class="row">
-            <div class="col-1">№</div>
-            <div class="col-4" style="max-widdiv: 200px">Критерий</div>
-            <div class="col-1">Вес критерия</div>
-            <div class="col-1">Источник</div>
-            <div class="col-2">Ед. Изм.</div>
-            <div class="col-1">План кол-во</div>
-            <div class="col-1">не выполнено, кол-во</div>
-            <div class="col-1">Оценка, %</div>
-
-            <div class="col-1">1</div>
-            <div class="col-4">Контроль и проведение аудитов согласно плана</div> 
-            <div class="col-1">30</div>
-            <div class="col-1">аналитика</div>
-            <div class="col-2">кол-во аудитов</div>
-            <div class="col-1">{{manager["total_assigned"]}}</div>
-            <div class="col-1">{{manager["total_undone"]}}</div>
-            <div class="col-1">{{manager["kpi1_mark"]}}</div>
-
-            <div class="col-1">2</div>
-            <div class="col-4">Своевременное и качественное исполнение поставленных задач</div> 
-            <div class="col-1">30</div>
-            <div class="col-1">Докуметооборот/ IQ300</div>
-            <div class="col-2">кол-во задач</div>
-            <div class="col-1"><input v-model="manager['tasks']" @change="computeManager()"></div>
-            <div class="col-1"><input v-model="manager['undone']" @change="computeManager()"></div>
-            <div class="col-1">{{manager["tasks_mark"]}}</div>
-
-            <div class="col-1">3</div>
-            <div class="col-4">Контроль за исполнительской дисциплиной ИТР и рем.бригады</div> 
-            <div class="col-1">40</div>
-            <div class="col-1">Оценочные листы</div>
-            <div class="col-2">Средний бал оценочных листов</div>
-            <div class="col-1">100</div>
-            <div class="col-1">{{manager["average"]}}</div>
-            <div class="col-1">{{manager["average_mark"]}}</div>
-
-            <div class="col-1"></div>
-            <div class="col-4"><b>Итоговая оценка/результативность</b></div> 
-            <div class="col-1">100</div>
-            <div class="col-1"></div>
-            <div class="col-2"></div>
-            <div class="col-1"></div>
-            <div class="col-1"></div>
-            <div class="col-1">{{manager["result"]}}</div>
-    
+    <div class="container-fluid">
+        <div class="row kpi-control p-4">
+            <date-picker v-model="date"  type="month" @change="getData()"></date-picker>
             <button @click="getExcell()" class="btn btn-small btn-success get-excell-button">EXCELL</button>
-    
         </div>
+        <template v-for="(engineer, key) in engineers">
+            <table class="table table-striped table-bordered">
+                <tr>
+                    <td colspan="8"><h3 class="text-center"> {{engineer.name}}</h3></td>                    
+                </tr>
+                <tr>
+                    <td>№</td>
+                    <td>Критерий</td>
+                    <td>Вес критерия</td>
+                    <td>Источник</td>
+                    <td>Ед. Изм.</td>
+                    <td>План кол-во</td>
+                    <td>не выполнено, кол-во</td>
+                    <td>Оценка, %</td>                    
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Контроль проведения влажной уборки в помещении котельной</td> 
+                    <td>10</td>
+                    <td>аналитика</td>
+                    <td>кол-во объектов</td>
+                    <td>{{engineer.audit_results["total_objects"]}}</td>
+                    <td>{{engineer.audit_results["kpi1"]}}</td>
+                    <td>{{engineer.audit_results["kpi1_mark"]}}</td>                    
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Ведение сменного журнала котельной. Наличие документации (режимная карта, график смен, телефоны ответственных лиц)</td> 
+                    <td>10</td>
+                    <td>аналитика</td>
+                    <td>кол-во объектов</td>
+                    <td>{{engineer.audit_results["total_objects"]}}</td>
+                    <td>{{engineer.audit_results["kpi2"]}}</td>
+                    <td>{{engineer.audit_results["kpi2_mark"]}}</td>
+                </tr>
+                <tr>    
+                    <td>3</td>
+                    <td>Обеспечение бесперебойного теплоснабжения потребителей в соответствии с утвержденным графиком, безопасную работу оборудования, соблюдение требований правил технической эксплуатации, правил охраны труда и пожарной безопасности</td> 
+                    <td>40</td>
+                    <td>журнал жалоб</td>
+                    <td>кол-во жалоб</td>
+                    <td>1</td>
+                    <td><input v-model="engineer.audit_results['report']" @change="compute(key)"></td>
+                    <td>{{engineer.audit_results['report_mark']}}</td>                    
+                </tr>
+                <tr> 
+                    <td>4</td>
+                    <td>Предоставление суточного расхода угля</td> 
+                    <td>20</td>
+                    <td>аналитика</td>
+                    <td>кол-во объектов</td>
+                    <td>{{engineer.consumption_data['total_objects']}}</td>
+                    <td>{{engineer.consumption_data['undone']}}</td>
+                    <td>{{engineer.consumption_data['consumption_mark']}}</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Авария электродвигателя (насосы, тягодутьевые машины) в результате несоблюдения норм технического обслуживания</td> 
+                    <td>20</td>
+                    <td>факт нарушения</td>
+                    <td>0 нет нарушений, 1 есть нарушения</td>
+                    <td>0</td>
+                    <td><input v-model="engineer.audit_results['crash']" @change="compute(key)"></td>
+                    <td>{{engineer.audit_results["crash_mark"]}}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><b>Итоговая оценка/результативность</b></td> 
+                    <td>100</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{engineer.audit_results["result"]}}</td>
+                </tr>
+            </table>
+        </template>
+        <table class="table table-bordered table-striped">
+            <tr>
+                <td colspan="8"><h3 class="text-center mt-10 mb-10">Оценочный лист эффективности деятельности главного инженера ТОО "КТРК" {{manager.name}}</h3></td>
+            </tr>
+            <tr>
+            <td>№</td>
+            <td>Критерий</td>
+            <td>Вес критерия</td>
+            <td>Источник</td>
+            <td>Ед. Изм.</td>
+            <td>План кол-во</td>
+            <td>не выполнено, кол-во</td>
+            <td>Оценка, %</td>
+            </tr>
+            <tr>
+            <td>1</td>
+            <td>Контроль и проведение аудитов согласно плана</td> 
+            <td>30</td>
+            <td>аналитика</td>
+            <td>кол-во аудитов</td>
+            <td>{{manager["total_assigned"]}}</td>
+            <td>{{manager["total_undone"]}}</td>
+            <td>{{manager["kpi1_mark"]}}</td>
+            </tr>
+            <tr>
+            <td>2</td>
+            <td>Своевременное и качественное исполнение поставленных задач</td> 
+            <td>30</td>
+            <td>Докуметооборот/ IQ300</td>
+            <td>кол-во задач</td>
+            <td><input v-model="manager['tasks']" @change="computeManager()"></td>
+            <td><input v-model="manager['undone']" @change="computeManager()"></td>
+            <td>{{manager["tasks_mark"]}}</td>
+            </tr>
+            <tr>
+            <td>3</td>
+            <td>Контроль за исполнительской дисциплиной ИТР и рем.бригады</td> 
+            <td>40</td>
+            <td>Оценочные листы</td>
+            <td>Средний бал оценочных листов</td>
+            <td>100</td>
+            <td>{{manager["average"]}}</td>
+            <td>{{manager["average_mark"]}}</td>
+            </tr>
+            <tr>
+            <td></td>
+            <td><b>Итоговая оценка/результативность</b></td> 
+            <td>100</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{manager["result"]}}</td>
+            </tr>
+        </table>
     </div>
 </template>
 <script>
 export default {
-    props: ["engineers", "manager"],
+    props: ["district_id"],
     data: function(){
         return {
-
+            date: new Date(),
+            data: {},
+            engineers: {},
+            manager: {}
         }
     },
     mounted(){
-        
+        var panel = $('.kpi-control')
+        $('.v-toolbar__title').after(panel)
+
+        var date = new Date()
+        axios.get("/analytics/kpi/"+this.date).then((response) => {this.engineers = response.data.engineers; this.manager = response.data.manager});
+        console.log(this.date)
     },
     computed:{
+        month: function(){
+            return this.date.toLocaleString("ru", {month: 'long'})
+        }
     },
     methods:{
+        getData: function(){
+            axios.get("/analytics/kpi/"+this.date).then((response) => {this.engineers = response.data.engineers; this.manager = response.data.manager; this.loader = false});
+        },
         compute: function(key){
             this.engineers[key].audit_results['report_mark'] = 40*(1-this.engineers[key].audit_results['report'])    
 
@@ -169,5 +204,8 @@ export default {
     font-size: 1.1em;
     color: black;
     font-weight: 700;
+}
+.kpi-control *{
+    margin: 5px;
 }
 </style>

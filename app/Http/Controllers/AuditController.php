@@ -756,13 +756,17 @@ class AuditController extends Controller
         $sheet->setCellValue('D5', 'Объект');
         $sheet->mergeCells('D5:D6');
         $sheet->getColumnDimension('D')->setAutoSize(true);
-        $sheet->setCellValue('E5', 'Всего');
-        $sheet->mergeCells("E5:G5");
-        $sheet->setCellValue('E6', 'Приход');
-        $sheet->setCellValue('F6', 'Аналитика');
-        $sheet->setCellValue('G6', 'Расход');
+        $sheet->setCellValue('E5', 'Аббревиатура');
+        $sheet->mergeCells('E5:E6');
+        $sheet->setCellValue('F5', 'Годовая потребность топлива');
+        $sheet->mergeCells('F5:F6');
+        $sheet->setCellValue('G5', 'Всего');
+        $sheet->mergeCells("G5:I5");
+        $sheet->setCellValue('G6', 'Приход');
+        $sheet->setCellValue('H6', 'Аналитика');
+        $sheet->setCellValue('I6', 'Расход');
         foreach($data["period"] as $key => $day){
-            $charNum = $key*3+8;
+            $charNum = $key*3+10;
             $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
             $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);
             $char2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+2);
@@ -783,7 +787,9 @@ class AuditController extends Controller
                 $sheet->setCellValue('B'.$cur_row, $i);
                 $sheet->setCellValue('C'.$cur_row, $user_name);
                 $sheet->setCellValue('D'.$cur_row, $object_name);
-                $charNum = 5;
+                $sheet->setCellValue('E'.$cur_row, $data["abbreviation"][$object_name] ?? "");
+                $sheet->setCellValue('F'.$cur_row, $data["reserve"][$object_name] ?? $data["reserve"][$user_name]);
+                $charNum = 7;
                 foreach($row1 as $row2){
                     $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
                     $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);

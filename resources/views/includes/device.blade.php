@@ -49,8 +49,8 @@
         </v-col>
         <v-col>
             <v-container>
-						<edit-parameters :device_id="{{$owen_device->id}}" :required_t={{$device->required_t ?? 0}} :required_p={{$device->required_p ?? 0}} :coal_reserve={{$device->coal_reserve ?? 0}}></edit-parameters>            
-						<h3>Температурный график</h3>
+                <edit-parameters :device_id="{{$owen_device->id}}" :required_t={{$device->required_t ?? 0}} :required_p={{$device->required_p ?? 0}} :coal_reserve={{$device->coal_reserve ?? 0}}></edit-parameters>            
+                <h3>Температурный график</h3>
             <v-simple-table fixed-header height="500px">
                 <template v-slot:default>
                 <thead>

@@ -16,10 +16,6 @@
             <td>Необходимое давление</td>
             <td>{{required_p}}</td>
         </tr>
-        <tr>
-            <td>Необходимый запас угля на год</td>
-            <td>{{coal_reserve}}</td>
-        </tr>        
     </table>
     <v-dialog v-model="modal" scrollable persistent max-width="300">
     <v-card color="#f5f0e7" raised>
@@ -28,7 +24,6 @@
             <hr>
             <v-text-field outlined v-model="required_t" label="Необходимая температура"></v-text-field>
             <v-text-field outlined v-model="required_p" label="Необходимое давление"></v-text-field>
-            <v-text-field outlined v-model="coal_reserve" label="Необходимый запас угля на год"></v-text-field>
         </v-card-text>
         <v-card-actions>
             <v-btn color="green darken-1" text @click="modal=!modal">Отменить</v-btn>
@@ -41,7 +36,7 @@
 </template>
 <script>
 export default {
-    props: ['device_id', 'required_t', 'required_p', 'coal_reserve'],
+    props: ['device_id', 'required_t', 'required_p'],
     data: function(){
         return{
             modal: false
@@ -53,8 +48,7 @@ export default {
                 token: $('meta[name="csrf-token"]').attr('content'),
                 parameters: {
                     required_t:     this.required_t,
-                    required_p:     this.required_p,
-                    coal_reserve:   this.coal_reserve
+                    required_p:     this.required_p
                 }     
             }).then((response)=> {
                 this.modal = !this.modal

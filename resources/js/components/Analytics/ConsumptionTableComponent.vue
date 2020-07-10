@@ -13,6 +13,7 @@
                         <th style="z-index: 4" class="side-heading-1" rowspan="2">№</th>
                         <th style="z-index: 4; min-width: 110px" class="side-heading-2" rowspan="2">ФИО</th>
                         <th style="z-index: 4" class="side-heading-3" rowspan="2">Объект</th>
+                        <th rowspan="2">Годовая потребность топлива</th>
                         <th colspan="4">Всего</th>
                         <th colspan="3" v-for="day in days">
                             {{day}}
@@ -34,12 +35,16 @@
                 <tbody v-show="loader==false">
                     <template v-for="(user_data, user_name) in data">
                         <template v-for="(object_data, object_name, index) in user_data">
-                            <tr>                                
-                                <td v-if="object_name == 'Всего'" colspan="3" class="side-heading-1 total">{{user_name}}</td>
+                            <tr>
+                                <template v-if="object_name == 'Всего'">
+                                    <td colspan="3" class="side-heading-1 total">{{user_name}}</td>
+                                    <td v-if="reserve[user_name] !== null">{{reserve[user_name]}}</td>
+                                </template>                                                                
                                 <template v-else>
-                                <td class="side-heading-1">{{++index}}</td>
-                                <td class="side-heading-2" style="width: 250px">{{user_name}}</td>
-                                <td class="side-heading-3" style="width: 250px">{{object_name}}</td>
+                                    <td class="side-heading-1">{{++index}}</td>
+                                    <td class="side-heading-2" style="width: 250px">{{user_name}}</td>
+                                    <td class="side-heading-3" style="width: 250px">{{object_name}}</td>
+                                    <td v-if="reserve[object_name] !== null">{{reserve[object_name]}}</td>            
                                 </template>
                                 <template v-for="(day_data, day_name) in object_data">
                                     <td @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
@@ -89,6 +94,7 @@ export default {
             days: {},
             data: {},
             dialog_data: {},
+            reserve: [],
             dialog: false,
             loader: false
         }
@@ -101,12 +107,12 @@ export default {
     },    
     mounted(){
         var date = new Date()
-        axios.get("/analytics/consumption/analytics/"+this.district_id+'/'+this.date).then((response) => {this.data = response.data.consumption_analytics; this.days = response.data.period});
+        axios.get("/analytics/consumption/analytics/"+this.district_id+'/'+this.date).then((response) => {this.data = response.data.consumption_analytics; this.days = response.data.period; this.reserve = response.data.reserve});
     },
     methods: {        
         getData: function(){
             this.loader = true
-            axios.get("/analytics/consumption/analytics/"+this.district_id+"/"+this.date).then((response) => {this.data = response.data.consumption_analytics; this.days = response.data.period; this.loader = false});            
+            axios.get("/analytics/consumption/analytics/"+this.district_id+"/"+this.date).then((response) => {this.data = response.data.consumption_analytics; this.days = response.data.period; this.reserve = response.data.reserve; this.loader = false});            
         },
         getSeasonData: function(){
             this.loader = true

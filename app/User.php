@@ -64,6 +64,17 @@ class User extends Authenticatable
 		return null !== $this->roles()->where('role_id', $role)->first();
 	}
 
+    public function relationToDistrict(){
+        if($this->hasAnyRoles([1, 4])){
+            return $this->districts()->first()->name ?? "Не назначено";
+        }elseif($this->hasAnyRole(2)){
+            $district_id = $this->devices()->first()->district_id ?? 0;
+            return $districts = District::where("owen_id", $district_id)->first()->name ?? "Не назначено"; 
+        }else{
+            return "Администраторы";
+        }
+    }
+
     public function getDistrictsTree(){
         if($this->hasAnyRole(2)){
             $district_id = $this->devices()->groupBy("district_id")->first()->district_id ?? null;

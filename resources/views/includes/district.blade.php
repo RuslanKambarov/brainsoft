@@ -24,6 +24,7 @@
         <tr>
             <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">№</th>
             <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Название</th>
+            <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Контр.</th>
 			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Тн.в.</th>
 			<th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т о.</th>	
             <th style="position: sticky; background: #9b9b9b; top: 125px; z-index: 5" class="text-left">Т1</th>
@@ -36,7 +37,12 @@
         @foreach($devices as $device)
             <tr>
                 <td>{{$loop->iteration}}</td>
-                <td>{{$device->name}}</td>
+				<td>{{$device->name}}</td>
+				@if($device->controller)
+					<td>Установлен</td>
+				@else
+					<td>Отсутствует</td>
+				@endif
 				@if($device->parameters)
 					<td>{{$device->parameters->outside_t}}</td>
 					<td>{{$device->parameters->object_t}}</td>

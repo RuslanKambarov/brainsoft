@@ -72,7 +72,9 @@ Route::group(["middleware" => "auth"], function(){
     
     Route::group(["prefix" => "alarms"], function(){
 	
-	    Route::get("/", "AlarmController@index");
+        Route::get("/", "AlarmController@index");
+        
+        Route::get("/{start}/{end}", "AlarmController@index");
 
     });
 

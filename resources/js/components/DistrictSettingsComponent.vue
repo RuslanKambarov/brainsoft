@@ -15,7 +15,8 @@
                 <div class="row"> 
                     <div class="col-3"><b>Название</b></div>
                     <div class="col-1"><b>Контр</b></div>
-                    <div class="col-2"><b>OWEN ID</b></div>
+                    <div class="col-1"><b>Аббревиатура</b></div>
+                    <div class="col-1"><b>OWEN ID</b></div>
                     <div class="col-2"><b>DISTRICT ID</b></div>
                     <div class="col-1"><b>Температура</b></div>
                     <div class="col-1"><b>Давление</b></div>

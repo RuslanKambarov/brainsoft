@@ -159,7 +159,6 @@ class CloudController extends Controller
         $device = Device::where('owen_id', $id)->first();
         $device->required_t = $request->parameters['required_t'];
         $device->required_p = $request->parameters['required_p'];
-        $device->coal_reserve = $request->parameters['coal_reserve'];
         if($device->save()){
             return "Изменения внесены";
         }else{

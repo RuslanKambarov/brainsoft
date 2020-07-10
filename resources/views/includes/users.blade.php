@@ -22,14 +22,19 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($users as $user)
-            <tr>
-                <td>{{$user->id}}</td>
-                <td>{{$user->name}}</td>
-                <td>{{$user->email}}</td>
-                <td>{{implode(', ', $user->roles->pluck('name')->unique()->toArray())}}</td>
-                <td><a href="{{url('users/'.$user->id)}}"><v-btn color="success"><v-icon>mdi-eye</v-icon></v-btn></a></td>
-            </tr>
+            @foreach ($users as $district_name => $item)
+                <tr>
+                    <td colspan="5"><h3 class="text-center">{{$district_name}}</h3></td>
+                </tr>
+                @foreach($item as $user)
+                <tr>
+                    <td>{{$user->id}}</td>
+                    <td>{{$user->name}}</td>
+                    <td>{{$user->email}}</td>
+                    <td>{{$user->role}}</td>
+                    <td><a href="{{url('users/'.$user->id)}}"><v-btn color="success"><v-icon>mdi-eye</v-icon></v-btn></a></td>
+                </tr>
+                @endforeach
             @endforeach
         </tbody>
     </template>

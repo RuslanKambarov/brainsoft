@@ -1,3 +1,5 @@
+<date-picker-component :base_url="'/alarms'"></date-picker-component>
+
 <v-tabs
     background-color="teal darken-3"
     class="elevation-2"

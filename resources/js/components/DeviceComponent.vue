@@ -1,6 +1,6 @@
 <template>
     <tbody>        
-        <tr v-for="item in parameters" :key="item.id">
+        <tr v-for="item in parameters.slice(0, 5)" :key="item.id">
             <td>{{item.name}}</td>
             <td>{{item.value}}</td>
             <td>

@@ -3,6 +3,7 @@
 namespace App;
 
 use DB;
+use App\Device;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,7 +30,7 @@ class Consumption extends Model
 
     public static function getDistrictConsumption($district_id, $date){
         return DB::table('objects')
-        ->select("users.name as user_name", "objects.name as object_name", "consumption.created_at as created_at", "consumption.*")
+        ->select("users.name as user_name", "objects.coal_reserve", "objects.abbreviation", "objects.name as object_name", "consumption.created_at as created_at", "consumption.*")
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
@@ -42,7 +43,7 @@ class Consumption extends Model
 
     public static function getDistrictMonthConsumption($district_id, $date){
         return DB::table('objects')
-        ->select(DB::raw("objects.name as object_name, users.name as user_name, SUM(income) as income, SUM(consumption) as consumption, (CASE WHEN DAY(LAST_DAY('$date')) - 3 > COUNT(consumption) THEN 1 ELSE 0 END) AS input, '$date' as date"))
+        ->select(DB::raw("objects.name as object_name, users.name as user_name, objects.coal_reserve, objects.abbreviation, SUM(income) as income, SUM(consumption) as consumption, (CASE WHEN DAY(LAST_DAY('$date')) - 3 > COUNT(consumption) THEN 1 ELSE 0 END) AS input, '$date' as date"))
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
@@ -70,7 +71,7 @@ class Consumption extends Model
         $period  = \Carbon\CarbonPeriod::create($start, $end); // create period - collection of Carbon days
 
         $query_data = self::getDistrictConsumption($district_id, $month); //get data from database
-        
+
         //sort data
         $query_data = $query_data->sortBy(function($device){
             if(stristr($device->object_name, 'ДС')){
@@ -89,18 +90,25 @@ class Consumption extends Model
         });
 
         $query_data = $query_data->groupBy("user_name");        
-        $district_total = [];
 
+        $district_total = [];
+        $reserve["Всего по району"] = 0;
         foreach($query_data as $user_name => $coll){
+            if($user_name == ""){
+                $user_name = "Не назначен";
+            }
             $coll = $coll->groupBy("object_name");
             $engineer_total = [];
+            $reserve[$user_name] = 0;
             foreach($coll as $object_name => $coll2){
+                $reserve[$object_name] = $coll2[0]->coal_reserve ?? 0;
+                $abbreviation[$object_name] = $coll2[0]->abbreviation ?? "";
+                $reserve[$user_name] += $reserve[$object_name];
+                $reserve["Всего по району"] += $reserve[$object_name];
                 $month_total = array("income" => 0, "consumption" => 0, "input" => 0);                                
                 foreach($period as $day){
                     $formated = $day->format("Y-m-d");
-                    if($user_name == ""){
-                        $user_name = "Не назначен";
-                    }
+
                     $consumption_analytics[$user_name][$object_name]["Всего"] = $month_total;
 
                     //take record with required date and object
@@ -192,17 +200,20 @@ class Consumption extends Model
         foreach($period as $day){
             $days[] = $day->format('Y-m-d');             
         }
-        //dd($consumption_analytics);
-        return  ["consumption_analytics" => $consumption_analytics, "period" => $days];
+        //dd($reserve);
+        return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 
 
-    //====              Season consumption analytics   ========// 
+    //====      Season consumption analytics   ========// 
     public static function getConsumptionSeasonAnalytics($district_id){
 
         $data = [];
         $dates = [];
         $period = [];
+
+        $devices = Device::where("district_id", $district_id)->select("name", "coal_reserve")->get();
+        $reserve = [];
 
         $dates[] = new \Carbon\Carbon("2020-09");
         $dates[] = new \Carbon\Carbon("2020-10");
@@ -213,7 +224,7 @@ class Consumption extends Model
         $dates[] = new \Carbon\Carbon("2020-03");
         $dates[] = new \Carbon\Carbon("2020-04");
         $dates[] = new \Carbon\Carbon("2020-05");
-
+        
         foreach($dates as $date){
             if(isset($collection)){
                 $collection = $collection->merge(Consumption::getDistrictMonthConsumption($district_id, $date));
@@ -228,18 +239,25 @@ class Consumption extends Model
         $consumption_analytics = [];
         $district_total = [];
 
+        $reserve["Всего по району"] = 0;
         foreach($users as $key => $row){
-            
+
+            if($key == ""){
+                $key = "Не назначен";
+            }
+
             $engineer_total = [];
+            $reserve[$key] = 0;
             $objects = $row->groupBy('object_name');
 
             foreach($objects as $key1 => $row1){
-                if($key == ""){
-                    $key = "Не назначен";
-                }
+
+                $reserve[$key1] = $coll2[0]->coal_reserve ?? 0;
+                $abbreviation[$key1] = $coll2[0]->abbreviation ?? "";
+                $reserve[$key] += $reserve[$key1];
+                $reserve["Всего по району"] += $reserve[$key1];
                 $consumption_analytics[$key][$key1]["Всего"] = array("income" => 0, "consumption" => 0, "input" => 0, "balance" => 0);
                 
-
                 foreach($row1 as $key2 => $row2){
 
                     $formated = \Carbon\Carbon::create($row2->date)->isoFormat("MMMM");
@@ -306,7 +324,7 @@ class Consumption extends Model
         $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
         $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
         $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
-
-        return  ["consumption_analytics" => $consumption_analytics, "period" => $period];
+               
+        return  ["consumption_analytics" => $consumption_analytics, "period" => $period, "reserve" => $reserve, "abbreviatin" => $abbreviation];
     }
 }

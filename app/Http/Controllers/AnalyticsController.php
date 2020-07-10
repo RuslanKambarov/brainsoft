@@ -66,12 +66,16 @@ class AnalyticsController extends Controller
         return ["engineers" => $engineer, "manager" => $manager];
     }
 
+
+    //Create and download KPI report excell file
+
     public function getExcell(Request $request){
 
         $spreadsheet = new Spreadsheet();        
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getStyle('A1:H100')
         ->getAlignment()->setWrapText(true);
+        $sheet->getPageSetup()->setFitToWidth(1);
         $sheet->setCellValue("A3", "Оценочный лист");
         $sheet->mergeCells('A3:H3');
         $sheet->setCellValue("A4", "эффективности деятельности  инженера ТОО 'КТРК'");
@@ -111,22 +115,23 @@ class AnalyticsController extends Controller
             $sheet->getStyle('A'.$i.':H'.$i)->applyFromArray($headerStyleArray);
             
             $i++;
+            $sheet->getRowDimension($i)->setRowHeight(30);
             $sheet->setCellValue("A".$i, "№");
-            $sheet->getColumnDimension('A')->setWidth(5);
+            $sheet->getColumnDimension('A')->setWidth(3);
             $sheet->setCellValue("B".$i, "Критерий");
-            $sheet->getColumnDimension('B')->setWidth(100);
+            $sheet->getColumnDimension('B')->setWidth(75);
             $sheet->setCellValue("C".$i, "Вес критерия, %");
-            $sheet->getColumnDimension('C')->setWidth(15);
+            $sheet->getColumnDimension('C')->setWidth(12);
             $sheet->setCellValue("D".$i, "Источник");
-            $sheet->getColumnDimension('D')->setAutoSize(20);
+            $sheet->getColumnDimension('D')->setWidth(15);
             $sheet->setCellValue("E".$i, "Ед. изм.");
-            $sheet->getColumnDimension('E')->setAutoSize(20);
+            $sheet->getColumnDimension('E')->setWidth(22);
             $sheet->setCellValue("F".$i, "План, кол-во");
-            $sheet->getColumnDimension('F')->setWidth(20);
+            $sheet->getColumnDimension('F')->setWidth(10);
             $sheet->setCellValue("G".$i, "не выполнено, кол-во");
-            $sheet->getColumnDimension('G')->setAutoSize(15);
+            $sheet->getColumnDimension('G')->setWidth(15);
             $sheet->setCellValue("H".$i, "Оценка, %");
-            $sheet->getColumnDimension('H')->setAutoSize(15);            
+            $sheet->getColumnDimension('H')->setWidth(10);            
 
             $sheet->getStyle('A'.$i.':H'.$i)
             ->applyFromArray($styleArray);

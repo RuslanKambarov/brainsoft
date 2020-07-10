@@ -14,7 +14,13 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function index(){
-        $users = User::with('roles')->get();
+        $users = User::with('roles', 'districts')->get();
+        foreach($users as $user){
+            $user->role = implode(', ', $user->roles->pluck('name')->unique()->toArray());
+            $user->district = $user->relationToDistrict();
+        }
+        $users = $users->groupBy('district');
+        
         return view("monitor", ["include" => "users", "users" => $users]);                 
     }
 

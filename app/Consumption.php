@@ -211,8 +211,6 @@ class Consumption extends Model
         $data = [];
         $dates = [];
         $period = [];
-
-        $devices = Device::where("district_id", $district_id)->select("name", "coal_reserve")->get();
         $reserve = [];
 
         $dates[] = new \Carbon\Carbon("2020-09");
@@ -233,7 +231,7 @@ class Consumption extends Model
             }
             $period[] = $date->isoFormat("MMMM");                
         }        
-
+        
         $users = $collection->groupBy('user_name');
 
         $consumption_analytics = [];
@@ -251,9 +249,9 @@ class Consumption extends Model
             $objects = $row->groupBy('object_name');
 
             foreach($objects as $key1 => $row1){
-
-                $reserve[$key1] = $coll2[0]->coal_reserve ?? 0;
-                $abbreviation[$key1] = $coll2[0]->abbreviation ?? "";
+                
+                $reserve[$key1] = $row1[0]->coal_reserve ?? 0;
+                $abbreviation[$key1] = $row1[0]->abbreviation ?? "";
                 $reserve[$key] += $reserve[$key1];
                 $reserve["Всего по району"] += $reserve[$key1];
                 $consumption_analytics[$key][$key1]["Всего"] = array("income" => 0, "consumption" => 0, "input" => 0, "balance" => 0);
@@ -303,7 +301,7 @@ class Consumption extends Model
                 if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
                 return $carry;
             });
-            $consumption_analytics[$key]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
+            $consumption_analytics[$key]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
             $pop = array_pop($consumption_analytics[$key]["Всего"]);
             $consumption_analytics[$key]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$key]["Всего"];
      
@@ -321,10 +319,10 @@ class Consumption extends Model
             $carry += $item["input"];
             return $carry;
         });
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input);
+        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
         $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
         $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
-               
-        return  ["consumption_analytics" => $consumption_analytics, "period" => $period, "reserve" => $reserve, "abbreviatin" => $abbreviation];
+        
+        return  ["consumption_analytics" => $consumption_analytics, "period" => $period, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 }

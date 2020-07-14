@@ -48,6 +48,8 @@ Route::group(["middleware" => "auth"], function(){
             
         Route::get("/{id}", "UserController@userInfo");
 
+        Route::get("/{id}/delete", "UserController@deleteUser");
+
         Route::get("/{user_id}/detach/{object_id}", "UserController@detachObject");
 
         Route::post("/{user_id}/attach", "UserController@attachObject");
@@ -80,35 +82,33 @@ Route::group(["middleware" => "auth"], function(){
 
     Route::group(["prefix" => "audit"], function(){
 
-        Route::get("/", "AuditController@index");
+        Route::group(["prefix" => "types"], function(){
+            
+            Route::get("/", "AuditController@auditControl");
+    
+            Route::get("/{id}", "AuditController@showAudit");
 
-        Route::get("/types", "AuditController@auditControl");
+            Route::post("/addaudit", "AuditController@addAudit");
 
-        Route::get("/results", "AuditController@results");
+            Route::get("/{id}/addquestion", "AuditController@addQuestion");
 
-        Route::get("/device/{id}/analytics", "AuditController@analytics");
+            Route::post("/{id}/addquestion", "AuditController@saveQuestion");
+    
+            Route::get("/delete/{id}", "AuditController@deleteAudit");
 
-        Route::get("/device/{id}/analytics/detail", "AuditController@analyticsDetail");
+            Route::get("/removequestion/{id}", "AuditController@removeQuestion");
 
-		Route::get("/user/{id}/analytics", "AuditController@analyticsUser");
+            Route::get("/updatequestion/{id}", "AuditController@updateQuestion");
 
-        Route::get("/device/{device_id}/{audit_id}/analytics", "AuditController@analyticsAudit");
+        });
 
-        Route::get("/results/{id}", "AuditController@showResult");
+        Route::group(["prefix" => "results"], function(){
 
-        Route::get("/types/{id}", "AuditController@showAudit");
+            Route::get("/", "AuditController@results");
 
-        Route::get("/types/{id}/addquestion", "AuditController@addQuestion");
+            Route::get("/{id}", "AuditController@showResult");
 
-        Route::get("/removequestion/{id}", "AuditController@removeQuestion");
-
-        Route::get("/director", "AuditController@director");
-
-        Route::post("/types/{id}/addquestion", "AuditController@saveQuestion");
-
-        Route::post("/types/addaudit", "AuditController@addAudit");
-
-        Route::get("/types/delete/{id}", "AuditController@deleteAudit");
+        });        
 
     });
 

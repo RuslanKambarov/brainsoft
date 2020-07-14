@@ -27,8 +27,8 @@
                         <template v-for="day in days">
                             <th>Приход</th>                            
                             <th>Расход</th>
-                            <th v-if="date==null">Ввод данных</th>
-                            <th v-else>Нарушение</th>
+                            <th v-if="date===null">Нарушение</th>
+                            <th v-else>Ввод данных</th>
                         </template>
                     </tr>
                 </thead>

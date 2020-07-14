@@ -20,16 +20,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 class AuditController extends Controller
 {
 
-
-    
-    public function index(Request $request){
-    
-        $devices = Device::all();
-        $audits = Audit::all();
-        return view("audit.index", ["devices" => $devices, "audits" => $audits]);
-
-    }
-
     public function addAudit(Request $request){
 
         $audit = new Audit;
@@ -104,238 +94,15 @@ class AuditController extends Controller
 
         $question = Question::find($id);
         $question->delete();
-        return redirect("/audit");
+        return "Удалено";
 
     }
 
-    public function analytics($id){
-        //Get instance of device
-        $device = \App\Device::where("owen_id", $id)->first();
-        //Select audit results of devices with auditor and audit 
-        $audits = Audit_result::where("object_id", $id)
-                                ->join('users', 'audit_results.auditor_id', '=', 'users.id')
-                                ->join('audits', 'audit_results.audit_id', '=', 'audits.id')
-                                ->whereRaw("MONTH(audit_date) = MONTH(NOW())")
-                                ->select("users.name", "audit_id", "auditor_id", "audits.name as audit", "object_id", "audit_json", "audit_results.created_at", "audit_results.updated_at")
-                                ->get();
-
-        //Get count of planned audits in current month                                
-        foreach($audits as $audit){
-            $audit->assigned = $audit->getAssignedAuditsCount($id);
-        }
-        //Group by auditor
-        $auditsByName = $audits->groupBy("audit");
-
-        //Group by audit
-        foreach($auditsByName as $key => $user){
-            $auditsByName[$key] = $user->groupBy("name");
-        }
-
-        return response()->json(["audits" => $auditsByName, "device" => $device]);
-
-    }
-
-    function getConductedAuditsCount($device_id, $audit_id, $date = NULL){
-
-        if(!$date){
-            $date = \Carbon\Carbon::now();
-        }
-
-        $audits = Audit_result::where([["object_id", $device_id], ["audit_id", $audit_id]])
-            ->whereRaw("MONTH(audit_date) = MONTH('$date')")
-            ->get();
-        
-        return count($audits);
-    
-    }
-
-    function compareAudits($audits){
-
-        $users = array_keys($audits);
-        $audit1 = array_shift($audits);
-        $audit2 = array_pop($audits);
-        $compareResult = [];
-
-        foreach($audit1 as $key => $value){
-
-                        
-            $audits1_array = $value;
-            $audits2_array = $audit2[$key];
-
-            if(($audits1_array->isEmpty()) || ($audits2_array->isEmpty())){
-                $compareResult[] = [];
-                continue;
-            }elseif(count($audits1_array) != count($audits2_array)){
-                $compareResult[] = [];
-                continue;
-            }else{
-				
-				$temp = [];
-                foreach($audits1_array as $key => $result){
-					
-					
-                    foreach(json_decode($result->audit_json) as $questionKey => $question){
-
-                        $opposite_answer = json_decode($audits2_array[$key]->audit_json)[$questionKey];                    
-                        if($question->answer !== $opposite_answer->answer){
-                            $mismatch = [];
-                            $mismatch["text"] = "Расхождение в ответах. Вопрос: ".\App\Question::find($question->question_id)->question;
-                            $mismatch["id"] = $question->question_id;
-                            $mismatch["user1"] = $users[0];
-                            $mismatch["date1"] = $result->audit_date;
-                            $mismatch["answer1"] = $question->answer;
-                            $mismatch["user2"] = $users[1];
-                            $mismatch["date2"] = $audits2_array[$key]->audit_date;
-                            $mismatch["answer2"] = $opposite_answer->answer;
-                            $temp[] = $mismatch;                        
-                        }
-                    }
-
-                }
-                $compareResult[] = $temp;
-            }
-
-        }
-        return $compareResult;
-
-    }
-
-    function analyticsDetail($device_id){
-        
-        $device = Device::where("owen_id", $device_id)->first();
-        $dates = [];
-        $compare = [];
-        $auditsTotal = [];
-        $auditsPlanned = [];
-        $auditsConducted = [];
-        $auditsConductedByUser = [];
-
-        for($i = -5; $i <= 6; $i++){
-            $dates[] = $date = \Carbon\Carbon::now()->add($i, 'month');
-            $auditsTotal[] = Audit_result::where("object_id", $device_id)->whereRaw("MONTH(audit_date) = MONTH('$date')")->get(); 
-        }
-        
-        $allAudits = Audit_result::where("object_id", $device_id)->get();
-        
-        //Users who conducted audits
-        $users = $allAudits->pluck("auditor_id")->unique();
-        
-        //Audit types conducted
-        $auditTypes = $allAudits->pluck("audit_id")->unique();
-
-        foreach($auditTypes as $type){
-            $array = [];
-            $audit = Audit::find($type);
-            foreach($dates as $date){                                
-                $array[] =  $audit->getAssignedAuditsCount($device_id, $type);
-            }
-            $auditName = $audit->name;
-            $auditsPlanned[$auditName] = $array;
-        }
-
-        foreach($auditTypes as $type){
-            $array = [];
-            foreach($dates as $date){                                
-                $array[] =  $this->getConductedAuditsCount($device_id, $type, $date);
-            }
-            $auditsConducted[$type] = $array;
-        }
-
-        foreach($auditTypes as $type){
-            foreach($users as $user){
-                $array = [];
-                foreach($dates as $date){
-                    
-                    $array[] = $a = Audit_result::where([["object_id", $device_id], 
-                                         ["audit_id", $type], 
-                                         ["auditor_id", $user]])
-                                         ->whereRaw("MONTH(audit_date) = MONTH('$date')")
-                                         ->get();
-                }
-                $userName = User::find($user)->name;
-                $auditName = Audit::find($type)->name;
-                $auditsConductedByUser[$auditName][$user] = $array;
-            }
-
-            $compare[$auditName] = $this->compareAudits($auditsConductedByUser[$auditName]);
-        }
-
-
-        //dd($auditsConductedByUser);
-        //dd($auditsConducted);
-        //dd($auditsPlanned);
-        //dd($auditsTotal);
-        //dd($compare);
-		
-        return view("audit.detail", ["dates"            => $dates,
-                                     "device"           => $device,
-                                     "compare"          => $compare, 
-                                     "auditsTotal"      => $auditsTotal, 
-                                     "auditsPlanned"    => $auditsPlanned,
-                                     "auditsConducted"  => $auditsConducted,
-                                     "auditsConductedByUser" => $auditsConductedByUser]);
-
-    }
-
-    public function analyticsUser($user_id){
-
-        $user = $user = User::find($user_id);
-        $audits = Audit_result::where("auditor_id", $user_id)->whereRaw("MONTH(audit_date) = MONTH(NOW())")->get();
-        foreach($audits as $audit){
-            $audit->answers = json_decode($audit->audit_json);
-        }
-        $answersCount = $this->countAnswers($audits);
-        return view("audit.user", ["answersCount" => $answersCount, "audits" => $audits, "user" => $user]);
-
-    }
-
-
-    public function analyticsAudit($device_id, $audit_id){
-
-        $device = Device::where("owen_id", $device_id)->first();
-        $audit = Audit::find($audit_id);
-        $audits = Audit_result::where("audit_id", $audit_id)->whereRaw("MONTH(audit_date) = MONTH(NOW())")->get();
-        foreach($audits as $audit){
-            $audit->result = json_decode($audit->audit_json);
-        }
-        $audits = $audits->groupBy("auditor_id");
-        
-        return view("audit.type", ["device" => $device, "audit" => $audit, "audits" => $audits]);
-    }
-
-    public function countAnswers($audits){
-
-        $data = [];
-        foreach($audits as $audit){
-
-            foreach(json_decode($audit->audit_json) as $answer){
-                 if(!isset($data[$answer->question_id][$answer->answer])){
-                    $data[$answer->question_id][$answer->answer] = 1;
-                }else{    
-                    ++$data[$answer->question_id][$answer->answer]; 
-                }
-            }
-
-        }
-
-        return $data;  
-
-    }
-
-    public function director(){
-
-        $districts = District::with('devices')->get();
-        foreach($districts as $district){
-            
-            foreach($district->devices as $device){
-
-                $device->audits = Audit_result::where('object_id', $device->owen_id)->get()->groupBy('audit_id');
-
-            }
-
-        }
-        // /dd($districts);
-        return view('audit.director', ["districts" => $districts]);
+    public function updateQuestion(Request $request, $id){
+        $question = Question::find($request->question_id);
+        $question->question = $request->question_text;
+        $question->save();
+        return "Запись обновлена";
     }
 
     public function monitorIndex(){
@@ -723,10 +490,10 @@ class AuditController extends Controller
         }else{
             $data = Consumption::getConsumptionAnalytics($district_id, $date);
         }        
-
+        
         $district_name = District::where("owen_id", $district_id)->first()->name;
         $spreadsheet = new Spreadsheet();
-        
+
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle("Аналитика Учета Топлива");
         $styleArray = [
@@ -757,23 +524,25 @@ class AuditController extends Controller
         $sheet->mergeCells('D5:D6');
         $sheet->getColumnDimension('D')->setAutoSize(true);
         $sheet->setCellValue('E5', 'Аббревиатура');
+        $sheet->getColumnDimension('E')->setWidth(20);
         $sheet->mergeCells('E5:E6');
         $sheet->setCellValue('F5', 'Годовая потребность топлива');
+        $sheet->getColumnDimension('F')->setWidth(17);
         $sheet->mergeCells('F5:F6');
         $sheet->setCellValue('G5', 'Всего');
         $sheet->mergeCells("G5:I5");
-        $sheet->setCellValue('G6', 'Приход');
-        $sheet->setCellValue('H6', 'Аналитика');
-        $sheet->setCellValue('I6', 'Расход');
+        $sheet->setCellValue('G6', 'Приход');        
+        $sheet->setCellValue('H6', 'Расход');
+        $sheet->setCellValue('I6', 'Аналитика');
         foreach($data["period"] as $key => $day){
             $charNum = $key*3+10;
             $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
             $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);
             $char2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+2);
             $sheet->setCellValue($char.'5', $day);
-            $sheet->setCellValue($char.'6', 'Приход');
-            $sheet->setCellValue($char1.'6', "Аналитика");
-            $sheet->setCellValue($char2.'6', "Расход");
+            $sheet->setCellValue($char.'6', 'Приход');            
+            $sheet->setCellValue($char1.'6', "Расход");
+            $sheet->setCellValue($char2.'6', "Аналитика");
             $sheet->mergeCells($char.'5:'.$char2.'5');            
         }
         $sheet->getStyle("B6:".$char2."6")->getFont()->setSize(11);
@@ -797,9 +566,9 @@ class AuditController extends Controller
                     $sheet->getColumnDimension($char)->setWidth(12);
                     $sheet->getColumnDimension($char1)->setWidth(12);
                     $sheet->getColumnDimension($char2)->setWidth(12);
-                    $sheet->setCellValue($char.$cur_row, $row2["income"]);
-                    $sheet->setCellValue($char1.$cur_row, $row2["input"]);
-                    $sheet->setCellValue($char2.$cur_row, $row2["consumption"]);
+                    $sheet->setCellValue($char.$cur_row, $row2["income"]);                    
+                    $sheet->setCellValue($char1.$cur_row, $row2["consumption"]);
+                    $sheet->setCellValue($char2.$cur_row, $row2["input"]);
                     $charNum = $charNum + 3;
                 }                
             }

@@ -1,10 +1,6 @@
 @extends("layouts.app")
 
 @section('content')
-    <v-system-bar window class="py-6">
-        <a href="{{url('/audit')}}"><v-btn color="blue-grey darken-1" elevation="10" class="mx-2" small>Аналитика аудитов</v-btn></a>
-        <a href="{{url('/audit/types')}}"><v-btn color="blue-grey darken-1" elevation="10" class="mx-2" small>Управление аудитами</v-btn></a>        
-    </v-system-bar>
     <div class="card">
         <div class="card-body">
             <h2>Результаты аудитов</h2>            
@@ -28,7 +24,7 @@
                         {{App\Device::where("owen_id", $result->object_id)->first()->name}}
                     </td>
                     <td>
-                        {{App\User::where("id", $result->auditor_id)->first()->name}}
+                        {{App\User::where("id", $result->auditor_id)->first()->name ?? "(Пользоватеьл был удален)"}}
                     </td>
                     <th>
                         {{$result->audit_date}}

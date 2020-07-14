@@ -2,6 +2,7 @@
     <div>
         <v-btn color="success" @click="attachObject()" v-if="user_role != 3">Прикрепить объект<v-icon>mdi-plus</v-icon></v-btn>
         <v-btn color="teal lighten-3" @click="dialog1 = true">Изменить роль<v-icon>mdi-pencil</v-icon></v-btn>
+        <a :href="'/users/'+user_id+'/delete'"><v-btn color="error">Удалить пользователя</v-btn></a>
         <a href="/users"><v-btn color="primary">Назад</v-btn></a>
         <v-dialog v-model="dialog1" scrollable persistent max-width="500">
             <v-card color="" raised>

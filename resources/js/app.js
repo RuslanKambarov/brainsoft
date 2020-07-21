@@ -36,9 +36,8 @@ Vue.component('application-settings-component', require('./components/Applicatio
 Vue.component('settings-component', require('./components/SettingsComponent.vue').default);
 Vue.component('device-settings-component', require('./components/DeviceSettingsComponent.vue').default);
 Vue.component('district-settings-component', require('./components/DistrictSettingsComponent.vue').default);
-Vue.component('audit-component', require('./components/Audit/AuditComponent.vue').default);
-//Vue.component('audit-device-component', require('./components/Audit/AuditDeviceComponent.vue').default);
-Vue.component('device-analytics-component', require('./components/Audit/DeviceAnalyticsComponent.vue').default);
+
+Vue.component('audit-question-component', require('./components/Audit/AuditQuestionComponent.vue').default);
 
 Vue.component('monitor-index-component', require('./components/Analytics/MonitorIndexComponent.vue').default);
 Vue.component('monitor-district-component', require('./components/Analytics/MonitorDistrictComponent.vue').default);

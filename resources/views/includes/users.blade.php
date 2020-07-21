@@ -32,7 +32,7 @@
                     <td>{{$user->name}}</td>
                     <td>{{$user->email}}</td>
                     <td>{{$user->role}}</td>
-                    <td><a href="{{url('users/'.$user->id)}}"><v-btn color="success"><v-icon>mdi-eye</v-icon></v-btn></a></td>
+                    <td><a href="{{url('users/'.$user->id)}}"><v-btn color="success"><v-icon>mdi-pencil</v-icon></v-btn></a></td>
                 </tr>
                 @endforeach
             @endforeach

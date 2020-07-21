@@ -31,18 +31,6 @@ class UserController extends Controller
 
     }
 
-    public function removeUser($user_id){
-    	$user = User::find($id);
-	    $user_objcets = DB::table("user_objects")->where("user_id", $id)->get();
-	    $user_objects->delete();
-        if($user->delete()){
-            $message  = "Пользователь ".$user." удален";
-        }else{
-            $message  = "Пользователь ".$user."не был удален";
-        }
-        return $message;	
-    }
-
     public function detachObject($user_id, $object_id){        
         $user = User::find($user_id);
         if($user->hasAnyRole(2)){
@@ -89,9 +77,14 @@ class UserController extends Controller
             return view("monitor", ['include' => 'profile', 'class' => 'success', 'message' => "Пароль успешно сохранен"]);
         }else{
             return view("monitor", ['include' => 'profile', 'class' => 'danger', 'message' => "Не верный пароль"]);
-        }
-        
-         
+        }                
+    }
 
+    public function deleteUser($user_id){
+        $user = User::find($user_id);
+        $user->districts()->detach();
+        $user->devices()->detach();        
+        $user->delete();
+        return $this->index();        
     }
 }

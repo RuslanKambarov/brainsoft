@@ -1,10 +1,6 @@
 @extends("layouts.app")
 
 @section('content')
-    <v-system-bar window class="py-6">
-        <a href="{{url('/audit')}}"><v-btn color="blue-grey darken-1" elevation="10" class="mx-2" small>Аналитика аудитов</v-btn></a>
-        <a href="{{url('/audit/results')}}"><v-btn color="blue-grey darken-1" elevation="10" class="mx-2" small>Результаты аудитов</v-btn></a>        
-    </v-system-bar>
     <div class="card">
         <div class="card-body">
             <h2>Управление аудитами</h2>            

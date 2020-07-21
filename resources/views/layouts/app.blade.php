@@ -56,14 +56,26 @@
                     <v-list-item-title>Пользователи</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-            <v-list-item link href="/audit" @if(request()->route()->getPrefix() === "/audit") style="background: #8286bc47" @endif>
-                <v-list-item-action>
-                    <v-icon>mdi-eye-check</v-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                    <v-list-item-title>Аудит</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
+            <v-list-group @if(strstr(request()->route()->getPrefix(), "audit")) value="true" @endif>
+                <template v-slot:activator>
+                    <v-list-item-action>
+                        <v-icon>mdi-eye-check</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Аудит</v-list-item-title>
+                    </v-list-item-content>            
+                </template>
+                <v-list-item class="ml-10" link href="/audit/types" @if(request()->route()->getPrefix() === "audit/types") style="background: #8286bc47" @endif>
+                    <v-list-item-content>
+                        <v-list-item-title>Управление аудитами</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-list-item class="ml-10" link href="/audit/results" @if(request()->route()->getPrefix() === "audit/results") style="background: #8286bc47" @endif>
+                    <v-list-item-content>
+                        <v-list-item-title>Результаты аудита</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list-group>
             <v-list-group @if(strstr(request()->route()->getPrefix(), "analytics")) value="true" @endif>
                 <template v-slot:activator>
                     <v-list-item-action>

@@ -1,4 +1,4 @@
-	
+<div class="container-fluid">	
     <v-row>
         <v-col style="border-right: 0.5px solid black">
           <div class = "card">
@@ -85,3 +85,4 @@
             </v-simple-table>
         </v-col>
     </v-row>
+</div>

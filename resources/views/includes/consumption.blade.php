@@ -10,7 +10,7 @@
     <div class="card-body">
 			<table class='table table-bordered'>
 				<tr>
-					<td>Угля на год</td>
+					<td>Годовая потребность топлива</td>
 					<td>{{$device->coal_reserve ?? 0}}</td>
 				</tr>
 				<tr>
@@ -18,7 +18,7 @@
 					<td>{{$consumption->income ?? 0}}</td>
 				</tr>
 				<tr>
-					<td>Израсходовано</td>
+					<td>Расход</td>
 					<td>{{$consumption->consumption ?? 0}}</td>
 				</tr>
 				<tr>

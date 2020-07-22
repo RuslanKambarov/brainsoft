@@ -215,7 +215,7 @@ class CloudController extends Controller
     }
 
     public function setIncome(Request $request, $id){
-        $insert = DB::table('consumption')->updateOrInsert(["object_id" => $id], ["income" => $request->income, "consumption" => 0]);
+        $insert = DB::table('objects')->updateOrInsert(["owen_id" => $id], ["coal_reserve" => $request->income]);
         if($insert){
             $class = "success";
             $message = "Данные сохранены";

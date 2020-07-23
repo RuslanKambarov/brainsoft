@@ -39,6 +39,10 @@
         
     <v-app>
     <v-navigation-drawer v-model="drawer" app>
+        <div class="row p-2">
+            <img class="ml-4 pt-2" src="{{asset('/logo.ico')}}" alt="" width="75px" height="75px">
+            <b class="h1 pl-9" style="margin-top: 5px; padding: 15px">ЦТК</b>
+        </div>        
         <v-list dense>
             <v-list-item link href="/" @if(request()->route()->getPrefix() === null) style="background: #8286bc47" @endif>
                 <v-list-item-action>

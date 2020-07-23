@@ -65,10 +65,10 @@ class compareParameters extends Command
         'body' => json_encode([])
     ]);
 
-    //Get only devices from response
+    //Get devices only from response
     $owen_status = json_decode($response->getBody()->getContents())->devices;
 
-
+    
     //Foreach devices from database
 	foreach($devices as $device){
 
@@ -152,5 +152,7 @@ class compareParameters extends Command
 
         $exec_time = microtime(true) - $start;
         echo "Выполнено за".$exec_time." секунд";
+
     }
+    
 }

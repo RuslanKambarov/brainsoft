@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function index(){
+        
+        if(!$user->hasAnyRole(3)){ return abort(403, "Эта страница доступна только администраторам"); }
         $users = User::with('roles', 'districts')->get();
         foreach($users as $user){
             $user->role = implode(', ', $user->roles->pluck('name')->unique()->toArray());

@@ -7,6 +7,8 @@ use App\User;
 use App\Objectcard;
 use App\Insidetemp;
 use Session;
+use Arr;
+use App\Device;
 
 class OwenCloud implements Cloud{
         
@@ -52,36 +54,69 @@ class OwenCloud implements Cloud{
     
     public function compare($data){
         
-        foreach($data as $param){
+        //Проверка на пустые значения с измерительного прибора
+        foreach($data as $key => $param){
             if(is_null($param)){
                 return [
                     "status"    => 1,
-                    "message"   => "Один из параметров не возващает значение"
+                    "message"   => $data['name'].". Один из параметров не возвращает значение (".$key.")"
                 ];
             }
         }
 
+        //Проверка на корректность значений с измерительного прибора
+        foreach(Arr::except($data, ['name', 'owen_id']) as $key => $param){
+            if(($param > 1000) || ($param < -1000)){
+                return [
+                    "status"    => 1,
+                    "message"   => $data['name'].". Один из параметров возвращает некорректное значение ($key)"
+                ];
+            }    
+        }
+
+        //Поиск температурной карты этого прибора при данной температуре
         $temp_card = Objectcard::where([
             ["object_id", "=", $data['owen_id']],
             ["outside_t", "=", $data['outside_t']]
         ])->first();
 
+        //Если не найдена температурная карта 
         if(!$temp_card){
             return [
                 "status"    => 0,
-                "message"   => $data['name'].". Не найдена температурная карта"
+                "message"   => $data['name'].". Не задана температурная карта для температуры улицы ".$data['outside_t']
             ];
         }
 
-        $direct_different = $this->getDifferent($data["direct_t"], $temp_card->direct_t);
-        $back_different = $this->getDifferent($data["back_t"], $temp_card->back_t);
+        //Определние задданых пераметров объекта (какая должна быть температура и давление)
+        $object = Device::where("owen_id", $data['owen_id'])->first();        
+        $defined_temperature = $object->required_t;
+        $defined_pressure    = $object->required_p;
+        
+        //Проверка температуры на соответствие
+        $object_t_diff = abs($data['object_t'] - $defined_temperature);
 
-        if(($direct_different === false) || ($back_different === false)){
+        if($object_t_diff > 2){
             return [
-                "status"    => 1,
-                "message"   => $data['name'].". Один из параметров не возващает значение"
+                "status"    => 4,
+                "message"   => $data['name'].". Температура объекта: недопустимое отклонение. Температура объекта - ".$data['object_t'].", небходимая температура -  $defined_temperature"
             ];
         }
+
+        //Проверка температуры на соответствие
+        $object_p_diff = abs($data['pressure'] - $defined_pressure);
+
+        if($object_p_diff > 0.5){
+            return [
+                "status"    => 4,
+                "message"   => $data['name'].". Давление: недопустимое отклонение. Давление на объекте - ".$data['pressure'].", необходимое давление - $defined_pressure"
+            ];
+        }
+
+
+        $direct_different   = $data["direct_t"] - $temp_card->direct_t;
+        $back_different     = $data["back_t"] - $temp_card->back_t;
+
         if(($direct_different > 10) || ($back_different > 10)){
             return  [
                 "status"    => 4,
@@ -103,22 +138,6 @@ class OwenCloud implements Cloud{
 
     }
 
-    public function floatOwenData($owen){
-
-        if(($owen > 1000) || ($owen < -1000)){
-            $owen = 0;
-        }
-
-        return $owen;
-    }
-
-    public function getDifferent($owen, $card){
-        $owen = $this->floatOwenData($owen);
-        if($owen == 0){
-            return false;
-        }
-        return abs($owen - $card);
-    }
 
     public function sendNotifications($users, $message, $device){
 

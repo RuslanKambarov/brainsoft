@@ -17,9 +17,9 @@ class AnalyticsController extends Controller
 {
     public function index(){
 
-        $user = \App\User::find(12);                    //get curent user
-        if(!$user->hasAnyRole(4)){ return abort(403); } //return 403 if no access
-        $district = $user->districts()->first();        //get attached district
+        $user = Auth::user();                    //get curent user
+        if(!$user->hasAnyRole(1)){ return abort(403, "Эта страница доступна только главному инженеру"); } //return 403 if no access
+        $district = $user->districts()->first() ?? return abort(403, "Нет прикрепленных районов");        //get attached district
         $district_id = $district->id;
         return view("analytics.audit.kpi", ["district_id" => $district_id]);    
     }

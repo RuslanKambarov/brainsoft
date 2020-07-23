@@ -9,7 +9,7 @@ class District extends Model
 {
     public function devices()
     {
-        return $this->hasMany('App\Device', 'district_id', 'owen_id');
+        return $this->hasMany('App\Device', 'owen_id', 'district_id');
     }
 
     public function users(){

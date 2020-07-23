@@ -19,7 +19,7 @@ class AnalyticsController extends Controller
 
         $user = Auth::user();                    //get curent user
         if(!$user->hasAnyRole(1)){ return abort(403, "Эта страница доступна только главному инженеру"); } //return 403 if no access
-        $district = $user->districts()->first()         //get attached district
+        $district = $user->districts()->first();         //get attached district
         if(!$district){
             return abort(403, "Нет прикрепленных районов");
         }

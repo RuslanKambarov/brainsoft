@@ -9,7 +9,7 @@ class District extends Model
 {
     public function devices()
     {
-        return $this->hasMany('App\Device', 'owen_id', 'district_id');
+        return $this->hasMany('App\Device', 'district_id', 'owen_id');
     }
 
     public function users(){
@@ -65,12 +65,12 @@ class District extends Model
     }
 
     public function getConsumption(){
-        $this->district_id   = $this->owen_id;
-        unset($this->owen_id, $this->id);
         $this->coal_reserve  = array_sum($this->devices()->pluck('coal_reserve')->toArray());   
         $this->income        = $consumption->income ?? 0;
         $this->consumption   = $consumption->consumption ?? 0;
         $this->balance       = $this->income - $this->consumption;       
+        $this->district_id   = $this->owen_id;
+        unset($this->owen_id, $this->id);
         return $this;
     }
 

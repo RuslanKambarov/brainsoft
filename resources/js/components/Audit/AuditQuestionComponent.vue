@@ -30,9 +30,9 @@
             </v-card>
         </v-dialog>
         <v-dialog v-model="response" max-width="300">
-            <v-card>
-                <v-card-title>{{message}}</v-card-title>
-            </v-card>
+            <div class="alert alert-success">
+                {{message}}
+            </div>
         </v-dialog>
     </table>
 </template>

@@ -29,7 +29,7 @@ class AnalyticsController extends Controller
 
     public function getKPIData($date){
 
-        $user = \App\User::find(12);                    //get curent user
+        $user = Auth::user();                    //get curent user
         if(!$user->hasAnyRole(4)){ return abort(403); } //return 403 if no access
         $district = $user->districts()->first();        //get attached district
 

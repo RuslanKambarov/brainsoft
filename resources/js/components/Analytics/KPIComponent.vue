@@ -5,7 +5,7 @@
             <button @click="getExcell()" class="btn btn-small btn-success get-excell-button">EXCELL</button>
         </div>
         <template v-for="(engineer, key) in engineers">
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered" :key="key">
                 <tr>
                     <td colspan="8"><h3 class="text-center"> {{engineer.name}}</h3></td>                    
                 </tr>
@@ -83,7 +83,7 @@
         </template>
         <table class="table table-bordered table-striped">
             <tr>
-                <td colspan="8"><h3 class="text-center mt-10 mb-10">Оценочный лист эффективности деятельности главного инженера ТОО "КТРК" {{manager.name}}</h3></td>
+                <td colspan="8"><h3 class="text-center mt-10 mb-10">Оценочный лист эффективности деятельности главного инженера {{manager.name}}</h3></td>
             </tr>
             <tr>
             <td>№</td>

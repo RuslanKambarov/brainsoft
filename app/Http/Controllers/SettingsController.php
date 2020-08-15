@@ -33,7 +33,9 @@ class SettingsController extends Controller
         if($request->target == "district"){
             $district = District::where('owen_id', $id)->first();
             foreach($request->district as $key => $setting){
-                $district->$key = $setting;
+                if($key != "devices"){
+                    $district->$key = $setting;
+                }                
             }
             $district->save();            
         }

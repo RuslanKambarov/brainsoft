@@ -87,6 +87,15 @@ export default {
                     identifier: 0,
                     district_id: this.district.owen_id
                 })
+        },
+        saveParams: function(){
+            axios.post("/settings/update/"+this.district.owen_id, {
+                token: $('meta[name="csrf-token"]').attr('content'),
+		        target: "district",
+                district: this.district
+            }).then(Response => {
+                console.log(Response.data)
+            })
         }
     }
 }

@@ -60,6 +60,9 @@ class CloudController extends Controller
 
         if($user->hasAnyRole(2)){
             $devices = $user->devices()->select('name', 'owen_id as id')->get();
+            foreach($devices as $device){
+                $device->parameters = DB::table('last_data')->where("object_id", $device->owen_id)->first();            	
+            }	
             $district = $user->districts()->first();
             $district->director = $district->director();
             $district->engineer = $district->manager();            

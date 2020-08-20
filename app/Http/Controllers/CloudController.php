@@ -59,8 +59,9 @@ class CloudController extends Controller
         }
 
         if($user->hasAnyRole(2)){
-            $devices = $user->devices()->select('name', 'owen_id as id')->get();
-            return view("monitor", ["include" => "district", "devices" => $devices]);
+            $districts = $user->districts()->get();
+            //$devices = $user->devices()->select('name', 'owen_id as id')->get();
+            //return view("monitor", ["include" => "district", "devices" => $devices]);
         }
         
         return view("monitor", ["include" => "home", "districts" => $districts->sortBy('name')]);        

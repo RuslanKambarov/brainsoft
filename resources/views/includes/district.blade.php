@@ -49,18 +49,18 @@
 					<td>{{$device->parameters->direct_t}}</td>
 					<td>{{$device->parameters->back_t}}</td>
 					<td>{{$device->parameters->pressure}}</td>
-					@if($device->parameters->status === 0)
-        	        	<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
-					@else
-                		<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
-					@endif
 				@else
 					<td></td>
 					<td></td>
 					<td></td>
 					<td></td>
-					<td></td>
-					<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="success">Просмотр</v-btn></a></td>	
+					<td></td>	
+				@endif
+				@if(!isset($device->parameters->status) || $device->parameters->status === 0)
+				
+        	        <td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="error">Просмотр</v-btn></a></td>
+				@else
+                	<td><a href="{{url('/device/'.$device->owen_id)}}"><v-btn color="success">Просмотр</v-btn></a></td>
 				@endif
             </tr>
         @endforeach

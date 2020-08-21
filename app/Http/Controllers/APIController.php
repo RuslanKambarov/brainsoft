@@ -63,7 +63,7 @@ class APIController extends Controller
 		$inside_temp = DB::table("insidetemps")->where("device_id", $id)->first()->value;
 		$device->engineer = $device->getEngineer();
 	
-		$device->employee = "Коспанов Арман Нургельдиевич";
+		$device->employee = "";
 		$device->has_alert = true;
 		$event->mode = $card;
 		$event->mode->object_t = $inside_temp;

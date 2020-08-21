@@ -35,11 +35,13 @@ class UserController extends Controller
 
     public function detachObject($user_id, $object_id){        
         $user = User::find($user_id);
-        if($user->hasAnyRole(2)){
-            $user->devices()->detach($object_id);    
-        }else{
-            $user->districts()->detach($object_id);
-        }
+        $user->devices()->detach($object_id);    
+        return redirect()->back();
+    }
+
+    public function detachDistrict($user_id, $object_id){        
+        $user = User::find($user_id);    
+        $user->districts()->detach($object_id);
         return redirect()->back();
     }
 

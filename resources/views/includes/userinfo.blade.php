@@ -48,7 +48,7 @@
 						@else
 							<td></td>
 						@endif
-						<td><a href="{{url()->current().'/detach/'.$district->id}}"><v-btn color="warning">Открепить<v-icon>mdi-delete</v-icon></v-btn></a></td>
+						<td><a href="{{url()->current().'/detach/district/'.$district->id}}"><v-btn color="warning">Открепить<v-icon>mdi-delete</v-icon></v-btn></a></td>
 					</tr>
 				@endforeach
 				@else
@@ -72,7 +72,7 @@
 						@else
 							<td></td>
 						@endif
-						<td><a href="{{url()->current().'/detach/'.$device->id}}"><v-btn color="warning">Открепить<v-icon>mdi-delete</v-icon></v-btn></a></td>
+						<td><a href="{{url()->current().'/detach/object/'.$device->id}}"><v-btn color="warning">Открепить<v-icon>mdi-delete</v-icon></v-btn></a></td>
 					</tr>
 				@endforeach
 				@else

@@ -50,7 +50,9 @@ Route::group(["middleware" => "auth"], function(){
 
         Route::get("/{id}/delete", "UserController@deleteUser");
 
-        Route::get("/{user_id}/detach/{object_id}", "UserController@detachObject");
+        Route::get("/{user_id}/detach/district/{object_id}", "UserController@detachDistrict");
+
+        Route::get("/{user_id}/detach/object/{object_id}", "UserController@detachObject");
 
         Route::post("/{user_id}/attach", "UserController@attachObject");
 

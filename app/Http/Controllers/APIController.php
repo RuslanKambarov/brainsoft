@@ -135,7 +135,7 @@ class APIController extends Controller
     public function saveResult(Request $request, $object_id, $audit_id){
 
 		if(Audit_result::checkLastAuditTime($object_id)){
-			response()->json(["success" => false, "message" => "Аудит уже проводился"], 200);
+			return response()->json(["success" => false, "message" => "Аудит уже проводился"], 200);
 		}	
 
 		$array = [];

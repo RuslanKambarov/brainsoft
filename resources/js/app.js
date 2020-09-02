@@ -54,6 +54,7 @@ Vue.component('consumption-table-component', require('./components/Analytics/Con
 Vue.component('kpi-component', require('./components/Analytics/KPIComponent.vue').default);
 Vue.component('alert-history-component', require('./components/AlertHistoryComponent.vue').default);
 Vue.component('date-picker-component', require('./components/DatePickerComponent.vue').default);
+Vue.component('users-actions-component', require('./components/UsersActionsComponent.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

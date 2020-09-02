@@ -213,6 +213,7 @@ class Consumption extends Model
         $period = [];
         $reserve = [];
 
+        $dates[] = new \Carbon\Carbon("2020-08");
         $dates[] = new \Carbon\Carbon("2020-09");
         $dates[] = new \Carbon\Carbon("2020-10");
         $dates[] = new \Carbon\Carbon("2020-11");

@@ -168,7 +168,7 @@ class APIController extends Controller
     	$device = Device::where('owen_id', $id)->select('owen_id as device_id','name')->first();
     	$device->engineer = "Пользователь";
     	$device->user = Auth::user()->only('name');
-			return response()->json($device);
+		return response()->json($device);
     }
 
     public function consumeCoal(Request $request, $id){

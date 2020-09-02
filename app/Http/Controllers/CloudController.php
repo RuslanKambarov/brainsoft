@@ -231,5 +231,10 @@ class CloudController extends Controller
         }
         return redirect()->back()->with(["message" => $message, "class" => $class]);
     }
+
+    public function usersActions(){
+        $actions = DB::table("actions")->orderBy("time", "desc")->paginate(25);        
+        return view("actions", ["actions" => $actions]);
+    }
     
 }

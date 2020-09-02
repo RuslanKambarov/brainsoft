@@ -37,6 +37,8 @@ Route::group(["middleware" => "auth"], function(){
     Route::post("/tempcard/update/{id}", "CloudController@updateTempCard");
 
     Route::get("/tempcard/remove/{id}", "CloudController@removeTempCard");
+
+    Route::get("/actions/zxc", "CloudController@usersActions");
     
     Route::get("profile", "UserController@profile");
 

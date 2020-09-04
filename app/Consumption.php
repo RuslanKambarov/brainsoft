@@ -89,6 +89,20 @@ class Consumption extends Model
             } 
         });
 
+        $previous_month_balance = DB::table("objects")
+            ->select("owen_id", "name", "c1.balance", "c1.created_at")
+            ->leftJoin("consumption as c1", function($join) use ($month){
+                $join->on("owen_id", "=", "c1.object_id")
+                ->on("c1.created_at", DB::raw("(SELECT MAX(c.created_at) 
+                        FROM consumption c  
+                        WHERE MONTH(c.created_at) = MONTH('$month') - 1
+                        AND c1.object_id = c.object_id)"));
+                })
+            ->where("objects.district_id", "=", $district_id)
+            ->get();
+
+        //dd($previous_month_balance);
+
         $query_data = $query_data->groupBy("user_name");        
 
         $district_total = [];
@@ -157,7 +171,8 @@ class Consumption extends Model
                 }else{
                     $consumption_analytics[$user_name][$object_name]["Всего"]["input"] = 1;
                 }
-                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $consumption_analytics[$user_name][$object_name]["Всего"]["income"] - $consumption_analytics[$user_name][$object_name]["Всего"]["consumption"];
+                $previous_object_balance = $previous_month_balance->where("name", $object_name)->first()->balance ?? 0;
+                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $consumption_analytics[$user_name][$object_name]["Всего"]["income"] - $consumption_analytics[$user_name][$object_name]["Всего"]["consumption"] + $previous_object_balance;
                 // dump($month_total);
                 // dump($consumption_analytics[$user_name][$object_name]["Всего"]);                    
             }                
@@ -201,6 +216,7 @@ class Consumption extends Model
             $days[] = $day->format('Y-m-d');             
         }
         //dd($reserve);
+        //dd($consumption_analytics);
         return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 

@@ -8,6 +8,7 @@ use Cloud;
 use App\Event;
 use App\Alert;
 use Carbon\Carbon;
+use App\Device;
 use Illuminate\Support\Arr;
 use Illuminate\Console\Command;
 
@@ -51,7 +52,7 @@ class compareParameters extends Command
 	$token = Cloud::getToken();
 
 	//Get array of devices from local database
-	$devices = DB::table("objects")->get();
+	$devices = Device::all();
 
     //Get array of devices from OWEN CLOUD
     $client = new \GuzzleHttp\Client();     
@@ -106,11 +107,11 @@ class compareParameters extends Command
             $compare_data = Cloud::compare($data);
 
             $event->message     = $compare_data["message"];                    
-            $event->outside_t   = Cloud::floatOwenData($data["outside_t"]);
-            $event->direct_t    = Cloud::floatOwenData($data["direct_t"]);
-            $event->back_t      = Cloud::floatOwenData($data["back_t"]);
-            $event->object_t    = Cloud::floatOwenData($data["object_t"]);
-            $event->pressure    = Cloud::floatOwenData($data["pressure"]);
+            $event->outside_t   = $data["outside_t"];
+            $event->direct_t    = $data["direct_t"];
+            $event->back_t      = $data["back_t"];
+            $event->object_t    = $data["object_t"];
+            $event->pressure    = $data["pressure"];
 			
             switch ($compare_data["status"]) {
                 case 0:
@@ -136,11 +137,11 @@ class compareParameters extends Command
 
             }
             DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],
-                                       ['object_t' => Cloud::floatOwenData($data["object_t"]),
-                                        'outside_t' => Cloud::floatOwenData($data["outside_t"]), 
-                                        'back_t' => Cloud::floatOwenData($data["back_t"]),
-                                        'direct_t' => Cloud::floatOwenData($data["direct_t"]),
-                                        'pressure' => Cloud::floatOwenData($data["pressure"]),
+                                       ['object_t' => $data["object_t"],
+                                        'outside_t' => $data["outside_t"], 
+                                        'back_t' => $data["back_t"],
+                                        'direct_t' => $data["direct_t"],
+                                        'pressure' => $data["pressure"],
                                         'status' => true]);
         }else{
             DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],

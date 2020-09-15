@@ -28,6 +28,18 @@ class Consumption extends Model
     	return self::where("object_id", $object_id)->latest()->first();
     }
 
+    public static function getDistrictTotalConsumption($district_id){
+        return DB::table('objects')
+        ->select("users.name as user_name", "objects.coal_reserve", "objects.abbreviation", "objects.name as object_name", "consumption.created_at as created_at", "consumption.*")
+        ->leftJoin("user_objects", "object_id", "=", "objects.id")
+        ->leftJoin("users", "user_id", "=", "users.id")
+        ->leftJoin("consumption", function($join){
+            $join->on("owen_id", "=", "consumption.object_id");
+        })
+        ->where("objects.district_id", "=", $district_id)
+        ->get();        
+    }
+
     public static function getDistrictConsumption($district_id, $date){
         return DB::table('objects')
         ->select("users.name as user_name", "objects.coal_reserve", "objects.abbreviation", "objects.name as object_name", "consumption.created_at as created_at", "consumption.*")

@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Consumption;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -65,10 +67,22 @@ class District extends Model
     }
 
     public function getConsumption(){
-        $this->coal_reserve  = array_sum($this->devices()->pluck('coal_reserve')->toArray());   
-        $this->income        = $consumption->income ?? 0;
-        $this->consumption   = $consumption->consumption ?? 0;
-        $this->balance       = $this->income - $this->consumption;       
+        $this->coal_reserve  = array_sum($this->devices()->pluck('coal_reserve')->toArray());
+        $date = Carbon::now();
+        $consumption = Consumption::getDistrictTotalConsumption($this->owen_id);   
+        $previous_month_balance = DB::table("objects")
+            ->select("owen_id", "name", "c1.balance", "c1.created_at")
+            ->leftJoin("consumption as c1", function($join){
+                $join->on("owen_id", "=", "c1.object_id")
+                ->on("c1.created_at", DB::raw("(SELECT MAX(c.created_at) 
+                        FROM consumption c  
+                        WHERE c1.object_id = c.object_id)"));
+                })
+            ->where("objects.district_id", "=", $this->owen_id)
+            ->get();
+        $this->income        = array_sum($consumption->pluck('income')->toArray()) ?? 0;
+        $this->consumption   = array_sum($consumption->pluck('consumption')->toArray()) ?? 0;
+        $this->balance       = array_sum($previous_month_balance->pluck('balance')->toArray()) ?? 0;       
         $this->district_id   = $this->owen_id;
         unset($this->owen_id, $this->id);
         return $this;

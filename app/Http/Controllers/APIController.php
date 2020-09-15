@@ -54,7 +54,7 @@ class APIController extends Controller
     }
 
     public function getParameters($id){
-		$device = Device::where("owen_id", $id)->select("id", "owen_id as device_id", "name")->first();
+		$device = Device::where("owen_id", $id)->select("id", "owen_id as device_id", "name", "required_t", "required_p")->first();
 		$event = Event::where('object_id', $id)->select("object_id", "outside_t", "direct_t", "back_t", "object_t", "pressure", "message")->latest()->first();
 		$card = Objectcard::where([["object_id", $event->object_id], ["outside_t", $event->outside_t]])->select("object_id", "outside_t", "direct_t", "back_t")->first();
 		if(!$card){
@@ -66,8 +66,8 @@ class APIController extends Controller
 		$device->employee = "";
 		$device->has_alert = true;
 		$event->mode = $card;
-		$event->mode->object_t = $inside_temp;
-		$event->mode->pressure = 2;
+		$event->mode->object_t = $device->required_t ?? 22;
+		$event->mode->pressure = $device->required_p ?? 2;
 		if($event->message == "offline"){
 			$device->status = false;
 			$device->power = false;

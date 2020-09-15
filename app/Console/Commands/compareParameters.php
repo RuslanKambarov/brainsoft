@@ -128,7 +128,7 @@ class compareParameters extends Command
                     $object_users = DB::table("user_objects")->where("object_id", $device->owen_id)->pluck("user_id");
                     $object_users = [2];
                     Alert::firstOrCreate(['object_id' => $device->owen_id, 'status' => 0], ['message' => $compare_data["message"]]);
-                    echo Cloud::sendNotifications($object_users,  $compare_data["message"], $device->owen_id);                  
+                    //echo Cloud::sendNotifications($object_users,  $compare_data["message"], $device->owen_id);                  
                     break;
                                 
                 default:

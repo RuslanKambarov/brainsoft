@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Arr;
 use Auth;
 use App\Audit;
@@ -328,5 +329,119 @@ class AnalyticsController extends Controller
 
         return response()->download(public_path("Аналитика мониторинга Оценочный лист.xlsx"));
         
+    }
+
+    public function logist($district = null, $month = null){
+        $districts = json_encode(\App\District::all());               
+        if($district){
+            
+            if($month){
+                $data = Consumption::getLogistData($district, $month);                
+            }else{
+                $data = Consumption::getLogistData($district);
+            }
+            $plan_chart = json_encode($data[2]);
+            $fact_chart = json_encode($data[1]);
+            $data = json_encode($data[0]);
+            $district = \App\District::where("owen_id", $district)->first();
+            return view("logist.index", ["districts" => $districts, "plan_chart" => $plan_chart, "fact_chart" => $fact_chart, "data" => $data, "district" => $district]);            
+        }                 
+
+        return view("logist.index", ["districts" => $districts]);
+    }
+
+    public function logistSave(Request $request, $type){
+        $user = Auth::id();
+        switch ($type) {
+            case 'plan':
+                $table = "logist_plan";
+                break;
+            case 'fact':
+                $table = "logist";
+                break;            
+            default:
+                # code...
+                break;
+        }
+        $result = DB::table($table)
+        ->insertGetId([
+            "object_id" => $request->object_id, 
+            "label"     => $request->label, 
+            "amount"    => $request->amount, 
+            "date"      => $request->date,
+            "created_at"=> now(),
+            "logist"    => $user]);
+        if($result){
+            $message = [
+                "text" => "Данные сохранены",
+                "type" => "success",
+                "record" => $result  
+            ];
+            
+        }else{
+            $message = [
+                "text" => "Произошла ошибка",
+                "type" => "danger"  
+            ];
+        }
+
+        return response()->json($message);
+    }
+
+    public function logistDelete($type, $id){
+        switch ($type) {
+            case 'plan':
+                $table = "logist_plan";
+                break;
+            case 'fact':
+                $table = "logist";
+                break;            
+            default:
+                # code...
+                break;
+        }
+        $result = DB::table($table)->where("id", $id)->delete();               
+        if($result){
+            $message = [
+                "text" => "Запись удалена",
+                "type" => "success"  
+            ];
+            
+        }else{
+            $message = [
+                "text" => "Произошла ошибка",
+                "type" => "danger"  
+            ];
+        }
+
+        return response()->json($message);        
+    }
+
+    public function logistUpdate(Request $request, $type, $id){
+        switch ($type) {
+            case 'plan':
+                $table = "logist_plan";
+                break;
+            case 'fact':
+                $table = "logist";
+                break;            
+            default:
+                # code...
+                break;
+        }
+        $result = DB::table($table)->where('id', $id)->update(["amount" => $request['amount'], "label" => $request['label']]);
+        if($result){
+            $message = [
+                "text" => "Запись удалена",
+                "type" => "success"                   
+            ];
+            
+        }else{
+            $message = [
+                "text" => "Произошла ошибка",
+                "type" => "danger"  
+            ];
+        }
+        response()->json($message);
     }
 }

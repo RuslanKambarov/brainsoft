@@ -590,20 +590,26 @@ class AuditController extends Controller
     }
 
     public function editConsumption(Request $request, $district_id){
-        $date = \Carbon\Carbon::parse($request->parameters["day_name"]);
+        $date = \Carbon\Carbon::parse($request->parameters["day_name"])->format("Y-m-d");
         $object_id = Device::where(["name" => $request->parameters["object_name"]])->first()->owen_id;  
         $balance = Consumption::where("object_id", $object_id)->first()->balance ?? 0;
-        $balance = $balance + $request->parameters['income'] - $request->parameters['consumption']/1000;
-        //$consumption = Consumption::whereRaw("DATE(created_at) = DATE('$date')")->where(['object_id' => $object_id])->first();
-        //["income" => $request->parameters['income'], "consumption" => $request->parameters['consumption'], "balance" => $balance]);
-        $consumption = new Consumption;
-        $consumption->income = $request->parameters['income'];
+        $balance = $balance + $request->parameters['income'] - $request->parameters['consumption']/1000;    
+        //dd($request);
+        //dd(Consumption::whereRaw("DATE(c.created_at) = DATE($date) AND object_id = $object_id")->first());
+        $consumption = Consumption::whereRaw("DATE(created_at) = DATE('$date') AND object_id = $object_id")->first();
+        if($consumption){
+
+        }else{
+            $consumption = new Consumption;
+            $consumption->object_id = $object_id;
+            $consumption->created_at = $date;
+        }
+        $consumption->income =  $request->parameters['income'];
         $consumption->consumption = $request->parameters['consumption']/1000;
-        $consumption->created_at = $date;
         $consumption->balance = $balance;
-        $consumption->object_id = $object_id;
         $consumption->input_type = "web";
         $consumption->save();
+        
         return "Сохранено";
     }
 }

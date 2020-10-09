@@ -56,6 +56,11 @@ Vue.component('alert-history-component', require('./components/AlertHistoryCompo
 Vue.component('date-picker-component', require('./components/DatePickerComponent.vue').default);
 Vue.component('users-actions-component', require('./components/UsersActionsComponent.vue').default);
 
+Vue.component('logist-component', require('./components/logist/LogistComponent.vue').default);
+Vue.component('logist-day-component', require('./components/logist/LogistDayComponent.vue').default);
+Vue.component('logist-control-component', require('./components/logist/LogistControlComponent.vue').default);
+Vue.component('logist-chart-component', require('./components/logist/LogistChartComponent.vue').default);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

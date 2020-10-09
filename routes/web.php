@@ -172,4 +172,16 @@ Route::group(["middleware" => "auth"], function(){
     
     });
     
+    Route::get("consumption", "AnalyticsController@logist");
+
+    Route::get("consumption/{type}/delete/{id}", "AnalyticsController@logistDelete");
+
+    Route::post("consumption/{type}/update/{id}", "AnalyticsController@logistUpdate");
+
+    Route::get("consumption/{district}", "AnalyticsController@logist");
+
+    Route::get("consumption/{district}/{month}", "AnalyticsController@logist");
+
+    Route::post("consumption/{type}/save", "AnalyticsController@logistSave");    
+
 });

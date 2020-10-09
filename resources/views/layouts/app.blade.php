@@ -83,7 +83,7 @@
             <v-list-group @if(strstr(request()->route()->getPrefix(), "analytics")) value="true" @endif>
                 <template v-slot:activator>
                     <v-list-item-action>
-                        <v-icon>mdi-eye-check</v-icon>
+                        <v-icon>mdi-google-analytics</v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
                         <v-list-item-title>Аналитика</v-list-item-title>
@@ -126,6 +126,14 @@
                     <v-list-item-title>События</v-list-item-title>
                 </v-list-item-content>
             </v-list-item> --}}
+            <v-list-item link href="/consumption" @if(request()->route()->getPrefix() === "/consumption") style="background: #8286bc47" @endif>
+                <v-list-item-action>
+                    <v-icon>mdi-excavator</v-icon>
+                </v-list-item-action>
+                <v-list-item-content>
+                    <v-list-item-title>Учет угля</v-list-item-title>
+                </v-list-item-content>
+            </v-list-item>            
             <v-list-item link href="/settings" @if(request()->route()->getPrefix() === "/settings") style="background: #8286bc47" @endif>
                 <v-list-item-action>
                     <v-icon>mdi-settings</v-icon>

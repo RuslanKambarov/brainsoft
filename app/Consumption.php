@@ -354,4 +354,110 @@ class Consumption extends Model
         
         return  ["consumption_analytics" => $consumption_analytics, "period" => $period, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
+
+
+    public static function getLogistData($district, $month = null){
+        
+        if($month){
+            $date = explode("(", $month)[0];
+        }else{
+            $date = date("Y-m-d");                             
+        }
+        
+        $month = \Carbon\Carbon::parse($date);
+        $start = $month->startOfMonth();         //create first day of the month Carbon instance   
+        $end = clone $month;                     //clone Carbon instance   
+        $end->addMonths(1)->subDays(1);          //make last day instance  
+
+
+        $period  = \Carbon\CarbonPeriod::create($start, $end); // create period - collection of Carbon days
+        
+        $result = DB::table("objects")
+        ->select("name", "amount", "label", "date", "owen_id", "logist.id as record_id")
+        ->leftJoin("logist", function($join) use ($month){
+            $join->on("owen_id", "=", "object_id")
+                 ->on(DB::raw("MONTH(logist.date)"), "=", DB::raw("MONTH('$month')"));
+        })
+        ->where("district_id", $district)
+        ->get();
+
+        $plan_result = DB::table("objects")
+        ->select("name", "amount", "label", "date", "owen_id", "logist_plan.id as record_id")
+        ->leftJoin("logist_plan", function($join) use ($month){
+            $join->on("owen_id", "=", "object_id")
+                 ->on(DB::raw("MONTH(logist_plan.date)"), "=", DB::raw("MONTH('$month')"));
+        })
+        ->where("district_id", $district)
+        ->get();
+        
+        $coal_labels = [1, 2, 3];
+        
+        $source = $result->groupBy("name");        
+
+        $data = [];
+        $total_per_day_fact = [];
+        $total_per_day_plan = [];        
+        foreach($source as $name => $object){
+            
+            $array = [];
+        
+            foreach($period as $day){
+
+                $dbFormat = $day->format("Y-m-d H:i:s");
+                $formated = $day->isoFormat("Do MMM");                                
+                                      
+                $day_planned_data = $plan_result->where("owen_id", $object[0]->owen_id)
+                                                ->where("date", $dbFormat)
+                                                ->where("record_id", "!=", null)
+                                                ->except("name", "owen_id");
+
+                $day_data = $object->where("date", "=", $dbFormat)->except("name", "owen_id");
+                
+                if(isset($total_per_day_fact[$formated])){
+                    $total_per_day_fact[$formated] += $day_data->sum("amount");
+                }else{
+                    $total_per_day_fact[$formated] = $day_data->sum("amount");
+                }
+                
+                if(isset($total_per_day_plan[$formated])){
+                    $total_per_day_plan[$formated] += $day_planned_data->sum("amount");
+                }else{
+                    $total_per_day_plan[$formated] = $day_planned_data->sum("amount");
+                }                
+                
+                $day_planned_data = $day_planned_data->toArray();
+                $array[] = array(
+                    "iso"       => $formated, 
+                    "db"        => $dbFormat, 
+                    "data"      => $day_data, 
+                    "owen_id"   => $object[0]->owen_id,
+                    "plan"      => $day_planned_data
+                );                
+
+            }
+ 
+            $total = array("plan" => [], "fact" => []);
+ 
+            foreach($coal_labels as $label){
+                $total["fact"][$label] = $result->where("name", $name)->where("label", $label)->sum("amount");
+                $total["plan"][$label] = $plan_result->where("name", $name)->where("label", $label)->sum("amount");
+            }
+ 
+            $data[] = array("id" => $object[0]->owen_id, "name" => $name, "data" => $array, "total" => $total);
+        }
+        $acc = 0;
+        
+        foreach($total_per_day_fact as $key => $day){
+            $acc += $day;
+            $total_per_day_fact[$key] = $acc;            
+        }
+        $acc = 0;
+        foreach($total_per_day_plan as $key => $day){
+            $acc += $day;
+            $total_per_day_plan[$key] = $acc;            
+        }
+        
+        return [$data, $total_per_day_fact, $total_per_day_plan];       
+    }
+
 }

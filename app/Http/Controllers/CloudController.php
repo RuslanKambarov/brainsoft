@@ -64,8 +64,10 @@ class CloudController extends Controller
                 $device->parameters = DB::table('last_data')->where("object_id", $device->owen_id)->first();            	
             }	
             $district = $user->districts()->first();
-            $district->director = $district->director();
-            $district->engineer = $district->manager();            
+            if($district){
+                $district->director = $district->director();
+                $district->engineer = $district->manager();                            
+            }
             return view("monitor", ["include" => "district", "devices" => $devices, "district" => $district]);
         }
         

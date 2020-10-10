@@ -6,6 +6,16 @@
     <div class="card-title">
         <h3 class="text-center">{{$district->name}}</h3>
     </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-2"><b>Итого на район по плану:</b></div>
+            <div class="col-2"><b>{{$district->districtPlanTotal}}т.</b></div>
+        </div>
+        <div class="row">
+            <div class="col-2"><b>Итого на район по факту:</b></div>
+            <div class="col-2"><b>{{$district->districtFactTotal}}т.</b></div>
+        </div>
+    </div>
 </div>
 @endif
 <logist-control-component :base_url="'/consumption'" :districts="{{$districts}}"></logist-control-component>

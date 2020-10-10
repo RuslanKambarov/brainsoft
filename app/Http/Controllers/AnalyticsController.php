@@ -340,11 +340,18 @@ class AnalyticsController extends Controller
             }else{
                 $data = Consumption::getLogistData($district);
             }
+            $district = \App\District::where("owen_id", $district)->first();
+            $district->districtPlanTotal = $data[2][array_key_last($data[2])];
+            $district->districtFactTotal = $data[1][array_key_last($data[1])];
             $plan_chart = json_encode($data[2]);
             $fact_chart = json_encode($data[1]);
             $data = json_encode($data[0]);
-            $district = \App\District::where("owen_id", $district)->first();
-            return view("logist.index", ["districts" => $districts, "plan_chart" => $plan_chart, "fact_chart" => $fact_chart, "data" => $data, "district" => $district]);            
+           
+            return view("logist.index", ["districts" => $districts, 
+                                         "plan_chart" => $plan_chart, 
+                                         "fact_chart" => $fact_chart, 
+                                         "data" => $data, 
+                                         "district" => $district]);            
         }                 
 
         return view("logist.index", ["districts" => $districts]);

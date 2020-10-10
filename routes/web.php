@@ -172,16 +172,19 @@ Route::group(["middleware" => "auth"], function(){
     
     });
     
-    Route::get("consumption", "AnalyticsController@logist");
+    Route::group(["prefix" => "consumption"], function(){
 
-    Route::get("consumption/{type}/delete/{id}", "AnalyticsController@logistDelete");
+        Route::get("/", "AnalyticsController@logist");
 
-    Route::post("consumption/{type}/update/{id}", "AnalyticsController@logistUpdate");
-
-    Route::get("consumption/{district}", "AnalyticsController@logist");
-
-    Route::get("consumption/{district}/{month}", "AnalyticsController@logist");
-
-    Route::post("consumption/{type}/save", "AnalyticsController@logistSave");    
+        Route::get("/{type}/delete/{id}", "AnalyticsController@logistDelete");
+    
+        Route::post("/{type}/update/{id}", "AnalyticsController@logistUpdate");
+    
+        Route::get("/{district}", "AnalyticsController@logist");
+    
+        Route::get("/{district}/{month}", "AnalyticsController@logist");
+    
+        Route::post("/{type}/save", "AnalyticsController@logistSave");    
+    });
 
 });

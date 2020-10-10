@@ -4,7 +4,7 @@
             <div class="plan border border-success">
                 <div><h5 class="text-center">План</h5></div>
                 <div class="add-button">
-                    <button class="form-control add-button" @click="invoke_dial('plan', 'add')">
+                    <button class="form-control add-button" @click="invoke_dial('plan', 'add', null)">
                         <v-icon>mdi-plus</v-icon>
                     </button>
                 </div>
@@ -94,7 +94,8 @@ export default {
                 action: "",
                 load: false,
                 subject: {
-
+                    label: "",
+                    amount: ""
                 }
             },
             labels: {
@@ -144,22 +145,27 @@ export default {
                 if(this.dial.type == 'plan'){
                     this.data.plan.push(new_record)
                 }
-                this.dial.state = false                
+                this.dial.state = false
+                this.dial.subject = {}                
             })
         },
         remove: function(){
-            
+            console.log(this.dial.subject.record_id)
             axios.get("/consumption/"+this.dial.type+"/delete/" + this.dial.subject.record_id).then((response) => {
                 this.message = response.data;
+                console.log(this.data)
                 if(this.dial.type == 'fact'){
-                    var index = Object.keys(this.data.data).find(key=> this.data.data[key] = this.dial.subject)
-                    delete this.data.data[index]
+                    var index = this.data.data.indexOf(this.dial.subject)
+                    this.data.data.splice(index, 1)
                 }
                 if(this.dial.type == 'plan'){                    
-                    var index = Object.keys(this.data.plan).find(key=> this.data.plan[key] = this.dial.subject)
-                    delete this.data.plan[index]
+                    var index = this.data.plan.indexOf(this.dial.subject)
+                    delete this.data.plan.splice(index, 1)
                 }
+                console.log(index)
+                console.log(this.data)
                 this.dial.state = false
+                this.dial.subject = {}
             })
         },
         update: function(){
@@ -169,16 +175,17 @@ export default {
             }).then((response) => {
                 this.message = response.data;                                 
                 if(this.dial.type == 'fact'){
-                    var index = Object.keys(this.data.data).find(key=> this.data.data[key] = this.dial.subject)
+                    var index = this.data.data.indexOf(this.dial.subject)
                     this.data.data[index].label = this.dial.subject.label
                     this.data.data[index].amount = this.dial.subject.amount
                 }
                 if(this.dial.type == 'plan'){
-                    var index = Object.keys(this.data.plan).find(key=> this.data.plan[key] = this.dial.subject)
+                    var index = this.data.plan.indexOf(this.dial.subject)
                     this.data.plan[index].label = this.dial.subject.label
                     this.data.plan[index].amount = this.dial.subject.amount
                 }
-                this.dial.state = false                
+                this.dial.state = false
+                this.dial.subject = {}                
             })
         }
     }

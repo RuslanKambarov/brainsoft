@@ -424,7 +424,7 @@ class Consumption extends Model
                 }else{
                     $total_per_day_plan[$formated] = $day_planned_data->sum("amount");
                 }                
-                
+                $day_data = array_values($day_data->toArray());
                 $day_planned_data = $day_planned_data->toArray();
                 $array[] = array(
                     "iso"       => $formated, 
@@ -456,7 +456,7 @@ class Consumption extends Model
             $acc += $day;
             $total_per_day_plan[$key] = $acc;            
         }
-        
+        //dd($data[0]);       
         return [$data, $total_per_day_fact, $total_per_day_plan];       
     }
 

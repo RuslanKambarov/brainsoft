@@ -59,7 +59,7 @@ class Device extends Model
         $this->income 		 = $this->getObjectTotalIncome() ?? 0;
         $this->consumption   = $this->getObjectTotalConsume() ?? 0;
         unset($this->owen_id, $this->id);        
-        $this->balance 		 = $consumption->balance ?? 0;
+        $this->balance 		 = $this->income - $this->consumption;
         $this->status 		 = $this->balance > $this->consumption * 14;
         return $this;
     }

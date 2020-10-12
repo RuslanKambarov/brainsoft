@@ -14,11 +14,11 @@
                     <div class="day-box">
                         <div class="plan border border-success">
                             <div><h5 class="text-center">План</h5></div>
-                            <div v-for="(row, key) in item.total.plan"><b>Марка {{key}}: {{row}}т.</b></div>
+                            <div v-for="(row, key) in item.total.plan"><b>{{labels[key]}}: {{row}}т.</b></div>
                         </div>
                         <div class="fact border border-danger">
                             <div><h5 class="text-center">Факт</h5></div>
-                            <div v-for="(row, key) in item.total.fact"><b>Марка {{key}}: {{row}}т.</b></div>
+                            <div v-for="(row, key) in item.total.fact"><b>{{labels[key]}}: {{row}}т.</b></div>
                         </div>
                     </div>
                 </td>
@@ -34,7 +34,14 @@
     props: ["data"],
     data () {
       return {
-
+            labels: {
+                1: "Б3 гамма",
+                2: "ГЖО",
+                3: "ГЖ-5 метровый",
+                4: "Шубар.ксн сор",
+                5: "Шубар. ряд",
+                6: "Шубар. сорт"
+            },
         }
     },
     mounted(){

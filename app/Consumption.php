@@ -390,7 +390,8 @@ class Consumption extends Model
         ->where("district_id", $district)
         ->get();
         
-        $coal_labels = [1, 2, 3];
+        $coal_labels = DB::table("labels")->get()->pluck("id");
+        //$coal_labels = [1, 2, 3, 4, 5, 6];
         
         $source = $result->groupBy("name");        
 

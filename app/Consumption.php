@@ -184,7 +184,8 @@ class Consumption extends Model
                     $consumption_analytics[$user_name][$object_name]["Всего"]["input"] = 1;
                 }
                 $previous_object_balance = $previous_month_balance->where("name", $object_name)->first()->balance ?? 0;
-                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $consumption_analytics[$user_name][$object_name]["Всего"]["income"] - $consumption_analytics[$user_name][$object_name]["Всего"]["consumption"] + $previous_object_balance;
+
+                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = Device::where("name", $object_name)->first()->getConsumption()->balance;
                 // dump($month_total);
                 // dump($consumption_analytics[$user_name][$object_name]["Всего"]);                    
             }                
@@ -197,22 +198,40 @@ class Consumption extends Model
                 $carry += $item["income"];
                 return $carry;
             });
+            $balance = array_reduce($consumption_analytics[$user_name], function($carry, $item){                
+                if(isset($item["Всего"])){
+                    $carry += $item["Всего"]["balance"];
+                }
+                return $carry;
+            });
             $input = array_reduce($consumption_analytics[$user_name], function($carry, $item){
                 if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
                 return $carry;
             });
-            $consumption_analytics[$user_name]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
+
+            $consumption_analytics[$user_name]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $balance);
+            
             $pop = array_pop($consumption_analytics[$user_name]["Всего"]);
             $consumption_analytics[$user_name]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$user_name]["Всего"];
 
         }
         $consumption_analytics["Всего по району"]["Всего"] = $district_total;
+        
         $consumption = array_reduce($district_total, function($carry, $item){
             $carry += $item["consumption"];
             return $carry;
         });
+        
         $income = array_reduce($district_total, function($carry, $item){
             $carry += $item["income"];
+            return $carry;
+        });
+        $balance = array_reduce($consumption_analytics, function($carry, $item){                
+
+            if(isset($item["Всего"]["Всего"])){
+                $carry += $item["Всего"]["Всего"]["balance"];
+            }
+
             return $carry;
         });
         $input = array_reduce($district_total, function($carry, $item){
@@ -220,7 +239,7 @@ class Consumption extends Model
             return $carry;
         });
 
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
+        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $balance);
         $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
         $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
 

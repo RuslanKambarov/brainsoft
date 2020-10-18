@@ -358,6 +358,8 @@ class AnalyticsController extends Controller
     }
 
     public function logistSave(Request $request, $type){
+
+        
         $user = Auth::id();
         switch ($type) {
             case 'plan':
@@ -370,14 +372,21 @@ class AnalyticsController extends Controller
                 # code...
                 break;
         }
+        $row = [];
+        $row["object_id"] = $request->object_id;
+        $row["label"] = $request->label;
+        $row["amount"] = $request->amount;
+        $row["date"] = $request->date;
+        $row["created_at"] = now();
+        $row["logist"] = $user;
+
+        if($request->isMix){
+            $row["isMix"] = true;
+            $row["mix"] = json_encode($request->mix);
+        }
+
         $result = DB::table($table)
-        ->insertGetId([
-            "object_id" => $request->object_id, 
-            "label"     => $request->label, 
-            "amount"    => $request->amount, 
-            "date"      => $request->date,
-            "created_at"=> now(),
-            "logist"    => $user]);
+        ->insertGetId($row);
         if($result){
             $message = [
                 "text" => "Данные сохранены",

@@ -51,6 +51,10 @@
                         Добавить запись
                     </v-card-title>
                     
+                    <div :class="'alert alert-'+dial.message.type">
+                        {{dial.message.text}}
+                    </div>
+
                     <v-card-text v-if="dial.load">
                         <div class="d-flex justify-content-center">
                             <div class="spinner-border" role="status">
@@ -67,6 +71,27 @@
                         </select>
                         <label>Количество в тоннах</label>
                         <input v-model="dial.subject.amount" class="form-control">
+                        
+                        <template v-if="isMix">
+
+                            <div v-for="(item, key, index) in dial.subject.mix" :key="key">
+                                <hr>
+                                <label>Марка угля {{index}}</label>
+                                <select outlined v-model="item.label" class="form-control mb-5" label="Марка угля">
+                                    <option v-for="(label, key) in labels" :value="key">{{label}}</option>
+                                </select>
+                                <label>Количество в процентах {{index}}</label>
+                                <input v-model="item.amount" class="form-control">
+                            </div>
+
+                            <button 
+                                @click="dial.subject.mix.push({label: '', amount: ''})" 
+                                class="form-control btn btn-primary"
+                            >Добавить</button>                        
+                        
+                        </template>
+
+                            
                     </v-card-text>
                     
                     <v-card-actions>
@@ -93,9 +118,15 @@ export default {
                 type: "",
                 action: "",
                 load: false,
+                message:{
+                    type: "",
+                    text: ""
+                },
                 subject: {
                     label: "",
-                    amount: ""
+                    amount: "",
+                    isMix: false,
+                    mix: []
                 }
             },
             labels: {
@@ -104,7 +135,8 @@ export default {
                 3: "ГЖ-5 метровый",
                 4: "ксн сорт",
                 5: "Шубар. ряд",
-                6: "Шубар. сорт"
+                6: "Шубар. сорт",
+                7: "Микс"
             },
             rec: {},
             plan: {},
@@ -117,6 +149,15 @@ export default {
     mounted(){
         
     },
+    computed:{
+        isMix: function(){
+            if(this.dial.subject.label == 7){
+                return true
+            }else{
+                false
+            }
+        }
+    },
     methods:{
         invoke_dial: function(type, action, subject = null){
 
@@ -128,13 +169,26 @@ export default {
             this.dial.state = true
         },
         send: function(){
-            axios.post("/consumption/"+this.dial.type+"/save", {
+            this.dial.load = true
+            var send_data = {
                 object_id: this.data.owen_id,
                 label: this.dial.subject.label,
                 amount: this.dial.subject.amount,
                 date: this.data.db
-            }).then((response) => {
-                this.message = response.data;                                 
+            }
+            if(this.isMix){
+                if(_.sumBy(this.dial.subject.mix, function(item){ return +item.amount }) != 100){
+                    this.dial.message.type = "warning"
+                    this.dial.message.text = "Сумма процентов должна быть 100"
+                    return
+                }else{
+                    send_data.isMix = true
+                    send_data.mix = this.dial.subject.mix
+                }
+            }
+            axios.post("/consumption/"+this.dial.type+"/save", send_data).then((response) => {
+                this.message = response.data; 
+                this.dial.load = true                                
                 var new_record = {
                     object_id: this.data.owen_id,
                     label: this.dial.subject.label,
@@ -148,15 +202,24 @@ export default {
                 if(this.dial.type == 'plan'){
                     this.data.plan.push(new_record)
                 }
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text 
                 this.dial.state = false
-                this.dial.subject = {}                
+                this.dial.load = false
+                this.dial.subject = {
+                    label: "",
+                    amount: "",
+                    isMix: false,
+                    mix: []
+                }               
             })
         },
         remove: function(){
+            this.dial.load = true
             console.log(this.dial.subject.record_id)
             axios.get("/consumption/"+this.dial.type+"/delete/" + this.dial.subject.record_id).then((response) => {
                 this.message = response.data;
-                console.log(this.data)
+                
                 if(this.dial.type == 'fact'){
                     var index = this.data.data.indexOf(this.dial.subject)
                     this.data.data.splice(index, 1)
@@ -165,13 +228,20 @@ export default {
                     var index = this.data.plan.indexOf(this.dial.subject)
                     delete this.data.plan.splice(index, 1)
                 }
-                console.log(index)
-                console.log(this.data)
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text                 
                 this.dial.state = false
-                this.dial.subject = {}
+                this.dial.load = false
+                this.dial.subject = {
+                    label: "",
+                    amount: "",
+                    isMix: false,
+                    mix: []
+                }
             })
         },
         update: function(){
+            this.dial.load = true
             axios.post("/consumption/"+this.dial.type+"/update/" + this.dial.subject.record_id, {
                 label: this.dial.subject.label,
                 amount: this.dial.subject.amount,
@@ -187,8 +257,16 @@ export default {
                     this.data.plan[index].label = this.dial.subject.label
                     this.data.plan[index].amount = this.dial.subject.amount
                 }
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text 
                 this.dial.state = false
-                this.dial.subject = {}                
+                this.dial.load = false
+                this.dial.subject = {
+                    label: "",
+                    amount: "",
+                    isMix: false,
+                    mix: []
+                }                
             })
         }
     }

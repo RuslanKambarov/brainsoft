@@ -46,7 +46,7 @@ class Consumption extends Model
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
-            $join->on("owen_id", "=", "consumption.object_id")
+            $join->on("objects.id", "=", "consumption.object_id")
                  ->on(DB::raw("MONTH(consumption.created_at)"), "=", DB::raw("MONTH('$date')"));
         })
         ->where("objects.district_id", "=", $district_id)
@@ -59,7 +59,7 @@ class Consumption extends Model
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
-            $join->on("owen_id", "=", "consumption.object_id")
+            $join->on("objects.id", "=", "consumption.object_id")
                  ->on(DB::raw("MONTH(consumption.created_at)"), "=", DB::raw("MONTH('$date')"));
         })
         ->where("objects.district_id", "=", $district_id)
@@ -392,18 +392,18 @@ class Consumption extends Model
         $period  = \Carbon\CarbonPeriod::create($start, $end); // create period - collection of Carbon days
         
         $result = DB::table("objects")
-        ->select("name", "amount", "label", "date", "owen_id", "logist.id as record_id")
+        ->select("name", "amount", "label", "date", "objects.id as object_id", "logist.id as record_id")
         ->leftJoin("logist", function($join) use ($month){
-            $join->on("owen_id", "=", "object_id")
+            $join->on("objects.id", "=", "object_id")
                  ->on(DB::raw("MONTH(logist.date)"), "=", DB::raw("MONTH('$month')"));
         })
         ->where("district_id", $district)
         ->get();
 
         $plan_result = DB::table("objects")
-        ->select("name", "amount", "label", "date", "owen_id", "logist_plan.id as record_id")
+        ->select("name", "amount", "label", "date", "objects.id as object_id", "logist_plan.id as record_id")
         ->leftJoin("logist_plan", function($join) use ($month){
-            $join->on("owen_id", "=", "object_id")
+            $join->on("objects.id", "=", "object_id")
                  ->on(DB::raw("MONTH(logist_plan.date)"), "=", DB::raw("MONTH('$month')"));
         })
         ->where("district_id", $district)
@@ -426,12 +426,12 @@ class Consumption extends Model
                 $dbFormat = $day->format("Y-m-d H:i:s");
                 $formated = $day->isoFormat("Do MMM");                                
                                       
-                $day_planned_data = $plan_result->where("owen_id", $object[0]->owen_id)
+                $day_planned_data = $plan_result->where("object_id", $object[0]->object_id)
                                                 ->where("date", $dbFormat)
                                                 ->where("record_id", "!=", null)
                                                 ->except("name", "owen_id");
 
-                $day_data = $object->where("date", "=", $dbFormat)->except("name", "owen_id");
+                $day_data = $object->where("date", "=", $dbFormat)->except("name", "object_id");
                 
                 if(isset($total_per_day_fact[$formated])){
                     $total_per_day_fact[$formated] += $day_data->sum("amount");
@@ -450,7 +450,7 @@ class Consumption extends Model
                     "iso"       => $formated, 
                     "db"        => $dbFormat, 
                     "data"      => $day_data, 
-                    "owen_id"   => $object[0]->owen_id,
+                    "object_id" => $object[0]->object_id,
                     "plan"      => $day_planned_data
                 );                
 
@@ -463,7 +463,7 @@ class Consumption extends Model
                 $total["plan"][$label] = $plan_result->where("name", $name)->where("label", $label)->sum("amount");
             }
  
-            $data[] = array("id" => $object[0]->owen_id, "name" => $name, "data" => $array, "total" => $total);
+            $data[] = array("id" => $object[0]->object_id, "name" => $name, "data" => $array, "total" => $total);
         }
         $acc = 0;
         
@@ -476,7 +476,7 @@ class Consumption extends Model
             $acc += $day;
             $total_per_day_plan[$key] = $acc;            
         }
-        //dd($data[0]);       
+               
         return [$data, $total_per_day_fact, $total_per_day_plan];       
     }
 

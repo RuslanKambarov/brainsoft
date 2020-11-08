@@ -23,7 +23,11 @@
     <tbody>
         @foreach($events as $event)
         <tr>       
-            <td><a href="{{url('/device/'.$event->object_id)}}">{{App\Device::where('owen_id', $event->object_id)->first()->name}}</a></td>
+            <td>
+                <a href="{{url('/device/'.App\Device::where('owen_id', $event->object_id)->first()->id)}}">
+                    {{App\Device::where('owen_id', $event->object_id)->first()->name}}
+                </a>
+            </td>
             <td>{{$event->object_t}}</td>
             <td>{{$event->direct_t}}</td>
             <td>{{$event->back_t}}</td>

@@ -3,7 +3,7 @@
         <div class="col-12 expander" @click="expand = !expand">
             <h3 class="text-center m-4">{{district.name}}</h3>
         </div>
-        <audit-table-component :district_id="district.owen_id" v-if="expand"></audit-table-component>
+        <audit-table-component :district_id="district.id" v-if="expand"></audit-table-component>
     </v-row>
 </template>
 <script>

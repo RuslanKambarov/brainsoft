@@ -49,8 +49,8 @@ class Audit extends Model
         
         $date = explode("(", $date)[0];         //get rid of "(timezone)"
         $date = \Carbon\Carbon::parse($date);   //create a Carbon instance from recieved date
-        $district = District::where("owen_id", $district_id)->first();
-        $objects = Device::where("district_id", $district_id)->get();
+        $district = District::find($district_id);
+        $objects = $district->devices()->get();
         $manager_id = $district->getManagerId();
         $district_audits_by_user = $district->getAuditResultsByUser($date)->groupBy('user_id');
         $analytics_data = [];

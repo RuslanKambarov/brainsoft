@@ -124,10 +124,10 @@ class CloudController extends Controller
         $district->director = $district->director();
         $district->engineer = $district->manager();
 
-        $devices = Device::where('district_id', $district->owen_id)->get();
+        $devices = $district->devices()->get();
 
         foreach($devices as $device){
-            $device->parameters = DB::table('last_data')->where("object_id", $device->owen_id)->first();            	
+            $device->parameters = $device->getLastData();            	
         }	
         
         $sorted = $devices->sortBy(function($device){
@@ -145,22 +145,20 @@ class CloudController extends Controller
                 return 6;
             } 
         });
+
         return view("monitor", ["include" => "district", "devices" => $sorted, "district" => $district]);
     }
 
     public function device($id){
-        $device = Device::where("owen_id", $id)->first();
+        $device = Device::find($id);
         $owen_device = [];
         if($device->controller === 1){
-            $owen_device = Cloud::request("v1/device/".$id, []);
+            $owen_device = Cloud::request("v1/device/".$device->owen_id, []);
             $owen_device = Cloud::getContent($owen_device);    
-        }
-        $device = Device::where("owen_id", $id)->first();
-        $user = DB::table("user_objects")->where("object_id", $device->id)->first();
-        if($user){
-            $user = User::find($user->user_id);
-        }
-        $district = District::where("owen_id", $device->district_id)->first();	
+        }        
+        $user = $device->getEngineerName();
+        
+        $district = District::where("id", $device->district_id)->first();	
         $temperature_card = Objectcard::where("object_id", $device->owen_id)->get();
         return view("monitor", ["include" => "device", "device" => $device, "district" => $district, "owen_device" => $owen_device, "temperature_card" => $temperature_card, "user" => $user]);
     }
@@ -220,13 +218,13 @@ class CloudController extends Controller
 
     public function deviceConsumption($id){
         $consumption = DB::table('consumption')->where('object_id', $id)->first();
-        $device = Device::where('owen_id', $id)->first();
-        $district = District::where("owen_id", $device->district_id)->first();
+        $device = Device::find($id);
+        $district = District::where("id", $device->district_id)->first();
         return view("monitor", ["include" => "consumption", "device" => $device, "district" => $district, "consumption" => $consumption]);
     }
 
     public function setIncome(Request $request, $id){
-        $insert = DB::table('objects')->updateOrInsert(["owen_id" => $id], ["coal_reserve" => $request->income]);
+        $insert = DB::table('objects')->updateOrInsert(["id" => $id], ["coal_reserve" => $request->coal_reserve]);
         if($insert){
             $class = "success";
             $message = "Данные сохранены";

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="width: 100%">
     <div class="table-wrapper">
         <table class="table table-striped table-bordered">
             <thead class="head">
@@ -152,8 +152,10 @@ table, tr, td, th{
     font-size: 12px;
 }
 .table-wrapper{
-    max-height: 750px;
+    max-height: 700px;
     overflow-y: scroll;
+    width: 100%;
+    overflow-x: scroll;
 }
 table thead th{
     color: black; 

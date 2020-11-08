@@ -51,8 +51,8 @@ class compareParameters extends Command
 	//Get auth token from OWEN CLOUD
 	$token = Cloud::getToken();
 
-	//Get array of devices from local database
-	$devices = Device::all();
+	//Get array of devices with controllers from local database
+	$devices = Device::where("controller", 1)->get();
 
     //Get array of devices from OWEN CLOUD
     $client = new \GuzzleHttp\Client();     

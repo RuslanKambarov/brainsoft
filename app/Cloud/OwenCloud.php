@@ -23,6 +23,7 @@ class OwenCloud implements Cloud{
             ],
             'body' => json_encode(['login' => "kambarov.rs@gmail.com", 'password' => "wwwggg123Q"])
         ]);
+        
         return $this->getContent($response)->token;
     }
 
@@ -46,6 +47,14 @@ class OwenCloud implements Cloud{
 	        "User-Agent" => null,
             "Authorization" => 'Bearer '.Session::get("CloudToken")
         ];
+    }
+
+    public function owenAddDistrict($body){
+        return $this->request("v1/modbus/create-parameter-category/", $body);   
+    }
+
+    public function owenAddDevice($body){
+        return $this->request("v1/device-management/register", $body);
     }
 
     public function getContent($response){
@@ -162,7 +171,7 @@ class OwenCloud implements Cloud{
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
-                                                       'Authorization: Basic ODY1OGRjZGQtOWMwMy00MmNhLTkxMGItYjg3Zjg0Y2RjN2U0'));
+                                                       'Authorization: Basic NTViZWEyYzYtOTg3My00NDg5LTgzODQtNjAyNTA4ZjQ4YWFh'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
             curl_setopt($ch, CURLOPT_POST, TRUE);

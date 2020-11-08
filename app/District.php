@@ -11,7 +11,7 @@ class District extends Model
 {
     public function devices()
     {
-        return $this->hasMany('App\Device', 'district_id', 'owen_id');
+        return $this->hasMany('App\Device', 'district_id', 'id');
     }
 
     public function users(){
@@ -62,18 +62,18 @@ class District extends Model
             $join->on('owen_id', '=', 'audit_results.object_id')
                  ->where('audit_id', '=', 4)->whereRaw("MONTH(audit_date) = MONTH('$date')");
         })
-        ->where('objects.district_id', '=', $this->owen_id)
+        ->where('objects.district_id', '=', $this->id)
         ->get();
     }
 
     public function getConsumption(){
         $this->coal_reserve  = array_sum($this->devices()->pluck('coal_reserve')->toArray());
         $date = Carbon::now();
-        $consumption = Consumption::getDistrictTotalConsumption($this->owen_id);   
+        $consumption = Consumption::getDistrictTotalConsumption($this->id);   
         $this->income        = $consumption->sum('income') ?? 0;
         $this->consumption   = $consumption->sum('consumption') ?? 0;
         $this->balance       = $this->income - $this->consumption;       
-        $this->district_id   = $this->owen_id;
+        $this->district_id   = $this->id;
         unset($this->owen_id, $this->id);
         return $this;
     }

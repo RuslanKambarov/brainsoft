@@ -2,7 +2,7 @@
     <div class="date-picker p-4">
         <date-picker v-model="date" type="month"></date-picker>
         <select class="form-control" v-model="district">
-            <option v-for="district in districts" :value="district.owen_id">{{district.name}}</option>
+            <option v-for="district in districts" :value="district.id">{{district.name}}</option>
         </select>
         <button class="btn btn-primary" @click="filter()">Применить</button>                
     </div>

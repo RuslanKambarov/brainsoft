@@ -3,7 +3,7 @@
         <div class="col-12 expander" @click="expand = !expand">
             <h3 class="text-center m-4">{{district.name}}</h3>
         </div>
-        <monitor-table-component v-if="expand==true" :district_id="district.owen_id"></monitor-table-component>
+        <monitor-table-component v-if="expand==true" :district_id="district.id"></monitor-table-component>
     </v-row>
 </template>
 <script>

@@ -41,8 +41,7 @@ class EventController extends Controller
     	return view("monitor", ["include" => "events", "meta" => $meta, "path" => $path, "events" => $events]);
     }
 
-    public function graph($id){
-      $events = Event::where('object_id', $id)->whereDate('created_at', \Carbon\Carbon::today())->get();
+    public function graph($id){      
       $events = Event::where('object_id', $id)->latest()->take(144)->get();
       $events = $events->map(function($item){
         $item->formatedDate = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $item->created_at)->isoFormat('HH:mm Do MMMM YYYY');

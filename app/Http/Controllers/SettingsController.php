@@ -50,8 +50,6 @@ class SettingsController extends Controller
         if($request->target == "district"){
             $district = new District;
             $district->name = $request->name;
-            $district->owen_id = $request->owen_id;
-            $district->parent_id = $request->parent;
             $district->save();
         }
         if($request->target == "device"){
@@ -62,27 +60,24 @@ class SettingsController extends Controller
                 
                 $new_device = new Device;
                 
-                $request_body = [
-                        "identifier"            => $device['identifier'], 
-                        "address"               => "16", 
-                        "device_type_id"        => "141", 
-                        "name"                  => $device['name'], 
-                        "categories_list"       => [$device['district_id']],
-                        "time_zone"             => "360",
-                        "archive_storage_time"  => "90"
-                ];
-                //dd(json_encode($request_body));
-                $owen_request = Cloud::request("v1/device-management/register", $request_body);
-                $owen_response = Cloud::getContent($owen_request);
-                
-                //$owen_status = json_decode($response->getBody()->getContents())->devices
+                // $request_body = [
+                //         "identifier"            => $device['identifier'], 
+                //         "address"               => "16", 
+                //         "device_type_id"        => "141", 
+                //         "name"                  => $device['name'], 
+                //         "categories_list"       => [$device['district_id']],
+                //         "time_zone"             => "360",
+                //         "archive_storage_time"  => "90"
+                // ];                
 
                 $new_device->name = $device['name'];
-                $new_device->owen_id = $owen_response->code;
                 $new_device->district_id = $device['district_id'];
-                $new_device->save();
-
-                $response[] = $owen_response->description;
+                
+                if($new_device->save()){
+                    $response[] = "Объект добавлен";
+                }else{
+                    $response[] = "Ошибка";
+                }                
             }
 
             return response()->json($response);

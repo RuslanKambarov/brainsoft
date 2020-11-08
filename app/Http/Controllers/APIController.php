@@ -53,14 +53,26 @@ class APIController extends Controller
         return response()->json($districts, 200);        
     }
 
+	
+    public function districtDevices($id){
+    	$user = Auth::user();
+  		$devices = $user->getDevicesTree($id);
+  		return response()->json($devices);
+	}
+	
     public function getParameters($id){
-		$device = Device::where("owen_id", $id)->select("id", "owen_id as device_id", "name", "required_t", "required_p")->first();
-		$event = Event::where('object_id', $id)->select("object_id", "outside_t", "direct_t", "back_t", "object_t", "pressure", "message")->latest()->first();
-		$card = Objectcard::where([["object_id", $event->object_id], ["outside_t", $event->outside_t]])->select("object_id", "outside_t", "direct_t", "back_t")->first();
+		$device = Device::find($id);
+		$event = $device->getLastData();
+
+		$card = Objectcard::where([
+			["object_id", $event->object_id], 
+			["outside_t", $event->outside_t]
+		])->select("object_id", "outside_t", "direct_t", "back_t")->first();
+
 		if(!$card){
 			$card = Objectcard::first();
 		}
-		$inside_temp = DB::table("insidetemps")->where("device_id", $id)->first()->value;
+
 		$device->engineer = $device->getEngineer();
 	
 		$device->employee = "";
@@ -68,30 +80,24 @@ class APIController extends Controller
 		$event->mode = $card;
 		$event->mode->object_t = $device->required_t ?? 22;
 		$event->mode->pressure = $device->required_p ?? 2;
-		if($event->message == "offline"){
-			$device->status = false;
-			$device->power = false;
-		}else{
+		if($event->status){
 			$device->power = true;
 			$device->status = true;
+		}else{
+			$device->status = false;
+			$device->power = false;
 		}
 		$device->parameters = $event;
 		unset($device->id);
 
 		return response()->json($device);
     }
-
-    public function districtDevices($id){
-    	$user = Auth::user();
-  		$devices = $user->getDevicesTree($id);
-  		return response()->json($devices);
-    }
-
 	
 	public function lastData($id){
 		$end = Carbon::now();
 		$start = Carbon::now()->subHours(5);
-		$data = Event::where("object_id", $id)->latest()->limit(10)->get();
+		$device = Device::find($id);
+		$id = $device->owen_id;
 		$data = Event::where([["object_id", $id], ["created_at", ">", $start], ["created_at", "<", $end]])->groupBy(DB::raw("EXTRACT(HOUR FROM created_at), EXTRACT(DAY FROM created_at)"))->orderBy("created_at")->get();
 		foreach($data as $row){
 			if($row->message == "offline"){
@@ -107,8 +113,8 @@ class APIController extends Controller
 			if(!$card){
 				$card = Objectcard::first();
 			}
-			$card->pressure = 2;
-			$card->object_t = 22;
+			$card->pressure = $device->required_p;
+			$card->object_t = $device->required_t;
 			unset($card->id);
 			unset($card->object_id);
 			$row->mode = $card;
@@ -117,21 +123,25 @@ class APIController extends Controller
 	}
 
 	public function audits($device_id){
-		$device = Device::where("owen_id", $device_id)->select("owen_id as device_id", "name")->first();
+		$device = Device::find($device_id);
+		$device->device_id = $device->id;
+		unset($device->device_id);
 		$device->audits = Audit::select("id as audit_id", "name")->get();
 		return response()->json($device);
 	}
 
 	public function getQuestions($device_id, $audit_id){
 
-		$device = Device::where("owen_id", $device_id)->select('owen_id as device_id', 'name', 'district_id')->first();
+		$device = Device::find($device_id);
+		$device->device_id = $device->id;
+		unset($device->id);
 		$device->auditor = Auth::user()->only("role_id", "name", "email");
 		$device->questions = Question::where("audit_id", $audit_id)->select("id as question_id", "audit_id", "question", "photo")->get();
 		return response()->json($device);
 
 	}
 	
-		//Gets audit data from mobile app and save. Move files on directory storage/app/public/{device_id}
+	//Gets audit data from mobile app and save. Move files on directory storage/app/public/{device_id}
     public function saveResult(Request $request, $object_id, $audit_id){
 
 		if(Audit_result::checkLastAuditTime($object_id)){
@@ -153,8 +163,8 @@ class APIController extends Controller
         $result = new Audit_result;
         $result->object_id  = $object_id;
         $result->audit_date = date("Y-m-d H:i:S");
-				$result->audit_id   = $audit_id;
-				$result->auditor_id = Auth::id();
+		$result->audit_id   = $audit_id;
+		$result->auditor_id = Auth::id();
         $result->audit_json = json_encode($array);
         if($result->save()){
 			return response()->json(["success" => true, "message" => "Аудит успешно завершен"], 200);
@@ -200,8 +210,7 @@ class APIController extends Controller
     }
 
     public function allDistrictsConsumption(){
-    	$districts = District::all();
-    	
+    	$districts = District::all();    	
     	$districts->map(function($item){
     		return $item->getConsumption();
     	});
@@ -220,7 +229,7 @@ class APIController extends Controller
     }
 
     public function deviceConsumption($device_id){
-    	$device = Device::where('owen_id', $device_id)->select("id", "owen_id", "name", "coal_reserve")->first()->getConsumption();
+    	$device = Device::find($device_id)->getConsumption();
     	return $device;
     }
 

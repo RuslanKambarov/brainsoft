@@ -16,7 +16,7 @@
                     @endif
                     <tr>
                         <td><b>Инженер:</b></td>
-                        <td><b>@if($user){{$user->name}}@else Не назначен @endif</b></td>
+                        <td><b>@if($user){{$user}}@else Не назначен @endif</b></td>
                     </tr>
                 </table>
             </div>

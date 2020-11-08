@@ -87,7 +87,7 @@ class User extends Authenticatable
             $districts = District::all();
         }                 
 		foreach($districts as $district){
-    	    $district->district_id = $district->owen_id;			
+    	    $district->district_id = $district->id;			
     	    $district->director = $district->director();
     	    $district->engineer = $district->manager();
             $district->devices_count = count($district->devices()->get()->toArray());
@@ -99,15 +99,21 @@ class User extends Authenticatable
 
     public function getDevicesTree($id){
         if($this->hasAnyRole(2)){
-            $devices = $this->devices()->select("id", "owen_id as device_id", "name", "district_id", "required_t", "required_p")->where('controller', 1)->get();
+            $devices = $this->devices()->select("id", "owen_id", "name", "district_id", "required_t", "required_p")->where('controller', 1)->get();
         }
         if($this->hasAnyRoles([1, 3, 4])){          
-            $devices = Device::where("district_id", $id)->select("id", "owen_id as device_id", "name", "district_id", "required_t", "required_p")->where('controller', 1)->get();
+            $devices = Device::where("district_id", $id)->select("id", "owen_id", "name", "district_id", "required_t", "required_p")->where('controller', 1)->get();
         }
         foreach($devices as $device){
-            $device->engineer = $device->getEngineer();
-            $parameters = DB::table('last_data')->where('object_id', $device->device_id)->first();
-            $mode = Objectcard::where([["object_id", $device->device_id], ["outside_t", $parameters->outside_t]])->first();
+            $device->engineer = $device->getEngineerName();
+            $device->device_id = $device->id;
+            $parameters = $device->getLastData();
+            
+            $mode = Objectcard::where([
+                ["object_id", $device->device_id], 
+                ["outside_t", $parameters->outside_t]
+            ])->first();
+            
             if(!$mode){
                 $mode = Objectcard::first();
             }
@@ -120,7 +126,12 @@ class User extends Authenticatable
                 $device->status = true;
                 $device->power = true;
             }
-            unset($parameters->id, $parameters->object_id, $parameters->status, $device->pivot, $device->id);
+            unset($parameters->id, 
+                  $parameters->object_id, 
+                  $parameters->status, 
+                  $device->pivot, 
+                  $device->id);
+            
             $device->parameters = $parameters;
             $device->parameters->mode = $mode->only("outside_t", "direct_t", "back_t", "object_t", "pressure");
         }

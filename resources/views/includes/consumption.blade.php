@@ -5,7 +5,7 @@
 @endif
 <div class = "card">
 		<div class="card-header">
-			<h4><a href="/district/{{$district->id}}">{{$district->name}}</a> / <a href="/device/{{$device->owen_id}}">{{$device->name}}</a> / Расход угля</h4	
+			<h4><a href="/district/{{$district->id}}">{{$district->name}}</a> / <a href="/device/{{$device->id}}">{{$device->name}}</a> / Расход угля</h4	
 		</div>
     <div class="card-body">
 			<table class='table table-bordered'>
@@ -36,7 +36,7 @@
 			<div class="row">	
 				{{csrf_field()}}
 				<div class="col-6">
-					<input type="text" class='form-control' name="income" placeholder='запас угля на год'>
+					<input type="text" class='form-control' name="coal_reserve" placeholder='запас угля на год'>
 				</div>
 				<div class="col-6">
 					<button class="btn btn-success">Сохранить</button>

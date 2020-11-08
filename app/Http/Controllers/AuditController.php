@@ -124,15 +124,17 @@ class AuditController extends Controller
         $mar = \Carbon\Carbon::create(2020, 03, 00);
         $apr = \Carbon\Carbon::create(2020, 04, 00);
         $may = \Carbon\Carbon::create(2020, 05, 00);
-
-        $devices = Device::where("district_id", $district_id)->get();
+        
+        $district = District::find($district_id);
+        $devices = $district->devices()->get();
+        
         $data = [];
 
         foreach($devices as $device){
             $data[]=array(
                 'id'     => $device->owen_id, 
                 'name'   => $device->name,
-                'engineer'  => $device->getEngineer(),
+                'engineer'  => $device->getEngineerName(),
                 'total'  => count(Alert::where("object_id", $device->owen_id)->get()),      
                 'sep'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$sep')")->get()),
                 'oct'    => count(Alert::where("object_id", $device->owen_id)->whereRaw("MONTH(created_at) = MONTH('$oct')")->get()),
@@ -211,7 +213,7 @@ class AuditController extends Controller
 
     public function createExcel($district_id){
 
-        $district_name = District::where("owen_id", $district_id)->first()->name;
+        $district_name = District::find($district_id)->name;
 
         $data = json_decode($this->getMonitorAnalytics($district_id)->content());
         
@@ -339,7 +341,7 @@ class AuditController extends Controller
     public function createExcelAuditAnalytics($district_id, $date){
         
         $data = $this->getAuditAnalytics($district_id, $date);
-        $district_name = District::where("owen_id", $district_id)->first()->name;
+        $district_name = District::find($district_id)->name;
         $spreadsheet = new Spreadsheet();
         
         $sheet = $spreadsheet->getActiveSheet();

@@ -12,8 +12,6 @@
             <v-card-text>
                 <hr>
                 <v-text-field outlined v-model="district.name" label="Название"></v-text-field>
-                <v-text-field outlined v-model="district.parent_id" label="OWEN PARENT"></v-text-field>
-                <v-text-field outlined v-model="district.owen_id" label="OWEN ID"></v-text-field>
             </v-card-text>
             <v-card-actions>
                     <v-btn color="green darken-1" text @click="dialog=!dialog">Отменить</v-btn>
@@ -31,9 +29,7 @@ export default {
         return {
             dialog: false,
             district: {
-                name:   "",
-                parent_id: 0,
-                owen_id: 0
+                name:   ""
             }
         }
     },
@@ -42,9 +38,7 @@ export default {
             axios.post("/settings/create", {
                 token:  $('meta[name="csrf-token"]').attr('content'),
                 target: "district",
-                name:   this.district.name,
-                owen_id: this.district.owen_id,
-                parent: this.district.parent_id
+                name:   this.district.name
             }).then(response => { 
                 this.dialog = !this.dialog
                 this.tree.push(this.district)

@@ -25,18 +25,15 @@
             </div>
         </div>
         <!-- Dialog window -->
-        <v-dialog v-model="dialog" max-width="900">
+        <v-dialog v-model="dialog" max-width="300">
             <v-card>
             <v-card-title>Добавить объект</v-card-title>
             <v-card-text>
             <v-row v-for="(device, index) in add_devices" :key="index">
                 
                 <hr>
-                <v-col cols='4'>
+                <v-col cols='12'>
                     <v-text-field outlined v-model="device.name" label="Название"></v-text-field>
-                </v-col>
-                <v-col cols='4'>
-                    <v-text-field outlined v-model="device.identifier" label="Идентификатор"></v-text-field>
                 </v-col>
             
             </v-row>
@@ -64,8 +61,7 @@ export default {
             add_devices: [
                 {
                     name: '',
-                    identifier: 0,
-                    district_id: this.district.owen_id
+                    district_id: this.district.id
                 }
             ]
         }
@@ -84,8 +80,7 @@ export default {
             this.add_devices.push(                
                 {
                     name: '',
-                    identifier: 0,
-                    district_id: this.district.owen_id
+                    district_id: this.district.id
                 })
         },
         saveParams: function(){

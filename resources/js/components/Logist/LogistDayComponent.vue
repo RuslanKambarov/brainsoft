@@ -39,30 +39,31 @@
             </div>
             <v-dialog max-width="300" v-model="dial.state">
                 <v-card>
-                    <v-card-title v-if="dial.action == 'remove'">
-                        Удалить запись?
-                    </v-card-title>
-                    
-                    <v-card-title v-if="dial.action == 'update'">
-                        Редактровать запись
-                    </v-card-title>
-                    
-                    <v-card-title v-if="dial.action == 'add'">
-                        Добавить запись
-                    </v-card-title>
-                    
-                    <div :class="'alert alert-'+dial.message.type">
-                        {{dial.message.text}}
-                    </div>
-
-                    <v-card-text v-if="dial.load">
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
+                    <div class="modal-head">
+                        <v-card-title v-if="dial.action == 'remove'">
+                            Удалить запись?
+                        </v-card-title>
+                        
+                        <v-card-title v-if="dial.action == 'update'">
+                            Редактровать запись
+                        </v-card-title>
+                        
+                        <v-card-title v-if="dial.action == 'add'">
+                            Добавить запись
+                        </v-card-title>
+                        
+                        <div :class="'alert alert-'+dial.message.type">
+                            {{dial.message.text}}
                         </div>
-                    </v-card-text>
 
+                        <v-card-text v-if="dial.load">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </v-card-text>
+                    </div>
                     <v-card-text v-if="dial.action != 'remove'">
                         <hr>
                         <label>Марка угля</label>
@@ -137,13 +138,7 @@ export default {
                 5: "Шубар. ряд",
                 6: "Шубар. сорт",
                 7: "Микс"
-            },
-            rec: {},
-            plan: {},
-            selected: {},
-            label: "",
-            amount: null,
-            message: {},
+            },        
         }
     },
     mounted(){
@@ -168,14 +163,14 @@ export default {
             }
             this.dial.state = true
         },
-        send: function(){
-            this.dial.load = true
+        send: function(){            
             var send_data = {
-                object_id: this.data.owen_id,
+                object_id: this.data.object_id,
                 label: this.dial.subject.label,
                 amount: this.dial.subject.amount,
                 date: this.data.db
             }
+
             if(this.isMix){
                 if(_.sumBy(this.dial.subject.mix, function(item){ return +item.amount }) != 100){
                     this.dial.message.type = "warning"
@@ -186,11 +181,14 @@ export default {
                     send_data.mix = this.dial.subject.mix
                 }
             }
+            this.dial.load = true
             axios.post("/consumption/"+this.dial.type+"/save", send_data).then((response) => {
-                this.message = response.data; 
+                this.message = response.data;
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text 
                 this.dial.load = true                                
                 var new_record = {
-                    object_id: this.data.owen_id,
+                    object_id: this.data.object_id,
                     label: this.dial.subject.label,
                     amount: this.dial.subject.amount,
                     date: this.data.db,
@@ -201,11 +199,13 @@ export default {
                 }
                 if(this.dial.type == 'plan'){
                     this.data.plan.push(new_record)
-                }
-                this.dial.message.type = response.data.type
-                this.dial.message.text = response.data.text 
+                } 
                 this.dial.state = false
                 this.dial.load = false
+                this.dial.message = {
+                    text: "",
+                    type: ""
+                }
                 this.dial.subject = {
                     label: "",
                     amount: "",
@@ -216,10 +216,10 @@ export default {
         },
         remove: function(){
             this.dial.load = true
-            console.log(this.dial.subject.record_id)
             axios.get("/consumption/"+this.dial.type+"/delete/" + this.dial.subject.record_id).then((response) => {
                 this.message = response.data;
-                
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text                                 
                 if(this.dial.type == 'fact'){
                     var index = this.data.data.indexOf(this.dial.subject)
                     this.data.data.splice(index, 1)
@@ -228,15 +228,18 @@ export default {
                     var index = this.data.plan.indexOf(this.dial.subject)
                     delete this.data.plan.splice(index, 1)
                 }
-                this.dial.message.type = response.data.type
-                this.dial.message.text = response.data.text                 
+
                 this.dial.state = false
                 this.dial.load = false
+                this.dial.message = {
+                    text: "",
+                    type: ""
+                }
                 this.dial.subject = {
                     label: "",
                     amount: "",
                     isMix: false,
-                    mix: []
+                    mix: []                    
                 }
             })
         },
@@ -247,6 +250,8 @@ export default {
                 amount: this.dial.subject.amount,
             }).then((response) => {
                 this.message = response.data;                                 
+                this.dial.message.type = response.data.type
+                this.dial.message.text = response.data.text
                 if(this.dial.type == 'fact'){
                     var index = this.data.data.indexOf(this.dial.subject)
                     this.data.data[index].label = this.dial.subject.label
@@ -257,17 +262,28 @@ export default {
                     this.data.plan[index].label = this.dial.subject.label
                     this.data.plan[index].amount = this.dial.subject.amount
                 }
+
                 this.dial.message.type = response.data.type
-                this.dial.message.text = response.data.text 
+                this.dial.message.text = response.data.text                  
                 this.dial.state = false
                 this.dial.load = false
                 this.dial.subject = {
                     label: "",
                     amount: "",
                     isMix: false,
-                    mix: []
+                    mix: []                    
                 }                
             })
+        },
+        validate(data){
+            for (var prop in data){
+                if(data[prop] == "")  {
+                    this.dial.message.type = "warning"
+                    this.dial.message.text = "Заполните все поля"
+                    return false
+                }
+            }
+            return true
         }
     }
 }
@@ -298,5 +314,10 @@ button{
 }
 .day-box{
     display: flex;
+}
+.modal-head{
+    position: sticky;
+    top: 0;
+    background-color: gainsboro;
 }
 </style>

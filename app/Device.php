@@ -11,8 +11,12 @@ class Device extends Model
 {
     public $table = "objects";
 
-    public function getEngineer(){
+    public function getEngineerName(){
         return $this->belongsToMany("App\User", "user_objects", "object_id", "user_id")->first()->name ?? "Не назначен";
+    }
+
+    public function getEngineer(){
+        return $this->belongsToMany("App\User", "user_objects", "object_id", "user_id")->first();
     }
 
     public function getEngineerId(){
@@ -35,6 +39,10 @@ class Device extends Model
         return json_decode($response->getBody()->getContents());		
     }
 
+    public function getLastData(){
+        return DB::table('last_data')->where("object_id", $this->owen_id)->first();
+    }
+
     public function getObjectRequiredTemp(){
         return $this->required_t ?? DB::table('app_settings')->find(5)->value();
     }
@@ -44,18 +52,18 @@ class Device extends Model
     }
 
     public function getObjectTotalIncome(){
-        $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->owen_id"))[0]->incomed ?? null;
+        $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id"))[0]->incomed ?? null;
         return $incomed;        
     }
 
     public function getObjectTotalConsume(){
-        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->owen_id"))[0]->consumed ?? null;
+        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id"))[0]->consumed ?? null;
         return $consumed;        
     }
 
     public function getConsumption(){       
-        $consumption = Consumption::where('object_id', $this->owen_id)->latest()->first();
-        $this->device_id 	 = $this->owen_id;        
+        $consumption = Consumption::where('object_id', $this->id)->latest()->first();
+        $this->device_id 	 = $this->id;        
         $this->income 		 = $this->getObjectTotalIncome() ?? 0;
         $this->consumption   = $this->getObjectTotalConsume() ?? 0;
         unset($this->owen_id, $this->id);        

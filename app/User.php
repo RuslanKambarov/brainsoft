@@ -69,7 +69,7 @@ class User extends Authenticatable
             return $this->districts()->first()->name ?? "Не назначено";
         }elseif($this->hasAnyRole(2)){
             $district_id = $this->devices()->first()->district_id ?? 0;
-            return $districts = District::where("owen_id", $district_id)->first()->name ?? "Не назначено"; 
+            return $districts = District::find($district_id)->name ?? "Не назначено"; 
         }else{
             return "Администраторы";
         }

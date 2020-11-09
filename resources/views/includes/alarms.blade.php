@@ -26,7 +26,7 @@
     <tbody>
         @foreach($currentAlarms as $alarm)
         <tr>            
-            <td><a href="{{url('/device/'.$alarm->object_id)}}">{{App\Device::where("owen_id", $alarm->object_id)->first()->name ?? "Объект был удален"}}</a></td>
+            <td><a href="{{url('/device/'.$alarm->object_id)}}">{{App\Device::find($alarm->object_id)->name ?? "Объект был удален"}}</a></td>
             <td>{{$alarm->message}}</td>
             <td>{{$alarm->status}}</td>
             <td>{{$alarm->created_at}}</td>
@@ -50,7 +50,7 @@
     <tbody>
         @foreach($fixedAlarms as $alarm)
         <tr>            
-            <td><a href="{{url('/device/'.$alarm->object_id)}}">{{App\Device::where("owen_id", $alarm->object_id)->first()->name ?? "Объект был удален"}}</a></td>
+            <td><a href="{{url('/device/'.$alarm->object_id)}}">{{App\Device::find($alarm->object_id)->name ?? "Объект был удален"}}</a></td>
             <td>{{$alarm->message}}</td>
             <td>{{$alarm->status}}</td>
             <td>{{$alarm->created_at}}</td>

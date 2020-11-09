@@ -34,7 +34,7 @@ class Consumption extends Model
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join){
-            $join->on("owen_id", "=", "consumption.object_id");
+            $join->on("objects.id", "=", "consumption.object_id");
         })
         ->where("objects.district_id", "=", $district_id)
         ->get();        

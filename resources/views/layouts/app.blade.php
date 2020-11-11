@@ -79,6 +79,11 @@
                         <v-list-item-title>Результаты аудита</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item class="ml-10" link href="/audit/control" @if(request()->route()->getPrefix() === "audit/control") style="background: #8286bc47" @endif>
+                    <v-list-item-content>
+                        <v-list-item-title>Назначение аудитов</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>                
             </v-list-group>
             <v-list-group @if(strstr(request()->route()->getPrefix(), "analytics")) value="true" @endif>
                 <template v-slot:activator>

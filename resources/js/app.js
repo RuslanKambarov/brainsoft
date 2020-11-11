@@ -37,16 +37,21 @@ Vue.component('settings-component', require('./components/SettingsComponent.vue'
 Vue.component('device-settings-component', require('./components/DeviceSettingsComponent.vue').default);
 Vue.component('district-settings-component', require('./components/DistrictSettingsComponent.vue').default);
 
+/* --------  AUDIT CONTROL ------------ */
 Vue.component('audit-question-component', require('./components/Audit/AuditQuestionComponent.vue').default);
+Vue.component('audit-append-root', require('./components/Audit/AuditAppendRoot.vue').default);
 
+/* --------  MONITOR ANALYTICS ------------ */
 Vue.component('monitor-index-component', require('./components/Analytics/MonitorIndexComponent.vue').default);
 Vue.component('monitor-district-component', require('./components/Analytics/MonitorDistrictComponent.vue').default);
 Vue.component('monitor-table-component', require('./components/Analytics/MonitorTableComponent.vue').default);
 
+/* --------  AUDIT ANALYTICS ------------ */
 Vue.component('audit-index-component', require('./components/Analytics/AuditIndexComponent.vue').default);
 Vue.component('audit-district-component', require('./components/Analytics/AuditDistrictComponent.vue').default);
 Vue.component('audit-table-component', require('./components/Analytics/AuditTableComponent.vue').default);
 
+/* --------  CONSUMPTION ANALYTICS ------------ */
 Vue.component('consumption-index-component', require('./components/Analytics/ConsumptionIndexComponent.vue').default);
 Vue.component('consumption-district-component', require('./components/Analytics/ConsumptionDistrictComponent.vue').default);
 Vue.component('consumption-table-component', require('./components/Analytics/ConsumptionTableComponent.vue').default);

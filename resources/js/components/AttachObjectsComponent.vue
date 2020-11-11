@@ -78,9 +78,7 @@ export default {
     },
     props: ["user_id", "user_role", "roles"],
     mounted(){
-        console.log('user_role' + this.user_role)
-        console.log('roles' + this.roles)
-        console.log('user_id' + this.user_id)
+
     },
     methods:{
 

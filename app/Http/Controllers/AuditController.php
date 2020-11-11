@@ -614,4 +614,23 @@ class AuditController extends Controller
         
         return "Сохранено";
     }
+
+    public function controlIndex()
+    {   
+        $auditAppends = Audit::getAuditAppends()->toArray();
+        $audits = Audit::select("id", "name")->get();        
+        return view("audit.append", ["audits" => $audits, "auditAppends" => $auditAppends]);
+    }
+
+    public function attachAudits(Request $request)
+    {
+        $device = Device::find($request->object);
+        if($device->audits()->sync($request->audits)){
+            return "Success";
+        }else{
+            return "Failure";
+        }
+
+
+    }
 }

@@ -112,7 +112,15 @@ Route::group(["middleware" => "auth"], function(){
 
             Route::get("/{id}", "AuditController@showResult");
 
-        });        
+        });
+        
+        Route::group(["prefix" => "control"], function(){
+
+            Route::get("/", "AuditController@controlIndex");
+
+            Route::post("/attach", "AuditController@attachAudits");
+
+        });
 
     });
 

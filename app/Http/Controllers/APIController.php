@@ -124,9 +124,9 @@ class APIController extends Controller
 
 	public function audits($device_id){
 		$device = Device::find($device_id);
-		$device->device_id = $device->id;
-		unset($device->device_id);
-		$device->audits = Audit::select("id as audit_id", "name")->get();
+		$device->device_id = $device->id;		
+		$device->audits = $device->audits()->select("id as audit_id", "name")->get();
+		unset($device->id);
 		return response()->json($device);
 	}
 

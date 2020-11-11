@@ -3,10 +3,13 @@
 namespace App;
 
 use DB;
+use App\District;
 use Illuminate\Database\Eloquent\Model;
 
 class Audit extends Model
 {
+    protected $hidden = ["pivot"];
+
     public function questions()
     {
         return $this->hasMany('App\Question');
@@ -36,10 +39,10 @@ class Audit extends Model
             $date = \Carbon\Carbon::now();
         }
 
-        $audits_assigned = DB::table("audit_assigned")
-            ->where([["device_id", $device_id], ["audit_id", $this->id]])
-            ->whereRaw("MONTH(month) = MONTH(NOW())")
-            ->get();
+        // $audits_assigned = DB::table("audit_assigned")
+        //     ->where([["device_id", $device_id], ["audit_id", $this->id]])
+        //     ->whereRaw("MONTH(month) = MONTH(NOW())")
+        //     ->get();
         
         return $audits_assigned[0]->audits_count ?? DB::table("app_settings")->where("id", 1)->get()[0]->value;
     
@@ -143,4 +146,20 @@ class Audit extends Model
 
         return $analytics_data;
     }
+
+    public static function getAuditAppends()
+    {
+        $districts = District::with([
+                "devices" => function($query){
+                    $query->select("id", "district_id", "name");
+                }, 
+                "devices.audits"
+        ])
+        ->select("id", "name")
+        ->get();
+        
+        
+        return $districts;
+    }
+
 }

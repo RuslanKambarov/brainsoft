@@ -11,6 +11,18 @@ class Device extends Model
 {
     public $table = "objects";
 
+    protected $appends = ['audit_ids'];
+
+    public function audits()
+    {
+        return $this->belongsToMany("App\Audit", "object_audit", "object_id", "audit_id");
+    }
+
+    public function getAuditIdsAttribute()
+    {
+        return $this->audits->pluck('id');
+    }
+
     public function getEngineerName(){
         return $this->belongsToMany("App\User", "user_objects", "object_id", "user_id")->first()->name ?? "Не назначен";
     }

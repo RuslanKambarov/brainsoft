@@ -182,12 +182,12 @@ class Consumption extends Model
             $consumption_analytics[$user_name]["Всего"] = $engineer_total;
 
             
-            $logist = array_reduce($consumption_analytics[$user_name], function($carry, $item){
+            $logist = round(array_reduce($consumption_analytics[$user_name], function($carry, $item){
                 if(isset($item['Всего'])){
                     $carry += $item['Всего']['logist'];
                 }
                 return $carry;
-            });
+            }), 2);
 
             $consumption = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
                 $carry += $item["consumption"];
@@ -219,10 +219,10 @@ class Consumption extends Model
 
         }
 
-        $logist = array_reduce($consumption_analytics, function($carry, $item){
+        $logist = round(array_reduce($consumption_analytics, function($carry, $item){
             $carry += $item['Всего']['Всего']['logist'];
             return $carry;
-        });
+        }), 2);
 
         $consumption_analytics["Всего по району"]["Всего"] = $district_total;
 

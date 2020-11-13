@@ -21,6 +21,7 @@
                     </tr>
                     <tr class="table-heading-2">
                         <th>Логист</th>
+                        <th>Расхождение</th> 
                         <th>Приход</th>                        
                         <th>Расход</th>
                         <th>Остаток</th>
@@ -49,6 +50,7 @@
                                 </template>
                                 <template v-for="(day_data, day_name) in object_data">
                                     <td v-if="typeof(day_data.logist) !== 'undefined'">{{Math.round(day_data.logist * 100)/100}}</td>
+                                    <td v-if="typeof(day_data.diff) !== 'undefined'">{{Math.round(day_data.diff * 100)/100}}</td>
                                     <td @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
                                     <td>{{Math.round(day_data.consumption * 100)/100}}</td>                                    
                                     <td v-if="typeof(day_data.balance) !== 'undefined'">{{Math.round(day_data.balance * 100)/100}}</td>

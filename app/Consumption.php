@@ -209,7 +209,7 @@ class Consumption extends Model
             });
 
             $consumption_analytics[$user_name]["Всего"]["Всего"] = array("logist" => $logist,
-                                                                         "diff" => $logist - $income,
+                                                                         "diff" => $income -$logist,
                                                                          "income" => $income, 
                                                                          "consumption" => $consumption, 
                                                                          "input" => $input, 
@@ -251,7 +251,7 @@ class Consumption extends Model
         });
 
         $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income,
-                                                                            "diff" => $logist - $income,
+                                                                            "diff" => $income -$logist,
                                                                             "logist" => $logist,
                                                                             "consumption" => $consumption, 
                                                                             "input" => $input, 

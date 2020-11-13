@@ -14,12 +14,13 @@
                         <th style="z-index: 4; min-width: 110px" class="side-heading-2" rowspan="2">ФИО</th>
                         <th style="z-index: 4" class="side-heading-3" rowspan="2">Объект</th>
                         <th rowspan="2">Годовая потребность топлива</th>
-                        <th colspan="4">Всего</th>
+                        <th colspan="5">Всего</th>
                         <th colspan="3" v-for="day in days">
                             {{day}}
                         </th>                        
                     </tr>
                     <tr class="table-heading-2">
+                        <th>Логист</th>
                         <th>Приход</th>                        
                         <th>Расход</th>
                         <th>Остаток</th>
@@ -47,6 +48,7 @@
                                     <td v-if="reserve[object_name] !== null">{{reserve[object_name]}}</td>            
                                 </template>
                                 <template v-for="(day_data, day_name) in object_data">
+                                    <td v-if="typeof(day_data.logist) !== 'undefined'">{{day_data.logist}}</td>
                                     <td @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
                                     <td>{{Math.round(day_data.consumption * 100)/100}}</td>                                    
                                     <td v-if="typeof(day_data.balance) !== 'undefined'">{{Math.round(day_data.balance * 100)/100}}</td>

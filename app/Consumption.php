@@ -101,24 +101,13 @@ class Consumption extends Model
             } 
         });
 
-        $previous_month_balance = DB::table("objects")
-            ->select("owen_id", "name", "c1.balance", "c1.created_at")
-            ->leftJoin("consumption as c1", function($join) use ($month){
-                $join->on("owen_id", "=", "c1.object_id")
-                ->on("c1.created_at", DB::raw("(SELECT MAX(c.created_at) 
-                        FROM consumption c  
-                        WHERE MONTH(c.created_at) = MONTH('$month') - 1
-                        AND c1.object_id = c.object_id)"));
-                })
-            ->where("objects.district_id", "=", $district_id)
-            ->get();
-
         //dd($previous_month_balance);
-
+        
         $query_data = $query_data->groupBy("user_name");        
 
         $district_total = [];
         $reserve["Всего по району"] = 0;
+        
         foreach($query_data as $user_name => $coll){
             if($user_name == ""){
                 $user_name = "Не назначен";
@@ -132,6 +121,7 @@ class Consumption extends Model
                 $reserve[$user_name] += $reserve[$object_name];
                 $reserve["Всего по району"] += $reserve[$object_name];
                 $month_total = array("income" => 0, "consumption" => 0, "input" => 0);                                
+                
                 foreach($period as $day){
                     $formated = $day->format("Y-m-d");
 
@@ -182,14 +172,23 @@ class Consumption extends Model
                     $consumption_analytics[$user_name][$object_name]["Всего"]["input"] = 0;
                 }else{
                     $consumption_analytics[$user_name][$object_name]["Всего"]["input"] = 1;
-                }
-                $previous_object_balance = $previous_month_balance->where("name", $object_name)->first()->balance ?? 0;
+                }                
 
-                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = Device::where("name", $object_name)->first()->getConsumption()->balance;
-                // dump($month_total);
-                // dump($consumption_analytics[$user_name][$object_name]["Всего"]);                    
+                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $obj_balance = Device::where("name", $object_name)->first()->getConsumption()->balance;
+                $iid = Device::where("name", $object_name)->first()->id;
+                $consumption_analytics[$user_name][$object_name]["Всего"]["logist"] = $log_balance = self::objectMonthTotalLogis($iid, $month, "logist");
+                //$consumption_analytics[$user_name][$object_name]["Всего"]["diff"] = 
             }                
             $consumption_analytics[$user_name]["Всего"] = $engineer_total;
+
+            
+            $logist = array_reduce($consumption_analytics[$user_name], function($carry, $item){
+                if(isset($item['Всего'])){
+                    $carry += $item['Всего']['logist'];
+                }
+                return $carry;
+            });
+
             $consumption = array_reduce($consumption_analytics[$user_name]["Всего"], function($carry, $item){
                 $carry += $item["consumption"];
                 return $carry;
@@ -209,13 +208,24 @@ class Consumption extends Model
                 return $carry;
             });
 
-            $consumption_analytics[$user_name]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $balance);
+            $consumption_analytics[$user_name]["Всего"]["Всего"] = array("logist" => $logist,
+                                                                         "income" => $income, 
+                                                                         "consumption" => $consumption, 
+                                                                         "input" => $input, 
+                                                                         "balance" => $balance);
             
             $pop = array_pop($consumption_analytics[$user_name]["Всего"]);
             $consumption_analytics[$user_name]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$user_name]["Всего"];
 
         }
+
+        $logist = array_reduce($consumption_analytics, function($carry, $item){
+            $carry += $item['Всего']['Всего']['logist'];
+            return $carry;
+        });
+
         $consumption_analytics["Всего по району"]["Всего"] = $district_total;
+
         
         $consumption = array_reduce($district_total, function($carry, $item){
             $carry += $item["consumption"];
@@ -239,7 +249,12 @@ class Consumption extends Model
             return $carry;
         });
 
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $balance);
+        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income,
+                                                                            "logist" => $logist,
+                                                                            "consumption" => $consumption, 
+                                                                            "input" => $input, 
+                                                                            "balance" => $balance);
+        
         $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
         $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
 
@@ -247,7 +262,7 @@ class Consumption extends Model
             $days[] = $day->format('Y-m-d');             
         }
         //dd($reserve);
-        //dd($consumption_analytics);
+        //dd($consumption_analytics["Всего по району"]);
         return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 
@@ -478,6 +493,15 @@ class Consumption extends Model
         }
                
         return [$data, $total_per_day_fact, $total_per_day_plan];       
+    }
+
+    public static function objectMonthTotalLogis($object_id, $month, $table)
+    {
+        return (float)DB::table($table)
+            ->select(DB::raw("SUM(amount) as sum"))
+            ->where("object_id", $object_id)
+            ->whereRaw("MONTH(date) = MONTH('$month')")
+            ->first()->sum;
     }
 
 }

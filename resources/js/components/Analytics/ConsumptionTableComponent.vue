@@ -14,7 +14,7 @@
                         <th style="z-index: 4; min-width: 110px" class="side-heading-2" rowspan="2">ФИО</th>
                         <th style="z-index: 4" class="side-heading-3" rowspan="2">Объект</th>
                         <th rowspan="2">Годовая потребность топлива</th>
-                        <th colspan="5">Всего</th>
+                        <th colspan="6">Всего</th>
                         <th colspan="3" v-for="day in days">
                             {{day}}
                         </th>                        

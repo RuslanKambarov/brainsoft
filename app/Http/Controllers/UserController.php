@@ -59,11 +59,11 @@ class UserController extends Controller
 
     public function getNotAttachedObjects($user_id){
         $user = User::with('roles', 'districts')->find($user_id);
-        $attachedDistricts = $user->districts->pluck('owen_id');
-        $attachedDevices = $user->devices->pluck('owen_id');
+        $attachedDistricts = $user->districts->pluck('id');
+        $attachedDevices = $user->devices->pluck('id');
         $notAttached = new \stdClass;
-        $notAttached->districts = District::whereNotIn('owen_id', $attachedDistricts)->get();
-        $notAttached->devices = Device::whereNotIn('owen_id', $attachedDevices)->get();
+        $notAttached->districts = District::whereNotIn('id', $attachedDistricts)->get();
+        $notAttached->devices = Device::whereNotIn('id', $attachedDevices)->get();
         return response()->json($notAttached);
     }
 

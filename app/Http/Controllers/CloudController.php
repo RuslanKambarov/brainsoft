@@ -16,7 +16,7 @@ class CloudController extends Controller
 {
     public function home(){
 
-        $districts = [];
+        $districts = collect([]);
         $user = Auth::user();
 
         /*  =========CLOUD STRUCTURE======= */
@@ -74,6 +74,7 @@ class CloudController extends Controller
         if($user->hasAnyRole(6)){
             return redirect('/consumption');
         }
+        
         return view("monitor", ["include" => "home", "districts" => $districts->sortBy('name')]);        
 	
     }

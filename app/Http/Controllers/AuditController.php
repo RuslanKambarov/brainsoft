@@ -593,7 +593,7 @@ class AuditController extends Controller
 
     public function editConsumption(Request $request, $district_id){
         $date = \Carbon\Carbon::parse($request->parameters["day_name"])->format("Y-m-d");
-        $object_id = Device::where(["name" => $request->parameters["object_name"]])->first()->owen_id;  
+        $object_id = Device::where(["name" => $request->parameters["object_name"]])->first()->id;  
         $balance = Consumption::where("object_id", $object_id)->first()->balance ?? 0;
         $balance = $balance + $request->parameters['income'] - $request->parameters['consumption']/1000;    
         //dd($request);

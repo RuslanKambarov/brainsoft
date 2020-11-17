@@ -49,14 +49,25 @@
                                     <td v-if="reserve[object_name] !== null">{{reserve[object_name]}}</td>            
                                 </template>
                                 <template v-for="(day_data, day_name) in object_data">
-                                    <td v-if="typeof(day_data.logist) !== 'undefined'">{{Math.round(day_data.logist * 100)/100}}</td>
-                                    <td v-if="typeof(day_data.diff) !== 'undefined'">{{Math.round(day_data.diff * 100)/100}}</td>
-                                    <td @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
-                                    <td>{{Math.round(day_data.consumption * 100)/100}}</td>                                    
-                                    <td v-if="typeof(day_data.balance) !== 'undefined'">{{Math.round(day_data.balance * 100)/100}}</td>
-                                    <td v-if="day_data.input == 1">Да</td>
-                                    <td v-else-if="day_data.input == 0">Нет</td>
-                                    <td v-else>{{day_data.input}}</td>                                                                        
+                                    <template v-if="day_name == 'Всего'">
+                                        <td v-if="typeof(day_data.logist) !== 'undefined'">{{Math.round(day_data.logist * 100)/100}}</td>
+                                        <td v-if="typeof(day_data.diff) !== 'undefined'">{{Math.round(day_data.diff * 100)/100}}</td>
+                                        <td>{{Math.round(day_data.income * 100)/100}}</td>
+                                        <td>{{Math.round(day_data.consumption * 100)/100}}</td>
+                                        <td>{{Math.round(day_data.balance * 100)/100}}</td> 
+                                        <td v-if="day_data.input == 1">Да</td>
+                                        <td v-else>Нет</td>
+                                    </template>                                    
+                                    <template v-else-if="day_data.input == 1">
+                                        <td class="input-true" @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
+                                        <td class="input-true">{{Math.round(day_data.consumption * 100)/100}}</td>                                                                            
+                                        <td class="input-true">Да</td>
+                                    </template>
+                                    <template v-else-if="day_data.input == 0">
+                                        <td class="input-false" @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
+                                        <td class="input-false">{{Math.round(day_data.consumption * 100)/100}}</td>                                                                            
+                                        <td class="input-false">Нет</td>
+                                    </template>
                                 </template>
                             </tr>
                         </template>
@@ -221,5 +232,11 @@ td button{
     background: #f1f2f3;
     border-top: 2px solid;
     border-bottom: 2px solid;
+}
+.input-true{
+    background-color: #A9F16C;
+}
+.input-false{
+    background-color: #FF7373;
 }
 </style>

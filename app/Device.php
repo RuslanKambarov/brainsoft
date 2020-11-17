@@ -52,7 +52,7 @@ class Device extends Model
     }
 
     public function getLastData(){
-        return DB::table('last_data')->where("object_id", $this->owen_id)->first();
+        return DB::table('last_data')->where("object_id", $this->id)->first();
     }
 
     public function getObjectRequiredTemp(){

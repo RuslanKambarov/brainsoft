@@ -73,7 +73,7 @@ class APIController extends Controller
 			$card = Objectcard::first();
 		}
 
-		$device->engineer = $device->getEngineer();
+		$device->engineer = $device->getEngineerName();
 	
 		$device->employee = "";
 		$device->has_alert = true;
@@ -88,7 +88,8 @@ class APIController extends Controller
 			$device->power = false;
 		}
 		$device->parameters = $event;
-		unset($device->id);
+		
+		unset($device->id, $device->parameters->id);
 
 		return response()->json($device);
     }

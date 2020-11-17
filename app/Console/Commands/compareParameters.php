@@ -125,9 +125,9 @@ class compareParameters extends Command
                 case 3:
                     break;
                 case 4:
-                    $object_users = DB::table("user_objects")->where("object_id", $device->owen_id)->pluck("user_id");
+                    $object_users = DB::table("user_objects")->where("object_id", $device->id)->pluck("user_id");
                     $object_users = [2];
-                    Alert::firstOrCreate(['object_id' => $device->owen_id, 'status' => 0], ['message' => $compare_data["message"]]);
+                    Alert::firstOrCreate(['object_id' => $device->id, 'status' => 0], ['message' => $compare_data["message"]]);
                     //echo Cloud::sendNotifications($object_users,  $compare_data["message"], $device->owen_id);                  
                     break;
                                 
@@ -136,7 +136,7 @@ class compareParameters extends Command
                     break;
 
             }
-            DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],
+            DB::table('last_data')->updateOrInsert(['object_id' => $device->id],
                                        ['object_t' => $data["object_t"],
                                         'outside_t' => $data["outside_t"], 
                                         'back_t' => $data["back_t"],
@@ -144,7 +144,7 @@ class compareParameters extends Command
                                         'pressure' => $data["pressure"],
                                         'status' => true]);
         }else{
-            DB::table('last_data')->updateOrInsert(['object_id' => $device->owen_id],
+            DB::table('last_data')->updateOrInsert(['object_id' => $device->id],
                            ['status' => false]);
             $event->message = "offline";
         }   

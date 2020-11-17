@@ -120,7 +120,7 @@ class compareParameters extends Command
                     break;
                 case 2:
                     //change satus of alert as fixed (row status set = 1)
-                    Alert::where(['object_id' => $device->owen_id, 'status' => 0])->update(['status' => 1]);
+                    Alert::where(['object_id' => $device->id, 'status' => 0])->update(['status' => 1]);
                     break;
                 case 3:
                     break;

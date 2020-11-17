@@ -63,7 +63,7 @@
                                         <td class="input-true">{{Math.round(day_data.consumption * 100)/100}}</td>                                                                            
                                         <td class="input-true">Да</td>
                                     </template>
-                                    <template v-else-if="day_data.input == 0">
+                                    <template v-else>
                                         <td class="input-false" @click="edit_consumption(day_data, day_name, object_name, user_name)">{{Math.round(day_data.income * 100)/100}}</td>                                    
                                         <td class="input-false">{{Math.round(day_data.consumption * 100)/100}}</td>                                                                            
                                         <td class="input-false">Нет</td>

@@ -163,7 +163,7 @@ class Consumption extends Model
                         $district_total[$formated]["income"] += $income;
                         $district_total[$formated]["consumption"] += $consumption;
                         $district_total[$formated]["input"]++;
-                    }                         
+                    }
 
                 }
                 // dump($month_total);
@@ -177,6 +177,8 @@ class Consumption extends Model
                 $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $obj_balance = Device::where("name", $object_name)->first()->getConsumption()->balance;
                 $iid = Device::where("name", $object_name)->first()->id;
                 $consumption_analytics[$user_name][$object_name]["Всего"]["logist"] = $log_balance = self::objectMonthTotalLogis($iid, $month, "logist");
+                $consumption_analytics[$user_name][$object_name]["Всего"]["income"] = $month_total['income'];
+                $consumption_analytics[$user_name][$object_name]["Всего"]["consumption"] = $month_total['consumption'];
                 $consumption_analytics[$user_name][$object_name]["Всего"]["diff"] = $month_total['income'] - $log_balance;                
             }                
             $consumption_analytics[$user_name]["Всего"] = $engineer_total;
@@ -264,7 +266,7 @@ class Consumption extends Model
             $days[] = $day->format('Y-m-d');             
         }
         //dd($reserve);
-        // dd($consumption_analytics["Всего по району"]);
+        
         return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 

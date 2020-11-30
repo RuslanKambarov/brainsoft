@@ -174,9 +174,11 @@ class Consumption extends Model
                     $consumption_analytics[$user_name][$object_name]["Всего"]["input"] = 1;
                 }                
 
-                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $obj_balance = Device::where("name", $object_name)->first()->getConsumption()->balance;
+                $consumption_analytics[$user_name][$object_name]["Всего"]["balance"] = $obj_balance = Device::where("name", $object_name)->first()->getConsumptionByMonth((string)$month)->balance;
+
                 $iid = Device::where("name", $object_name)->first()->id;
                 $consumption_analytics[$user_name][$object_name]["Всего"]["logist"] = $log_balance = self::objectMonthTotalLogis($iid, $month, "logist");
+
                 $consumption_analytics[$user_name][$object_name]["Всего"]["income"] = $month_total['income'];
                 $consumption_analytics[$user_name][$object_name]["Всего"]["consumption"] = $month_total['consumption'];
                 $consumption_analytics[$user_name][$object_name]["Всего"]["diff"] = $month_total['income'] - $log_balance;                
@@ -266,7 +268,7 @@ class Consumption extends Model
             $days[] = $day->format('Y-m-d');             
         }
         //dd($reserve);
-        
+        //dd($consumption_analytics["Петров Владимир Анатольевич"]);
         return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 

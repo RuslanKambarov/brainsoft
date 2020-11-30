@@ -68,13 +68,32 @@ class Device extends Model
         return $incomed;        
     }
 
+    public function getObjectTotalIncomeByMonth($month){
+        $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id AND MONTH(created_at) <= MONTH('$month')"))[0]->incomed ?? null;
+        return $incomed;        
+    }
+
     public function getObjectTotalConsume(){
         $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id"))[0]->consumed ?? null;
         return $consumed;        
     }
+    public function getObjectTotalConsumeByMonth($month){
+        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id AND MONTH(created_at) <= MONTH('$month')"))[0]->consumed ?? null;
+        return $consumed;        
+    }
+
+    public function getConsumptionByMonth($month){
+        $this->device_id 	 = $this->id;        
+        $this->income 		 = $this->getObjectTotalIncomeByMonth($month) ?? 0;
+        $this->consumption   = $this->getObjectTotalConsumeByMonth($month) ?? 0;
+        unset($this->owen_id, $this->id);        
+        $this->balance 		 = $this->income - $this->consumption;
+        $this->status 		 = $this->balance > $this->consumption * 14;
+        return $this;
+    }   
 
     public function getConsumption(){       
-        $consumption = Consumption::where('object_id', $this->id)->latest()->first();
+        $consumption = Consumption::where('object_id', $this->id)->latest()->first(); //unused
         $this->device_id 	 = $this->id;        
         $this->income 		 = $this->getObjectTotalIncome() ?? 0;
         $this->consumption   = $this->getObjectTotalConsume() ?? 0;

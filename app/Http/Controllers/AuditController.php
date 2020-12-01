@@ -492,7 +492,7 @@ class AuditController extends Controller
         }else{
             $data = Consumption::getConsumptionAnalytics($district_id, $date);
         }        
-        
+
         $district_name = District::find($district_id)->name;
         $spreadsheet = new Spreadsheet();
 
@@ -529,15 +529,18 @@ class AuditController extends Controller
         $sheet->getColumnDimension('E')->setWidth(20);
         $sheet->mergeCells('E5:E6');
         $sheet->setCellValue('F5', 'Годовая потребность топлива');
-        $sheet->getColumnDimension('F')->setWidth(17);
+        $sheet->getColumnDimension('F')->setWidth(25);
         $sheet->mergeCells('F5:F6');
         $sheet->setCellValue('G5', 'Всего');
-        $sheet->mergeCells("G5:I5");
-        $sheet->setCellValue('G6', 'Приход');        
-        $sheet->setCellValue('H6', 'Расход');
-        $sheet->setCellValue('I6', 'Аналитика');
+        $sheet->mergeCells("G5:L5");
+        $sheet->setCellValue('G6', 'Логист');        
+        $sheet->setCellValue('H6', 'Расхождение');
+        $sheet->setCellValue('I6', 'Приход');        
+        $sheet->setCellValue('J6', 'Расход');
+        $sheet->setCellValue('K6', 'Остаток');
+        $sheet->setCellValue('L6', 'Аналитика');
         foreach($data["period"] as $key => $day){
-            $charNum = $key*3+10;
+            $charNum = $key*3+13;
             $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
             $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);
             $char2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+2);
@@ -547,6 +550,11 @@ class AuditController extends Controller
             $sheet->setCellValue($char2.'6', "Аналитика");
             $sheet->mergeCells($char.'5:'.$char2.'5');            
         }
+
+        $sheet->getStyle('G5:'.$char2.'6')->getFill()
+        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        ->getStartColor()->setARGB('FF6C757D');
+        
         $sheet->getStyle("B6:".$char2."6")->getFont()->setSize(11);
         $cur_row = 6;
         $i = 0;
@@ -560,26 +568,47 @@ class AuditController extends Controller
                 $sheet->setCellValue('D'.$cur_row, $object_name);
                 $sheet->setCellValue('E'.$cur_row, $data["abbreviation"][$object_name] ?? "");
                 $sheet->setCellValue('F'.$cur_row, $data["reserve"][$object_name] ?? $data["reserve"][$user_name]);
-                $charNum = 7;
-                foreach($row1 as $row2){
-                    $char = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum);
-                    $char1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+1);
-                    $char2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($charNum+2);
-                    $sheet->getColumnDimension($char)->setWidth(12);
-                    $sheet->getColumnDimension($char1)->setWidth(12);
-                    $sheet->getColumnDimension($char2)->setWidth(12);
-                    $sheet->setCellValue($char.$cur_row, $row2["income"]);                    
-                    $sheet->setCellValue($char1.$cur_row, $row2["consumption"]);
-                    $sheet->setCellValue($char2.$cur_row, $row2["input"]);
-                    $charNum = $charNum + 3;
+                $colChar = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(7);
+                foreach($row1 as $row2){  
+                    $startChar = $colChar;                                    
+                    if(isset($row2["logist"])){
+                        $sheet->setCellValue($colChar.$cur_row, round($row2["logist"], 2));
+                        $sheet->getColumnDimension($colChar)->setWidth(12);
+                        $colChar++;                        
+                    }
+                    if(isset($row2["diff"])){
+                        $sheet->setCellValue($colChar.$cur_row, round($row2["diff"], 2));
+                        $sheet->getColumnDimension($colChar)->setWidth(12);
+                        $colChar++;                        
+                    }
+                    $sheet->setCellValue($colChar.$cur_row, $row2["income"]);
+                    $sheet->getColumnDimension($colChar)->setWidth(12);                    
+                    $sheet->setCellValue(++$colChar.$cur_row, $row2["consumption"]);
+                    $sheet->getColumnDimension($colChar)->setWidth(12);
+                    if(isset($row2["balance"])){
+                        $sheet->setCellValue(++$colChar.$cur_row, round($row2["balance"], 2));
+                        $sheet->getColumnDimension($colChar)->setWidth(12);                        
+                    }
+                    $sheet->setCellValue(++$colChar.$cur_row, $row2["input"]);
+                    $sheet->getColumnDimension($colChar)->setWidth(12);
+                    if(!isset($row2["balance"])){                        
+                        $sheet->getStyle($startChar.$cur_row.":".$colChar.$cur_row)->getFill()
+                        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()->setARGB($row2["input"] ? "FFA9F16C" : "FFFF7373");                    
+                    }
+                    $colChar++;
                 }                
             }
         }
         $sheet->getStyle('B4:'.$char2.$cur_row)
         ->applyFromArray($styleArray);
 
+        $sheet->getStyle('B5:F'.$cur_row)->getFill()
+        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        ->getStartColor()->setARGB('FFA7A19E');
+
         $sheet->getStyle('B4:'.$char2.'5')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);        
 
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

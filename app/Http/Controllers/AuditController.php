@@ -493,7 +493,7 @@ class AuditController extends Controller
             $data = Consumption::getConsumptionAnalytics($district_id, $date);
         }        
         
-        $district_name = District::where("owen_id", $district_id)->first()->name;
+        $district_name = District::find($district_id)->name;
         $spreadsheet = new Spreadsheet();
 
         $sheet = $spreadsheet->getActiveSheet();

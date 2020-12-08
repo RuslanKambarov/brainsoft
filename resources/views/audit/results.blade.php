@@ -21,7 +21,7 @@
                         {{App\Audit::find($result->audit_id)->name ?? "(Аудит был удален)"}}
                     </td>
                     <td>
-                        {{App\Device::where("owen_id", $result->object_id)->first()->name}}
+                        {{App\Device::find($result->object_id)->name}}
                     </td>
                     <td>
                         {{App\User::where("id", $result->auditor_id)->first()->name ?? "(Пользоватеьл был удален)"}}

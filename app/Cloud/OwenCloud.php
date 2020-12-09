@@ -156,7 +156,7 @@ class OwenCloud implements Cloud{
                 );
             
             $fields = array(
-                'app_id' => "9f70cb55-3cb9-41c5-97f3-56a41cfb8fe4",
+                'app_id' => env('ONE_SIGNAL_APP_ID'),
                 'filters' => array(array("field" => "tag", "key" => "user_id", "relation" => "=", "value" => $user)),
                 'data' => array("device" => $device, "mobile_url" => "/smartheating/device/".$device),
                 'web_url' =>"http://brainsoft.kz/device/".$device,
@@ -171,7 +171,7 @@ class OwenCloud implements Cloud{
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
-                                                       'Authorization: Basic NTViZWEyYzYtOTg3My00NDg5LTgzODQtNjAyNTA4ZjQ4YWFh'));
+                                                       'Authorization: Basic '.env('ONE_SIGNAL_REST_API_KEY')));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
             curl_setopt($ch, CURLOPT_POST, TRUE);

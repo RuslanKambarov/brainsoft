@@ -23,7 +23,13 @@
                     </td>
                     <td>
                         @if(isset($answer->photo))
-                        <img src="{{Storage::url("/".$result->object_id."/".$answer->photo)}}" alt="" width="400" height="500">
+                            @if(is_array($answer->photo))
+                                @foreach($answer->photo as $photo)
+                                <img src="{{Storage::url("/".$result->object_id."/".$photo)}}" alt="" width="400" height="500">
+                                @endforeach
+                            @else
+                            <img src="{{Storage::url("/".$result->object_id."/".$answer->photo)}}" alt="" width="400" height="500">
+                            @endif
                         @endif
                     </td>
                     <th>

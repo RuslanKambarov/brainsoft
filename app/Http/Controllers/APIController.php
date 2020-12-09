@@ -153,10 +153,8 @@ class APIController extends Controller
 		
 		foreach($request->questions as $key => $question){
 			if(isset($question['photo'])){
-				$storeFileName = microtime().".jpg";
-				$data = base64_decode($question['photo']);
-				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? "", "photo" => $storeFileName];
-				Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);	
+				$storeFileName = $this->managePhoto($question['photo']);
+				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? "", "photo" => $storeFileName];	
 			}else{
 				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? ""];
 			}
@@ -181,6 +179,24 @@ class APIController extends Controller
     	$device->user = Auth::user()->only('name');
 		return response()->json($device);
     }
+
+	public function managePhoto($photoData){
+		if(is_array($question['photo'])){
+			$photos = [];
+			foreach($question['photo'] as $photo){
+				$storeFileName = microtime().".jpg";
+				$photos[] = $storeFileName;
+				$data = base64_decode($photo);
+				Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);						
+			}
+			return $photos;
+		}else{
+			$storeFileName = microtime().".jpg";
+			$data = base64_decode($photoData);
+			Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);
+			return $storeFileName;
+		}		
+	}
 
     public function consumeCoal(Request $request, $id){
 

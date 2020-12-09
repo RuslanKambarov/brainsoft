@@ -185,4 +185,12 @@ class OwenCloud implements Cloud{
         
         return $response;
     }
+
+    public function testMessage()
+    {
+        $users = [1];
+        $message = "Content";
+        $device = 5;
+        return $this->sendNotifications($users, $message, $device);       
+    }
 }

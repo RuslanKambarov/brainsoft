@@ -88,7 +88,7 @@ class APIController extends Controller
 			$device->power = false;
 		}
 		$device->parameters = $event;
-		
+		$device->device_id = $device->id;
 		unset($device->id, $device->parameters->id);
 
 		return response()->json($device);

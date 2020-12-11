@@ -106,6 +106,13 @@ class compareParameters extends Command
             //Compare actual data with temp card
             $compare_data = Cloud::compare($data);
 
+
+            foreach($data as $param){
+                if(is_int($param) && (abs($param) > 1000){
+                    $param = 9999;
+                }
+            }
+
             $event->message     = $compare_data["message"];                    
             $event->outside_t   = $data["outside_t"];
             $event->direct_t    = $data["direct_t"];

@@ -43,20 +43,34 @@ class District extends Model
                         $question->question_id = $question->id;
                         return $question->only("question_id", "audit_id", "question", "photo");
                     });
+                    $arr = [
+                        "device_id" => $device->id,
+                        "name" => $device->name,
+                        "auditor" => \Auth::user()->only("name", "email"),
+                        "questions" => $questions
+                    ];
+                    $audit->questions_data = $arr;
 
-                    $audit->questions_data["device_id"] = $device->id;
-                    $audit->questions_data["name"] = $device->name;
-                    $audit->questions_data["auditor"] = \Auth::user()->only("name", "email");
-                    $audit->questions_data["questions"] = $questions; 
+                    // $audit->questions_data["device_id"] = $device->id;
+                    // $audit->questions_data["name"] = $device->name;
+                    // $audit->questions_data["auditor"] = \Auth::user()->only("name", "email");
+                    // $audit->questions_data["questions"] = $questions; 
                     
                     $audit->audit_id = $audit->id;
                     return $audit->only("audit_id", "name", "questions_data"); 
                 });
                 
+                $arr = [
+                    "device_id" => $device->id,
+                    "name" => $device->name,
+                    "audits" => $audits
+                ];
 
-                $device->audits_data["device_id"] = $device->id;
-                $device->audits_data["name"] = $device->name;
-                $device->audits_data["audits"] = $audits;
+                $device->audits_data = $arr;
+
+                // $device->audits_data["device_id"] = $device->id;
+                // $device->audits_data["name"] = $device->name;
+                // $device->audits_data["audits"] = $audits;
 
                 $device->district_id = $district->id;
                 $device->device_id = $device->id;                

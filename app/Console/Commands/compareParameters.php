@@ -108,7 +108,7 @@ class compareParameters extends Command
 
 
             foreach($data as $param){
-                if(is_numeric($param) && (($param > 1000) || ($param < -1000)){
+                if(is_numeric($param) && (($param > 1000) || ($param < -1000))){
                     $param = 9999;
                 }
             }

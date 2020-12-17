@@ -252,5 +252,10 @@ class APIController extends Controller
 
     public function takeToWork($device_id){
     	return response()->json(["success" => true, "message" => "Принято в работу"]);
-    }
+	}
+	
+	public function offlineData()
+	{
+		return response()->json(District::offlineData());
+	}
 }

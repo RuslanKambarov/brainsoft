@@ -75,7 +75,8 @@ class User extends Authenticatable
         }
     }
 
-    public function getDistrictsTree(){
+    public function getUserDistricts()
+    {
         if($this->hasAnyRole(2)){
             $district_id = $this->devices()->groupBy("district_id")->first()->district_id ?? null;
             $districts = District::find($district_id)->get();
@@ -85,7 +86,14 @@ class User extends Authenticatable
         }
         if($this->hasAnyRole(3)){
             $districts = District::all();
-        }                 
+        }
+
+        return $districts;
+    }
+    
+    public function getDistrictsTree(){
+
+        $districts = $this->getUserDistricts();
 		foreach($districts as $district){
     	    $district->district_id = $district->id;			
     	    $district->director = $district->director();

@@ -25,6 +25,52 @@ class District extends Model
         ->where([['user_district.district_id', '=', $this->id], ['user_role.role_id', '=', 4]])->pluck('users.name')->first() ?? "Не назначен";
     }
 
+    public static function offlineData()
+    {
+        $districts = \Auth::user()->getUserDistricts();
+        $districts = $districts->map(function($district){
+            
+            $devices = $district->devices()->get();
+            $devices_data = $devices->map(function($device) use ($district){
+                
+                $audits = $device->audits()->get();
+                
+                $audits = $audits->map(function($audit) use ($device){
+                    
+                    $questions = $audit->questions()->get();
+
+                    $questions = $questions->map(function($question){
+                        $question->question_id = $question->id;
+                        return $question->only("question_id", "audit_id", "question", "photo");
+                    });
+
+                    $audit->questions_data["device_id"] = $device->id;
+                    $audit->questions_data["name"] = $device->name;
+                    $audit->questions_data["auditor"] = \Auth::user()->only("name", "email");
+                    $audit->questions_data["questions"] = $questions; 
+                    
+                    $audit->audit_id = $audit->id;
+                    return $audit->only("audit_id", "name", "questions_data"); 
+                });
+                
+
+                $device->audits_data["device_id"] = $device->id;
+                $device->audits_data["name"] = $device->name;
+                $device->audits_data["audits"] = $audits;
+
+                $device->district_id = $district->id;
+                $device->device_id = $device->id;                
+                return $device->only("district_id", "device_id", "name", "audits_data"); 
+            });
+
+            $district->district_id = $district->id;
+            $district->devices_data = $devices_data;
+            
+            return $district->only("district_id", "name", "devices_data");
+        });
+        return $districts;
+    }
+
     public function engineer(){
         return DB::table('objects')
         ->distinct()

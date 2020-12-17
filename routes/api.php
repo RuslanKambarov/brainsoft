@@ -54,4 +54,6 @@ Route::group(["middleware" => 'auth:api'], function(){
     Route::get("/consumption/devices/{device_id}", "APIController@deviceConsumption");
 
     Route::get("/devices/{device_id}/taketowork", "APIController@takeToWork");
+
+    Route::get("/offline/audit/data", "APIController@offlineData");
 });

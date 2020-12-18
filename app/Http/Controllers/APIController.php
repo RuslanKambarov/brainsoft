@@ -254,6 +254,13 @@ class APIController extends Controller
     	return response()->json(["success" => true, "message" => "Принято в работу"]);
 	}
 	
+	public function ifModified()
+    {
+        $response = response()->json(District::offlineData());
+        $hash = md5($response->content());
+        return response()->json(["hash" => $hash]);
+	}
+	
 	public function offlineData()
 	{
 		return response()->json(District::offlineData());

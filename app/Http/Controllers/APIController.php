@@ -152,8 +152,8 @@ class APIController extends Controller
 		$array = [];
 		
 		foreach($request->questions as $key => $question){
-			if(isset($question['photo'])){
-				$storeFileName = $this->managePhoto($question['photo']);
+			if(isset($question['photos'])){
+				$storeFileName = $this->managePhoto($question['photos'], $object_id);
 				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? "", "photo" => $storeFileName];	
 			}else{
 				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? ""];
@@ -180,22 +180,17 @@ class APIController extends Controller
 		return response()->json($device);
     }
 
-	public function managePhoto($photoData){
-		if(is_array($question['photo'])){
+	public function managePhoto($photoData, $object_id){
+		if(is_array($photoData)){
 			$photos = [];
-			foreach($question['photo'] as $photo){
+			foreach($photoData as $photo){
 				$storeFileName = microtime().".jpg";
 				$photos[] = $storeFileName;
-				$data = base64_decode($photo);
+				$data = base64_decode($photo["photo"]);
 				Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);						
 			}
 			return $photos;
-		}else{
-			$storeFileName = microtime().".jpg";
-			$data = base64_decode($photoData);
-			Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);
-			return $storeFileName;
-		}		
+		}
 	}
 
     public function consumeCoal(Request $request, $id){

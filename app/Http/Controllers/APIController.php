@@ -153,6 +153,9 @@ class APIController extends Controller
 		
 		foreach($request->questions as $key => $question){
 			if(isset($question['photos'])){
+				if(count($question['photos']) > 5){
+					return response()->json(["success" => false, "message" => "Превышен максимум в 5 фото в одном вопросе"], 200);
+				}
 				$storeFileName = $this->managePhoto($question['photos'], $object_id);
 				$array[] = ["question_id" => $question['question_id'], "answer" => $question['answer'], "comment" => $question['comment'] ?? "", "photo" => $storeFileName];	
 			}else{
@@ -180,17 +183,16 @@ class APIController extends Controller
 		return response()->json($device);
     }
 
-	public function managePhoto($photoData, $object_id){
-		if(is_array($photoData)){
-			$photos = [];
-			foreach($photoData as $photo){
-				$storeFileName = microtime().".jpg";
-				$photos[] = $storeFileName;
-				$data = base64_decode($photo["photo"]);
-				Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);						
-			}
-			return $photos;
+	public function managePhoto($photoData, $object_id)
+	{	
+		$photos = [];
+		foreach($photoData as $photo){
+			$storeFileName = microtime().".jpg";
+			$photos[] = $storeFileName;
+			$data = base64_decode($photo["photo"]);
+			Storage::disk('local')->put("public/".$object_id."/".$storeFileName, $data);						
 		}
+		return $photos;
 	}
 
     public function consumeCoal(Request $request, $id){

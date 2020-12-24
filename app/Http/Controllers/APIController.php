@@ -224,7 +224,8 @@ class APIController extends Controller
     }
 
     public function allDistrictsConsumption(){
-    	$districts = District::all();    	
+		$user = Auth::user();
+    	$districts = $user->getUserDistricts();    	
     	$districts->map(function($item){
     		return $item->getConsumption();
     	});

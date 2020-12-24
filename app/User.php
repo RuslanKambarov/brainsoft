@@ -79,7 +79,7 @@ class User extends Authenticatable
     {
         if($this->hasAnyRole(2)){
             $district_id = $this->devices()->groupBy("district_id")->first()->district_id ?? null;
-            $districts = District::find($district_id)->get();
+            $districts = District::where("id", $district_id)->get();
         }
         if($this->hasAnyRoles([1, 4])){
             $districts = $this->districts()->get();

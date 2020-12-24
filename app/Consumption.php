@@ -42,7 +42,18 @@ class Consumption extends Model
 
     public static function getDistrictConsumption($district_id, $date){
         return DB::table('objects')
-        ->select("users.name as user_name", "objects.coal_reserve", "objects.abbreviation", "objects.name as object_name", "consumption.created_at as created_at", "consumption.*")
+        ->select("users.name as user_name", 
+                 "objects.coal_reserve", 
+                 "objects.abbreviation",
+                 "objects.id as object_id", 
+                 "objects.name as object_name", 
+                 "consumption.created_at as created_at", 
+                 "consumption.id",
+                 "consumption.income",
+                 "consumption.consumption",
+                 "consumption.created_at",
+                 "consumption.updated_at",
+                 "consumption.input_type")
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
@@ -55,7 +66,14 @@ class Consumption extends Model
 
     public static function getDistrictMonthConsumption($district_id, $date){
         return DB::table('objects')
-        ->select(DB::raw("objects.name as object_name, users.name as user_name, objects.coal_reserve, objects.abbreviation, SUM(income) as income, SUM(consumption) as consumption, (CASE WHEN DAY(LAST_DAY('$date')) - 3 > COUNT(consumption) THEN 1 ELSE 0 END) AS input, '$date' as date"))
+        ->select(DB::raw("objects.name as object_name, 
+                          users.name as user_name, 
+                          objects.coal_reserve, 
+                          objects.abbreviation, 
+                          SUM(income) as income, 
+                          SUM(consumption) as consumption, 
+                          (CASE WHEN DAY(LAST_DAY('$date')) - 3 > COUNT(consumption) THEN 1 ELSE 0 END) AS input, 
+                          '$date' as date"))
         ->leftJoin("user_objects", "object_id", "=", "objects.id")
         ->leftJoin("users", "user_id", "=", "users.id")
         ->leftJoin("consumption", function($join) use ($date){
@@ -83,7 +101,7 @@ class Consumption extends Model
         $period  = \Carbon\CarbonPeriod::create($start, $end); // create period - collection of Carbon days
 
         $query_data = self::getDistrictConsumption($district_id, $month); //get data from database
-
+        
         //sort data
         $query_data = $query_data->sortBy(function($device){
             if(stristr($device->object_name, 'ДС')){
@@ -105,6 +123,7 @@ class Consumption extends Model
         
         $query_data = $query_data->groupBy("user_name");        
 
+        
         $district_total = [];
         $reserve["Всего по району"] = 0;
         
@@ -116,6 +135,7 @@ class Consumption extends Model
             $engineer_total = [];
             $reserve[$user_name] = 0;
             foreach($coll as $object_name => $coll2){
+                $object_id = $coll2->first()->object_id;
                 $reserve[$object_name] = $coll2[0]->coal_reserve ?? 0;
                 $abbreviation[$object_name] = $coll2[0]->abbreviation ?? "";
                 $reserve[$user_name] += $reserve[$object_name];
@@ -135,8 +155,13 @@ class Consumption extends Model
                     //float result
                     $income = round($parameters->income ?? 0, 2);
                     $consumption = round($parameters->consumption ?? 0, 2);
+                    $record_id = $parameters->id ?? null;
 
-                    $consumption_analytics[$user_name][$object_name][$formated] = array("income" => $income, "consumption" => $consumption);
+                    $consumption_analytics[$user_name][$object_name][$formated] = array("income" => $income, 
+                                                                                        "consumption" => $consumption,
+                                                                                        "record_id" => $record_id,
+                                                                                        "object_id" => $object_id
+                                                                                    );
 
                     
                     if(!isset($engineer_total[$formated])){
@@ -268,7 +293,7 @@ class Consumption extends Model
             $days[] = $day->format('Y-m-d');             
         }
         //dd($reserve);
-        //dd($consumption_analytics["Петров Владимир Анатольевич"]);
+        //dd($consumption_analytics);
         return  ["consumption_analytics" => $consumption_analytics, "period" => $days, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 

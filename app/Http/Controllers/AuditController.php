@@ -621,27 +621,31 @@ class AuditController extends Controller
     }
 
     public function editConsumption(Request $request, $district_id){
-        $date = \Carbon\Carbon::parse($request->parameters["day_name"])->format("Y-m-d");
-        $object_id = Device::where(["name" => $request->parameters["object_name"]])->first()->id;  
-        $balance = Consumption::where("object_id", $object_id)->first()->balance ?? 0;
-        $balance = $balance + $request->parameters['income'] - $request->parameters['consumption']/1000;    
-        //dd($request);
-        //dd(Consumption::whereRaw("DATE(c.created_at) = DATE($date) AND object_id = $object_id")->first());
-        $consumption = Consumption::whereRaw("DATE(created_at) = DATE('$date') AND object_id = $object_id")->first();
-        if($consumption){
-
+        if($request->parameters["record_id"]){
+            $consumption = Consumption::find($request->parameters["record_id"]);
         }else{
             $consumption = new Consumption;
-            $consumption->object_id = $object_id;
+            $consumption->object_id = $request->parameters["object_id"];
+            $date = \Carbon\Carbon::parse($request->parameters["day_name"])->format("Y-m-d");
             $consumption->created_at = $date;
         }
-        $consumption->income =  $request->parameters['income'];
+        $consumption->income = $request->parameters['income'];
         $consumption->consumption = $request->parameters['consumption']/1000;
-        $consumption->balance = $balance;
         $consumption->input_type = "web";
-        $consumption->save();
-        
-        return "Сохранено";
+        if($consumption->save()){
+            $message = [
+                "text" => "Данные сохранены",
+                "type" => "success",
+                "record" => $consumption  
+            ];
+        }else{
+            $message = [
+                "text" => "Произошла ошибка",
+                "type" => "danger"  
+            ];
+        }
+                
+        return response()->json($message);
     }
 
     public function controlIndex()

@@ -84,6 +84,11 @@
         </div>
         <!-- edit consumption dialog -->
         <v-dialog v-model="dialog" max-width="500">
+
+        <div :class="'alert alert-'+message.type">
+            {{message.text}}
+        </div>
+
         <v-card>
           <v-card-title class="headline">Изменить данные</v-card-title>
             <v-card-text>
@@ -92,7 +97,7 @@
                 <v-text-field v-model="dialog_data.consumption" outlined  label="Расход в кг."></v-text-field>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="green darken-1" text @click="dialog=!dialog">Отменить</v-btn>
+                <v-btn color="green darken-1" text @click="dialog=!dialog; message = {}">Отменить</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn  color="green darken-1" text @click="send_data()">Сохранить</v-btn>
             </v-card-actions>
@@ -111,7 +116,8 @@ export default {
             dialog_data: {},
             reserve: [],
             dialog: false,
-            loader: false
+            loader: false,
+            message: {}
         }
     },
     computed: {
@@ -134,11 +140,13 @@ export default {
             axios.get("/analytics/consumption/season/"+this.district_id).then((response) => {this.data = response.data.consumption_analytics; this.days = response.data.period; this.loader = false, this.date = null});                        
         },
         edit_consumption: function(day_data, day_name, object_name, user_name){
+            this.dialog_data.record_id = day_data.record_id
             this.dialog_data.income = day_data.income
-            this.dialog_data.consumption = day_data.consumption
-            this.dialog_data.day_name = day_name
-            this.dialog_data.object_name = object_name
+            this.dialog_data.consumption = day_data.consumption            
+            this.dialog_data.object_id = day_data.object_id
             this.dialog_data.user_name = user_name
+            this.dialog_data.object_name = object_name
+            this.dialog_data.day_name = day_name
 
             this.dialog = true
         },
@@ -146,19 +154,24 @@ export default {
             axios.post("/analytics/consumption/edit/"+this.district_id, {
                 token:  $('meta[name="csrf-token"]').attr('content'),
                 parameters: this.dialog_data
-            }).then((response)=> {
-                this.dialog = false
-                this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].income = this.dialog_data.income
-                this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].consumption = this.dialog_data.consumption/1000
-
-                this.data[this.dialog_data.user_name][this.dialog_data.object_name]["Всего"].income += this.dialog_data.income
-                this.data[this.dialog_data.user_name][this.dialog_data.object_name]["Всего"].consumption += this.dialog_data.consumption/1000
-
-                this.data[this.dialog_data.user_name]["Всего"][this.dialog_data.day_name].income += this.dialog_data.income
-                this.data[this.dialog_data.user_name]["Всего"][this.dialog_data.day_name].consumption += this.dialog_data.consumption/1000
-
-                this.data[this.dialog_data.user_name]["Всего"]["Всего"].income += this.dialog_data.income
-                this.data[this.dialog_data.user_name]["Всего"]["Всего"].consumption += this.dialog_data.consumption/1000
+            }).then((response)=> { 
+                if(response.data.type == "success"){
+                    this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].income = response.data.record.income
+                    this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].consumption = response.data.record.consumption
+                    this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].input = 1
+                    this.data[this.dialog_data.user_name][this.dialog_data.object_name][this.dialog_data.day_name].record_id = response.data.record.id
+                    this.dialog = false
+                }else{
+                    this.message = {
+                        text: response.data.text,
+                        type: response.data.type
+                    } 
+                }                
+            }).catch((error) => {
+                this.message = {
+                    type: "danger",
+                    text: "Произошла ошибка! Попробуйте позднее" 
+                }
             })
         }
     }

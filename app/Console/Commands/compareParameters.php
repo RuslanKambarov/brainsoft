@@ -53,7 +53,7 @@ class compareParameters extends Command
 
 	//Get array of devices with controllers from local database
 	$devices = Device::where("controller", 1)->get();
-
+    
     //Get array of devices from OWEN CLOUD
     $client = new \GuzzleHttp\Client();     
     $response = $client->post("https://api.owencloud.ru/v1/user-object/index", [
@@ -107,9 +107,9 @@ class compareParameters extends Command
             $compare_data = Cloud::compare($data);
 
 
-            foreach($data as $param){
+            foreach($data as $param_name => $param){
                 if(is_numeric($param) && (($param > 1000) || ($param < -1000))){
-                    $param = 9999;
+                    $data[$param_name] = 9999;
                 }
             }
 

@@ -381,8 +381,20 @@ class Consumption extends Model
                     $district_total[$formated]["consumption"] += $consumption;
                     $district_total[$formated]["input"] += $input; 
                 }
+                $iid = Device::where("name", $key1)->first()->id;
+                $consumption_analytics[$key][$key1]["Всего"]["logist"] = $log_balance = self::objectSeasonTotalLogist($iid, "logist");
+                $consumption_analytics[$key][$key1]["Всего"]["diff"] = $consumption_analytics[$key][$key1]["Всего"]["income"] - $log_balance;
+
             }
             $consumption_analytics[$key]["Всего"] = $engineer_total;
+
+            $logist = round(array_reduce($consumption_analytics[$key], function($carry, $item){
+                if(isset($item['Всего'])){
+                    $carry += $item['Всего']['logist'];
+                }
+                return $carry;
+            }), 2);
+
             $consumption = array_reduce($consumption_analytics[$key]["Всего"], function($carry, $item){
                 $carry += $item["consumption"];
                 return $carry;
@@ -395,12 +407,28 @@ class Consumption extends Model
                 if(isset($item["Всего"])) $carry += $item["Всего"]["input"];
                 return $carry;
             });
-            $consumption_analytics[$key]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
+            $consumption_analytics[$key]["Всего"]["Всего"] = array(
+                                                                    "income" => $income, 
+                                                                    "consumption" => $consumption, 
+                                                                    "input" => $input, 
+                                                                    "balance" => $income - $consumption,
+                                                                    "logist" => $logist,
+                                                                    "diff" => $income - $logist
+            );  
+
             $pop = array_pop($consumption_analytics[$key]["Всего"]);
             $consumption_analytics[$key]["Всего"] = array("Всего" => $pop) + $consumption_analytics[$key]["Всего"];
      
         }
+        
+
+        $logist = round(array_reduce($consumption_analytics, function($carry, $item){
+            $carry += $item['Всего']['Всего']['logist'];
+            return $carry;
+        }), 2);
+
         $consumption_analytics["Всего по району"]["Всего"] = $district_total;
+
         $consumption = array_reduce($district_total, function($carry, $item){
             $carry += $item["consumption"];
             return $carry;
@@ -413,10 +441,17 @@ class Consumption extends Model
             $carry += $item["input"];
             return $carry;
         });
-        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array("income" => $income, "consumption" => $consumption, "input" => $input, "balance" => $income - $consumption);
+        $consumption_analytics["Всего по району"]["Всего"]["Всего"] = array(
+                                                                            "income" => $income, 
+                                                                            "consumption" => $consumption, 
+                                                                            "input" => $input, 
+                                                                            "balance" => $income - $consumption,
+                                                                            "diff" => $income -$logist,
+                                                                            "logist" => $logist,
+        );
         $pop = array_pop($consumption_analytics["Всего по району"]["Всего"]);
         $consumption_analytics["Всего по району"]["Всего"] = array("Всего" => $pop) + $consumption_analytics["Всего по району"]["Всего"];
-        
+               
         return  ["consumption_analytics" => $consumption_analytics, "period" => $period, "reserve" => $reserve, "abbreviation" => $abbreviation];
     }
 
@@ -533,6 +568,14 @@ class Consumption extends Model
             ->where("object_id", $object_id)
             ->whereRaw("MONTH(date) = MONTH('$month')")
             ->first()->sum;
+    }
+
+    public static function objectSeasonTotalLogist($object_id, $table)
+    {
+        return (float)DB::table($table)
+        ->select(DB::raw("SUM(amount) as sum"))
+        ->where("object_id", $object_id)        
+        ->first()->sum;
     }
 
 }

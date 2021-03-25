@@ -1,12 +1,13 @@
 <template>
     <div style="width: 100%">
+        <div class="row grand-heading">
+            <div class="col-7"><h3 class="text-center"><b>Аналитика учета топлива за {{month}}</b></h3></div>
+            <div class="col-2"><date-picker v-model="date"  type="month" @change="getData()"></date-picker></div>
+            <div class="col-2"><button @click="getSeasonData()" class="btn btn-small btn-primary m-4 get-excell-button">За сезон</button></div>
+            <div class="col-1"><a :href="'/analytics/consumption/excell/'+this.district_id+'/'+this.date"><button class="btn btn-small btn-success m-4 get-excell-button">EXCELL</button></a></div>
+        </div>
         <div class="table-wrapper">
-            <div class="row grand-heading">
-                <div class="col-7"><h3 class="text-center"><b>Аналитика учета топлива за {{month}}</b></h3></div>
-                <div class="col-2"><date-picker v-model="date"  type="month" @change="getData()"></date-picker></div>
-                <div class="col-2"><button @click="getSeasonData()" class="btn btn-small btn-primary m-4 get-excell-button">За сезон</button></div>
-                <div class="col-1"><a :href="'/analytics/consumption/excell/'+this.district_id+'/'+this.date"><button class="btn btn-small btn-success m-4 get-excell-button">EXCELL</button></a></div>
-            </div>
+
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr class="table-heading-1">

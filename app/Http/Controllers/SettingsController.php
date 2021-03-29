@@ -23,11 +23,9 @@ class SettingsController extends Controller
     }
 
     public function update(Request $request, $id){
-        if($request->target == "device"){
-            $device = Device::where('owen_id', $id)->first();
-            foreach($request->device as $key => $setting){
-                $device->$key = $setting;
-            }
+        if($request->target == "device"){            
+            $device = Device::find($id);
+            $device->{$request->param_name} = $request->param_value;
             $device->save();
         }
         if($request->target == "district"){
@@ -42,7 +40,7 @@ class SettingsController extends Controller
         if($request->target == "setting"){            
             $setting = DB::table("app_settings")->where('id', $id)->update(["value" => $request->setting['value']]);
         }
-        return response()->json($id);
+        return response()->json(["type" => "success", "text" => "Сохранено"]);
     }
 
     public function create(Request $request){

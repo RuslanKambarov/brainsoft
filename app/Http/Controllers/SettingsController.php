@@ -29,12 +29,8 @@ class SettingsController extends Controller
             $device->save();
         }
         if($request->target == "district"){
-            $district = District::where('owen_id', $id)->first();
-            foreach($request->district as $key => $setting){
-                if($key != "devices"){
-                    $district->$key = $setting;
-                }                
-            }
+            $district = District::find($id);
+            $district->{$request->param_name} = $request->param_value;
             $district->save();            
         }
         if($request->target == "setting"){            

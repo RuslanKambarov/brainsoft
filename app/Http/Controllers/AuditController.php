@@ -621,6 +621,14 @@ class AuditController extends Controller
     }
 
     public function editConsumption(Request $request, $district_id){
+        $user = \Auth::user();        
+        if(!in_array($request->parameters["object_id"], $user->devicesIDs()->toArray())){
+            $message = [
+                "text" => "Нет доступа для редактирования этого объекта",
+                "type" => "danger"  
+            ];          
+            return response()->json($message);  
+        }
         if($request->parameters["record_id"]){
             $consumption = Consumption::find($request->parameters["record_id"]);
         }else{
@@ -628,7 +636,7 @@ class AuditController extends Controller
             $consumption->object_id = $request->parameters["object_id"];
             $date = \Carbon\Carbon::parse($request->parameters["day_name"])->format("Y-m-d");
             $consumption->created_at = $date;
-        }
+        }        
         $consumption->income = $request->parameters['income'];
         $consumption->consumption = $request->parameters['consumption']/1000;
         $consumption->input_type = "web";

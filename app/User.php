@@ -147,4 +147,15 @@ class User extends Authenticatable
         return $devices;
     }
   
+    public function devicesIDs()
+    {
+        switch($this->roles()->first()->id){
+            case(1): return $this->districts()->first()->devices()->get()->pluck("id");
+            case(2): return $this->devices()->get()->pluck("id");
+            case(3): return Device::all()->pluck("id");
+            case(4): return $this->districts()->first()->devices()->get()->pluck("id");
+            case(5): return $this->districts()->first()->devices()->get()->pluck("id");
+            default: return null;
+        }
+    }
 }

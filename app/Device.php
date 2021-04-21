@@ -63,25 +63,64 @@ class Device extends Model
         return $this->required_p ?? DB::table('app_settings')->find(6)->value();
     }
 
+    /*
+    Total income for all time ex.
+    */
     public function getObjectTotalIncome(){
         $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id"))[0]->incomed ?? null;
         return $incomed;        
     }
 
     public function getObjectTotalIncomeByMonth($month){
-        $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id AND MONTH(created_at) <= MONTH('$month')"))[0]->incomed ?? null;
+        $incomed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id AND created_at <= '$month'"))[0]->incomed ?? null;
         return $incomed;        
     }
 
+    /*
+    Total consumption for all time ex.
+    */
     public function getObjectTotalConsume(){
         $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id"))[0]->consumed ?? null;
         return $consumed;        
     }
+
     public function getObjectTotalConsumeByMonth($month){
-        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id AND MONTH(created_at) <= MONTH('$month')"))[0]->consumed ?? null;
+        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id AND created_at <= '$month'"))[0]->consumed ?? null;
         return $consumed;        
     }
 
+
+    /**
+     * Total consumption for month ex. from 01.03 to 31.03.
+     * @param string $month javascript datetime string
+     * @return float total coal consumed for month
+     */
+    public function getObjectMonthConsume($month){
+        list($start, $end) = getStartEndMonth($month);
+        $consumed = DB::select(DB::raw("SELECT SUM(consumption) as consumed FROM consumption WHERE object_id = $this->id AND created_at >= '$start' AND created_at <= '$end'"))[0]->consumed ?? null;
+        return $consumed;
+    }
+
+    /*
+    Total income for month ex. from 01.03 to 31.03
+    */
+    public function getObjectMonthIncome($month){
+        list($start, $end) = getStartEndMonth($month);
+        $consumed = DB::select(DB::raw("SELECT SUM(income) as incomed FROM consumption WHERE object_id = $this->id AND created_at >= '$start' AND created_at <= '$end'"))[0]->incomed ?? null;
+        return $consumed;
+    }
+
+    public function isHasDisturbance($date){
+        list($start, $end) = getStartEndMonth($date);
+        $daysInMonth = count(getMonthDays($date));
+        $minFilling = $daysInMonth - 3;
+        $fills = DB::select(DB::raw("SELECT count(*) as fillings FROM consumption WHERE object_id = $this->id AND created_at >= '$start' AND created_at <= '$end'"))[0]->fillings ?? null;
+        return $fills <= $minFilling ? true : false;
+    }
+
+    /*
+    Method from API form mobile app Accounting/District/
+    */
     public function getConsumptionByMonth($month){
         $this->device_id 	 = $this->id;        
         $this->income 		 = $this->getObjectTotalIncomeByMonth($month) ?? 0;
@@ -92,8 +131,12 @@ class Device extends Model
         return $this;
     }   
 
+    /*
+    Method from API form mobile app Accounting/District/Device/
+    */
     public function getConsumption(){       
         $consumption = Consumption::where('object_id', $this->id)->latest()->first(); //unused
+        $this->engineer      = $this->getEngineerName();
         $this->device_id 	 = $this->id;        
         $this->income 		 = $this->getObjectTotalIncome() ?? 0;
         $this->consumption   = $this->getObjectTotalConsume() ?? 0;

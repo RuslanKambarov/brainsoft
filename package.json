@@ -28,6 +28,6 @@
         "jquery-ui": "^1.12.1",
         "vue2-datepicker": "^3.5.0",
         "vuejs-datepicker": "^1.6.2",
-        "vuetify": "^2.2.30"
+        "vuetify": "^2.6.10"
     }
 }

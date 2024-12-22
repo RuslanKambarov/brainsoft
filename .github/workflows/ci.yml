@@ -3,10 +3,10 @@ name: Laravel CI/CD Pipeline
 on:
   push:
     branches:
-      - main # Запускать CI/CD только при push в main
+      - master # Запускать CI/CD только при push в main
   pull_request:
     branches:
-      - main # Запускать при открытии PR на main
+      - master # Запускать при открытии PR на main
 
 jobs:
   build:
@@ -31,4 +31,4 @@ jobs:
 
     - name: Deploy to server
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@194.32.140.225 "cd /var/www/brainsoft && git pull origin main"
+        ssh -o StrictHostKeyChecking=no ubuntu@194.32.140.225 "cd /var/www/brainsoft && git pull origin master"

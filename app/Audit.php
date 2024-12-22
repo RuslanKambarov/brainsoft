@@ -39,12 +39,15 @@ class Audit extends Model
             $date = \Carbon\Carbon::now();
         }
 
-        // $audits_assigned = DB::table("audit_assigned")
-        //     ->where([["device_id", $device_id], ["audit_id", $this->id]])
-        //     ->whereRaw("MONTH(month) = MONTH(NOW())")
-        //     ->get();
-        
-        return $audits_assigned[0]->audits_count ?? DB::table("app_settings")->where("id", 1)->get()[0]->value;
+        $audits_assigned = DB::table("audit_assigned")
+            ->where([["device_id", $device_id], ["audit_id", $this->id]])
+            ->whereRaw("MONTH(month) = MONTH(NOW())")
+            ->get();
+
+        if (!$audits_assigned->isEmpty()) {
+            return $audits_assigned[0]->audits_count;
+        }
+        return DB::table("app_settings")->where("id", 1)->get()[0]->value;
     
     }
 
@@ -104,6 +107,10 @@ class Audit extends Model
                     ->where("auditor_id", $manager_id)
                     ->whereRaw("MONTH(audit_date) = MONTH('$date')")
                     ->get();
+
+                if ($manager_audits->isEmpty()) {
+                    continue;
+                }
 
                 $temp["manager_assigned"] = count($manager_audits);
                 $temp["manager_conducted"] = count($manager_audits);

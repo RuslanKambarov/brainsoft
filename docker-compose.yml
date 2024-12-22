@@ -1,0 +1,54 @@
+services:
+  nginx:
+    container_name: brainsoft_nginx
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - .:/var/www
+      - ./vhost.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - default
+    depends_on:
+      - php
+  php:
+    container_name: brainsoft_php
+    build: ./images/php81fpm
+    volumes:
+      - .:/var/www
+      - ./php.ini:/usr/local/etc/php/conf.d/php.ini
+    networks:
+      - default
+    depends_on:
+      - mysql
+  mysql:
+    container_name: brainsoft_mysql
+    image: biarms/mysql:5.7
+    ports:
+      - 33006:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    environment:
+     MYSQL_USER: '${DB_USERNAME}'
+     MYSQL_PASSWORD: '${DB_PASSWORD}'
+     MYSQL_DATABASE: '${DB_DATABASE}'
+     MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+    networks:
+      - default
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      UPLOAD_LIMIT: 300M
+    ports:
+      - 8080:8080
+  npm:
+    build: ./images/npm
+    container_name: brainsoft_npm
+    volumes:
+      - ./:/var/www:cached
+    networks:
+        - default
+
+networks:
+  default:

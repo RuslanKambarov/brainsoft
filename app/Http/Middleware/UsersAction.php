@@ -21,7 +21,7 @@ class UsersAction
         $username = Auth::user()->name ?? "Guest";
         //dd(Auth::user());
         $req = json_encode($request->all());
-        DB::table("actions")->insert(["user" => $username, "route" => url()->current(), "request" => $req, "time" => date("y-m-d H:i:s")]);
+        //DB::table("actions")->insert(["user" => $username, "route" => url()->current(), "request" => $req, "time" => date("y-m-d H:i:s")]);
         return $next($request);
     }
 }

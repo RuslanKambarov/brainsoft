@@ -74,7 +74,7 @@ class CloudController extends Controller
         if($user->hasAnyRole(6)){
             return redirect('/consumption');
         }
-        
+        //dd($districts);
         return view("monitor", ["include" => "home", "districts" => $districts->sortBy('name')]);        
 	
     }

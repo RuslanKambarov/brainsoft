@@ -46,7 +46,7 @@ class AnalyticsController extends Controller
         $manager["name"] = $district->manager();
         $manager["total_assigned"] = $manager["manager_assigned"] + $manager["engineer_assigned"];
         $manager["total_undone"] = $manager["total_assigned"] - $manager["total_conducted"];
-        $manager["kpi1_mark"] = 30*($manager["total_assigned"] - $manager["total_undone"])*1/$manager["total_assigned"];
+        $manager["kpi1_mark"] = $manager["total_assigned"] ? 30*($manager["total_assigned"] - $manager["total_undone"])*1/$manager["total_assigned"] : 0;
         
         $data = Arr::where($data, function ($value, $key) {
             return count($value) === 1;

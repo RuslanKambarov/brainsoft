@@ -1,19 +1,18 @@
 /node_modules
 /public/hot
-<<<<<<< HEAD
 /vendor
 .env
 .env.backup
-=======
 /public/storage
 /storage/*.key
 /vendor
-.env
-.env.backup
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
->>>>>>> f3094d65956a7a96160a882d11b9a1b80307d131
 public/js/app.js
+mysql-data
+.composer
+.rnd
+.config

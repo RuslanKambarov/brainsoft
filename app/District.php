@@ -90,7 +90,7 @@ class District extends Model
         ->distinct()
         ->join('user_objects', 'object_id', '=', 'objects.id')
         ->join('users', 'user_id', '=', 'users.id')
-        ->where('district_id', '=', $this->owen_id)->get('users.*');
+        ->where('objects.district_id', '=', $this->owen_id)->get('users.*');
     }
 
     public function manager(){

@@ -21,7 +21,7 @@ class OwenCloud implements Cloud{
 		        'User-Agent' => null,
                 "Accept"         => "*/*",    
             ],
-            'body' => json_encode(['login' => "kambarov.rs@gmail.com", 'password' => "wwwggg123Q"])
+            'body' => json_encode(['login' => config('services.owen.login'), 'password' => config('services.owen.password')])
         ]);
         
         return $this->getContent($response)->token;
